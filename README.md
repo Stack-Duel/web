@@ -1,3 +1,7 @@
+# Stack Duel Web
+
+[![Quality gate status](https://sonarcloud.io/api/project_badges/measure?project=Stack-Duel_web&metric=alert_status&token=9d5894ad491b96582f34ed66f309d2f2169120a2)](https://sonarcloud.io/summary/new_code?id=Stack-Duel_web)
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
