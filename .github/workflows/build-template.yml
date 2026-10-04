@@ -7,6 +7,10 @@ on:
         required: false
         type: string
         default: "22"
+      app-base-url:
+        required: false
+        type: string
+        default: "http://localhost:3000"
     secrets:
       CLERK_SECRET_KEY:
         required: false
@@ -53,9 +57,9 @@ jobs:
 
       - name: Run build
         env:
-          NEXT_TELEMETRY_DISABLED: "1"
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          APP_BASE_URL: ${{ inputs.app-base-url }}
           NEXT_PUBLIC_CLERK_SIGN_IN_URL: "/sign-in"
           NEXT_PUBLIC_CLERK_SIGN_UP_URL: "/sign-up"
           NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: "/"
