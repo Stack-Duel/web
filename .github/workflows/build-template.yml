@@ -11,34 +11,26 @@ on:
         required: false
         type: string
         default: "http://localhost:3000"
-      auth0-domain:
-        required: false
-        type: string
-        default: ""
-      auth0-callback-url:
-        required: false
-        type: string
-        default: ""
-      auth0-audience:
-        required: false
-        type: string
-        default: ""
-      api-server-url:
-        required: false
-        type: string
-        default: "http://localhost:5041"
     secrets:
+      AUTH0_DOMAIN:
+        required: false
       AUTH0_CLIENT_ID:
         required: false
       AUTH0_SECRET:
         required: false
       AUTH0_CLIENT_SECRET:
         required: false
+      AUTH0_AUDIENCE:
+        required: false
+
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    environment: Development
 
     steps:
       - name: Checkout
@@ -76,11 +68,11 @@ jobs:
       - name: Run build
         env:
           APP_BASE_URL: ${{ inputs.app-base-url }}
-          AUTH0_DOMAIN: ${{ inputs.auth0-domain }}
+          AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
           AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
           AUTH0_SECRET: ${{ secrets.AUTH0_SECRET }}
           AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
-          AUTH0_CALLBACK_URL: ${{ inputs.auth0-callback-url }}
-          AUTH0_AUDIENCE: ${{ inputs.auth0-audience }}
-          NEXT_PUBLIC_API_SERVER_URL: ${{ inputs.api-server-url }}
+          AUTH0_CALLBACK_URL: "${{ inputs.app-base-url }}/account/callback"
+          AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
+          NEXT_PUBLIC_API_SERVER_URL: "http://localhost:5041"
         run: pnpm build

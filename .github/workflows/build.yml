@@ -26,8 +26,4 @@ jobs:
     with:
       node-version: "22"
       app-base-url: ${{ vars.APP_BASE_URL }}
-      auth0-domain: ${{ vars.AUTH0_DOMAIN }}
-      auth0-callback-url: ${{ vars.AUTH0_CALLBACK_URL }}
-      auth0-audience: ${{ vars.AUTH0_AUDIENCE }}
-      api-server-url: ${{ vars.NEXT_PUBLIC_API_SERVER_URL }}
     secrets: inherit
