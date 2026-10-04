@@ -11,6 +11,9 @@ on:
         type: string
         default: ""
 
+permissions:
+  contents: read
+
 env:
   DB_CONNECTION_STRING: "Host=localhost;Port=5432;Database=stackduel;Username=myuser;Password=mypassword"
   API_BASE_URL: "http://localhost:5041"
