@@ -2,7 +2,6 @@ import Link from "next/link";
 import Logo from "@/shared/logo/logo";
 import { routerConfig } from "@/shared/router-config";
 import { socialLinks } from "@/shared/lib/social-links";
-import { getCurrentTenant } from "@/domains/tenant/lib/get-current-tenant";
 
 const platformLinks = [
   { name: "Problems", href: routerConfig.problems.path },
@@ -20,9 +19,7 @@ const accountLinks = [
   { name: "Profile Settings", href: routerConfig.profileSettings.path },
 ];
 
-export default async function Footer() {
-  const tenant = await getCurrentTenant();
-
+export default function Footer() {
   return (
     <footer className="relative w-full overflow-hidden border-t">
       <div
@@ -33,7 +30,8 @@ export default async function Footer() {
         <div className="col-span-2 flex flex-col gap-3">
           <Logo className="h-10" />
           <p className="text-muted-foreground max-w-xs text-sm">
-            {tenant.tagline}
+            Algowars is an online competitive coding platform. Practice through
+            competition.
           </p>
           <ul className="flex items-center gap-3 mt-1">
             {socialLinks.map(({ name, href, icon: Icon }) => (
@@ -85,20 +83,20 @@ export default async function Footer() {
           <h3 className="text-sm font-semibold">Account</h3>
           <ul className="flex flex-col gap-2">
             <li>
-              <Link
+              <a
                 href={routerConfig.authLogIn.path}
                 className="text-muted-foreground text-sm hover:text-foreground"
               >
                 Login
-              </Link>
+              </a>
             </li>
             <li>
-              <Link
+              <a
                 href={routerConfig.authSignUp.path}
                 className="text-muted-foreground text-sm hover:text-foreground"
               >
                 Sign Up
-              </Link>
+              </a>
             </li>
             {accountLinks.map((link) => (
               <li key={link.href}>
@@ -116,7 +114,8 @@ export default async function Footer() {
       <div className="relative">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <p className="text-muted-foreground text-sm">
-            &copy; {new Date().getFullYear()} {tenant.name}. {tenant.tagline}.
+            &copy; {new Date().getFullYear()} Algowars. Practice through
+            competition.
           </p>
         </div>
       </div>

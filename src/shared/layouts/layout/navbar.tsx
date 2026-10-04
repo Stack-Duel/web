@@ -21,15 +21,12 @@ import { routerConfig } from "@/shared/router-config";
 import { ModeToggle } from "@/shared/theme/mode-toggle";
 import SocialLinkButton from "@/shared/components/social-link-button";
 import { discordLink } from "@/shared/lib/social-links";
-import { useTenant } from "@/domains/tenant/state/tenant-store";
-import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs";
+import { useUser } from "@auth0/nextjs-auth0";
 import { MenuIcon } from "lucide-react";
 import Link from "next/link";
 
 export default function Navbar() {
-  const { isSignedIn } = useUser();
-  const tenant = useTenant();
-
+  const { user } = useUser();
   const defaultRoutes = [
     { name: "Home", href: routerConfig.home.path },
     { name: "Problems", href: routerConfig.problems.path },
@@ -38,6 +35,34 @@ export default function Navbar() {
     { name: "About", href: routerConfig.about.path },
     { name: "Community", href: routerConfig.community.path },
   ];
+
+  const unauthenticatedLinks = [
+    <Button asChild variant="ghost" key="login">
+      <a href={routerConfig.authLogIn.path} data-testid="sign-in-button">
+        Login
+      </a>
+    </Button>,
+    <Button
+      asChild
+      variant="default"
+      key="signup"
+      className="rounded-full"
+      data-testid="sign-up-button"
+    >
+      <a href={routerConfig.authSignUp.path}>Get Started</a>
+    </Button>,
+  ];
+
+  const authenticatedLinks = [
+    <Button asChild variant="outline" key="profile">
+      <Link href={routerConfig.profile.path}>Profile</Link>
+    </Button>,
+    <Button asChild variant="default" key="logout">
+      <a href={routerConfig.authLogOut.path}>Log Out</a>
+    </Button>,
+  ];
+
+  const links = user ? authenticatedLinks : unauthenticatedLinks;
 
   return (
     <nav className="fixed inset-x-0 top-4 z-50 px-4">
@@ -51,36 +76,11 @@ export default function Navbar() {
           ))}
         </ul>
         <ul className="justify-self-end flex row-reverse lg:row items-center gap-2 lg:gap-3">
-          {isSignedIn ? (
-            <>
-              <li className="hidden lg:block">
-                <Button asChild variant="outline">
-                  <Link href={routerConfig.dashboard.path}>Dashboard</Link>
-                </Button>
-              </li>
-              <li className="hidden lg:block">
-                <UserButton />
-              </li>
-            </>
-          ) : (
-            <>
-              <li className="hidden lg:block">
-                <Button asChild variant="ghost" data-testid="sign-in-button">
-                  <SignInButton mode="modal" />
-                </Button>
-              </li>
-              <li className="hidden lg:block">
-                <Button
-                  asChild
-                  variant="default"
-                  className="rounded-full"
-                  data-testid="sign-up-button"
-                >
-                  <SignUpButton mode="modal" />
-                </Button>
-              </li>
-            </>
-          )}
+          {links.map((link) => (
+            <li key={link.key} className="hidden lg:block">
+              {link}
+            </li>
+          ))}
           <li>
             <SocialLinkButton
               href={discordLink.href}
@@ -121,39 +121,35 @@ export default function Navbar() {
                   </ul>
                 </div>
                 <SheetFooter>
-                  {isSignedIn ? (
-                    <div className="flex items-center gap-3">
-                      <UserButton />
-                      <Button asChild variant="default" className="grow">
-                        <Link href={routerConfig.dashboard.path}>
-                          Dashboard
-                        </Link>
-                      </Button>
-                    </div>
+                  {user ? (
+                    <Button asChild variant="default">
+                      <a href={routerConfig.authLogOut.path}>Log Out</a>
+                    </Button>
                   ) : (
                     <Card className="rounded">
                       <CardHeader>
-                        <CardTitle>Join the {tenant.name} community</CardTitle>
+                        <CardTitle>Join the algowars community</CardTitle>
                         <CardDescription>
                           Sign up to track progress, solve problems, and
                           compete.
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="grid grid-cols-2 gap-3">
-                        <Button
-                          asChild
-                          variant="outline"
-                          className="grow"
-                          data-testid="sign-in-button"
-                        >
-                          <SignInButton mode="modal" />
+                        <Button asChild variant="outline" className="grow">
+                          <a
+                            href={routerConfig.authLogIn.path}
+                            data-testid="sign-in-button"
+                          >
+                            Login
+                          </a>
                         </Button>
-                        <Button
-                          asChild
-                          variant="default"
-                          data-testid="sign-up-button"
-                        >
-                          <SignUpButton mode="modal" />
+                        <Button asChild variant="default">
+                          <a
+                            href={routerConfig.authSignUp.path}
+                            data-testid="sign-up-button"
+                          >
+                            Get Started
+                          </a>
                         </Button>
                       </CardContent>
                     </Card>

@@ -12,13 +12,23 @@ export default function Logo({ className }: Readonly<LogoProps>) {
   const tenant = useTenant();
 
   return (
-    <Image
-      src={tenant.logo.light}
-      alt={tenant.name}
-      width={160}
-      height={32}
-      className={cn("h-8 w-auto", className)}
-      priority
-    />
+    <span className="flex items-center gap-1">
+      <Image
+        src={tenant.logo.light}
+        alt={tenant.name}
+        width={120}
+        height={24}
+        className={cn("h-6 w-auto dark:hidden", className)}
+        priority
+      />
+      <Image
+        src={tenant.logo.dark}
+        alt={tenant.name}
+        width={120}
+        height={24}
+        className={cn("hidden h-6 w-auto dark:block", className)}
+        priority
+      />
+    </span>
   );
 }

@@ -3,16 +3,20 @@
 import Link from "next/link";
 import { Button } from "@/shared/components/ui/button";
 import { routerConfig } from "@/shared/router-config";
-import { SignInButton, useUser } from "@clerk/nextjs";
+import { GameModeKey } from "@/domains/game/models/game-mode";
+import {
+  useUserStore,
+  selectIsAuthenticated,
+} from "@/domains/user/state/user-store";
 
 const CHALLENGE_TARGET = `${routerConfig.games.execute({
-  mode: "duel",
+  mode: GameModeKey.Duel,
 })}&challenge=1`;
 
 export default function ChallengeFriendButton() {
-  const { isSignedIn } = useUser();
+  const isAuthenticated = useUserStore(selectIsAuthenticated);
 
-  if (isSignedIn) {
+  if (isAuthenticated) {
     return (
       <Button asChild size="lg" variant="secondary" className="w-40">
         <Link href={CHALLENGE_TARGET}>Challenge a friend</Link>
@@ -22,7 +26,13 @@ export default function ChallengeFriendButton() {
 
   return (
     <Button asChild size="lg" variant="secondary" className="w-40">
-      <SignInButton mode="modal">Challenge a friend</SignInButton>
+      <a
+        href={`${routerConfig.authLogIn.path}?returnTo=${encodeURIComponent(
+          CHALLENGE_TARGET
+        )}`}
+      >
+        Challenge a friend
+      </a>
     </Button>
   );
 }

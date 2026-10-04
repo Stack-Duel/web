@@ -24,7 +24,7 @@ export default function FeaturesSection() {
             </div>
             <Image
               src="/Demos/leaderboards-demo.png"
-              alt="Leaderboard showing a list of players and their scores"
+              alt="Algowars leaderboard showing a list of players and their scores"
               width={1901}
               height={1020}
               className="absolute -bottom-16 -right-4 hidden w-[380px] h-auto rounded-t-lg shadow-2xl ring-1 ring-white/10 sm:block"
@@ -51,7 +51,7 @@ export default function FeaturesSection() {
             </div>
             <Image
               src="/Demos/competitive-games-demo.png"
-              alt="Competitive programming dashboard showing a live coding duel"
+              alt="Algowars competitive programming dashboard showing a live coding duel"
               width={1901}
               height={1020}
               className="absolute -bottom-8 right-10 hidden w-[440px] h-auto rounded-t-lg shadow-2xl ring-1 ring-white/10 sm:block"

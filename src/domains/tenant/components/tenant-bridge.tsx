@@ -13,7 +13,9 @@ export function TenantBridge({ tenant }: Readonly<TenantBridgeProps>) {
 
   useEffect(() => {
     setTenant(tenant);
-  }, [setTenant, tenant, tenant.id]);
+    // Only sync when the resolved tenant identity actually changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tenant.id]);
 
   return null;
 }

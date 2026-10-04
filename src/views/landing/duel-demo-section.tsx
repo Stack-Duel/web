@@ -5,7 +5,7 @@ import Image from "next/image";
 import { BrowserMockup } from "@/shared/components/ui/browser-mockup";
 
 const DUEL_DEMO_ALT =
-  "A live duel: two players racing to solve the same coding problem, judged instantly";
+  "A live Algowars duel: two players racing to solve the same coding problem, judged instantly";
 
 export default function DuelDemoSection() {
   const [videoDisabled, setVideoDisabled] = useState(false);

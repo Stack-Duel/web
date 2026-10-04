@@ -1,0 +1,104 @@
+name: Deploy Production
+
+on:
+  push:
+    branches:
+      - "release/**"
+  workflow_dispatch:
+    inputs:
+      target_ref:
+        description: Branch or commit SHA to deploy.
+        required: false
+        default: main
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production-${{ github.event_name == 'workflow_dispatch' && inputs.target_ref || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: Production
+      url: ${{ vars.APP_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          ref: ${{ inputs.target_ref || github.ref }}
+          fetch-depth: 1
+          submodules: true
+          lfs: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e
+        with:
+          node-version: "24.5"
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Validate environment settings
+        shell: bash
+        env:
+          AZURE_TOKEN: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          NEXT_PUBLIC_API_SERVER_URL: ${{ vars.NEXT_PUBLIC_API_SERVER_URL }}
+          NEXT_PUBLIC_APPLICATIONINSIGHTS_CONNECTION_STRING: ${{ vars.NEXT_PUBLIC_APPLICATIONINSIGHTS_CONNECTION_STRING }}
+          NEXT_PUBLIC_CODEPREVIEW_ORIGIN: ${{ vars.NEXT_PUBLIC_CODEPREVIEW_ORIGIN }}
+        run: |
+          set -euo pipefail
+
+          required=(AZURE_TOKEN NEXT_PUBLIC_API_SERVER_URL NEXT_PUBLIC_CODEPREVIEW_ORIGIN)
+          missing=()
+          for name in "${required[@]}"; do
+            if [ -z "${!name:-}" ]; then
+              missing+=("$name")
+            fi
+          done
+
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "Missing required Production environment secret/variable(s): ${missing[*]}"
+            exit 1
+          fi
+
+      # For hybrid Next.js apps, output_location must stay empty so Oryx
+      # detects and builds the app itself (it needs the raw source, not a
+      # pre-built .next folder) - see https://aka.ms/swaworkflowconfig
+      #
+      # AUTH0_* vars are server-only (see src/env.js) - Next.js never inlines
+      # them into the build output, so the real values only need to live in
+      # the Static Web App's Application settings and are read at runtime.
+      # SKIP_ENV_VALIDATION bypasses the Zod check in src/env.js that would
+      # otherwise fail the build over their absence here.
+      - name: Build And Deploy
+        id: builddeploy
+        uses: Azure/static-web-apps-deploy@1a947af9992250f3bc2e68ad0754c0b0c11566c9
+        env:
+          AUTH0_SECRET: ${{ secrets.AUTH0_SECRET }}
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+          AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
+          AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
+          AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
+          NEXT_PUBLIC_API_SERVER_URL: ${{ vars.NEXT_PUBLIC_API_SERVER_URL }}
+          NEXT_PUBLIC_APPLICATIONINSIGHTS_CONNECTION_STRING: ${{ vars.NEXT_PUBLIC_APPLICATIONINSIGHTS_CONNECTION_STRING }}
+          NEXT_PUBLIC_CODEPREVIEW_ORIGIN: ${{ vars.NEXT_PUBLIC_CODEPREVIEW_ORIGIN }}
+          AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
+          AUTH0_CALLBACK_URL: ${{ secrets.AUTH0_CALLBACK_URL }}
+
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "/"
+          api_location: ""
+          output_location: ""
