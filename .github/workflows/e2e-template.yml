@@ -12,7 +12,7 @@ on:
         default: ""
 
 env:
-  DB_CONNECTION_STRING: "Host=localhost;Port=5432;Database=algowars;Username=myuser;Password=mypassword"
+  DB_CONNECTION_STRING: "Host=localhost;Port=5432;Database=stackduel;Username=myuser;Password=mypassword"
   API_BASE_URL: "http://localhost:5041"
   WEB_BASE_URL: "http://localhost:3000"
 
@@ -31,9 +31,8 @@ jobs:
       - name: Checkout server
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          repository: algowars/server
+          repository: Stack-Duel/server
           path: server
-          token: ${{ secrets.SERVER_REPO_TOKEN }}
 
       - name: Start Postgres and RabbitMQ
         run: docker compose -f docker-compose.yml up -d --wait
@@ -45,30 +44,30 @@ jobs:
           dotnet-version: "10.0.x"
 
       - name: Restore server dependencies
-        run: dotnet restore Server.slnx
+        run: dotnet restore StackDuel.slnx
         working-directory: server
 
       - name: Build server
-        run: dotnet build Server.slnx --configuration Release --no-restore
+        run: dotnet build StackDuel.slnx --configuration Release --no-restore
         working-directory: server
 
       - name: Install EF Core tools
         run: dotnet tool install --global dotnet-ef
 
       - name: Run database migrations
-        run: dotnet ef database update --context AlgowarsDbContext --project Algowars.Infrastructure --startup-project Algowars.Api
+        run: dotnet ef database update --context StackDuelDbContext --project StackDuel.Infrastructure --startup-project StackDuel.Api
         working-directory: server
         env:
           ConnectionStrings__DefaultConnection: ${{ env.DB_CONNECTION_STRING }}
 
       - name: Seed reference data
-        run: dotnet run --project Algowars.Seeder -- --static
+        run: dotnet run --project StackDuel.Seeder -- --static
         working-directory: server
         env:
           ConnectionStrings__DefaultConnection: ${{ env.DB_CONNECTION_STRING }}
 
       - name: Start API
-        run: nohup dotnet run --project Algowars.Api --no-launch-profile --no-build --no-restore --configuration Release > ../api.log 2>&1 &
+        run: nohup dotnet run --project StackDuel.Api --no-launch-profile --no-build --no-restore --configuration Release > ../api.log 2>&1 &
         working-directory: server
         env:
           ASPNETCORE_ENVIRONMENT: Development
@@ -168,7 +167,7 @@ jobs:
 
       - name: Grant admin role to the second test user
         if: ${{ env.TEST_USER_2_EMAIL != '' }}
-        run: dotnet run --project Algowars.Seeder -- --grant-admin test-admin
+        run: dotnet run --project StackDuel.Seeder -- --grant-admin test-admin
         working-directory: server
         env:
           ConnectionStrings__DefaultConnection: ${{ env.DB_CONNECTION_STRING }}
