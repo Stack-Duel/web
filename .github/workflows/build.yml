@@ -25,5 +25,5 @@ jobs:
     uses: ./.github/workflows/build-template.yml
     with:
       node-version: "22"
-      app-base-url: ${{ secrets.APP_BASE_URL }}
+      app-base-url: ${{ vars.APP_BASE_URL }}
     secrets: inherit
