@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none';"
+    />
+    <title>React preview</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        color: #111;
+        background: #fff;
+      }
+      #algowars-preview-error {
+        display: none;
+        color: #dc2626;
+        white-space: pre-wrap;
+        margin: 0;
+        padding: 12px;
+        font-size: 13px;
+      }
+      #algowars-preview-root {
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <pre id="algowars-preview-error"></pre>
+    <div id="algowars-preview-root"></div>
+
+    <script src="/vendor/tailwind-browser.js"></script>
+    <script src="/vendor/react-preview-runtime.js"></script>
+    <script src="/vendor/babel.min.js"></script>
+    <script src="/preview-frame-runtime.js"></script>
+  </body>
+</html>

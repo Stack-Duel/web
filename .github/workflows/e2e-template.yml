@@ -1,0 +1,203 @@
+name: E2E Tests (template)
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      grep:
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+env:
+  DB_CONNECTION_STRING: "Host=localhost;Port=5432;Database=stackduel;Username=myuser;Password=mypassword"
+  API_BASE_URL: "http://localhost:5041"
+  WEB_BASE_URL: "http://localhost:3000"
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout web
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: web
+
+      - name: Checkout server
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: Stack-Duel/server
+          path: server
+
+      - name: Start Postgres and RabbitMQ
+        run: docker compose -f docker-compose.yml up -d --wait
+        working-directory: server
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore server dependencies
+        run: dotnet restore StackDuel.slnx
+        working-directory: server
+
+      - name: Build server
+        run: dotnet build StackDuel.slnx --configuration Release --no-restore
+        working-directory: server
+
+      - name: Install EF Core tools
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Run database migrations
+        run: dotnet ef database update --context StackDuelDbContext --project StackDuel.Infrastructure --startup-project StackDuel.Api
+        working-directory: server
+        env:
+          ConnectionStrings__DefaultConnection: ${{ env.DB_CONNECTION_STRING }}
+
+      - name: Seed reference data
+        run: dotnet run --project StackDuel.Seeder -- --static
+        working-directory: server
+        env:
+          ConnectionStrings__DefaultConnection: ${{ env.DB_CONNECTION_STRING }}
+
+      - name: Start API
+        run: nohup dotnet run --project StackDuel.Api --no-launch-profile --no-build --no-restore --configuration Release > ../api.log 2>&1 &
+        working-directory: server
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
+          ASPNETCORE_URLS: ${{ env.API_BASE_URL }}
+          ConnectionStrings__DefaultConnection: ${{ env.DB_CONNECTION_STRING }}
+          MessageBus__Transport: RabbitMQ
+          MessageBus__RabbitMQ__Host: localhost
+          MessageBus__RabbitMQ__VirtualHost: /
+          MessageBus__RabbitMQ__Username: guest
+          MessageBus__RabbitMQ__Password: guest
+          Auth0__Domain: ${{ secrets.AUTH0_DOMAIN }}
+          Auth0__Audience: ${{ secrets.AUTH0_AUDIENCE }}
+          Cors__AllowedOrigins__0: ${{ env.WEB_BASE_URL }}
+          ExecutionEngines__Judge0__ApiKey: ${{ secrets.JUDGE0_API_KEY }}
+
+      - name: Wait for API to be healthy
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fs "${{ env.API_BASE_URL }}/api/v1/health" > /dev/null; then
+              echo "API is up"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "API failed to become healthy in time"
+          cat api.log || true
+          exit 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          version: 11.10.0
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install web dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: web
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+        working-directory: web
+
+      - name: Build web app
+        run: pnpm build
+        working-directory: web
+        env:
+          APP_BASE_URL: ${{ env.WEB_BASE_URL }}
+          AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
+          AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
+          AUTH0_SECRET: ${{ secrets.AUTH0_SECRET }}
+          AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
+          AUTH0_CALLBACK_URL: "${{ env.WEB_BASE_URL }}/account/callback"
+          AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
+          NEXT_PUBLIC_API_SERVER_URL: ${{ env.API_BASE_URL }}
+
+      - name: Start web app
+        run: nohup pnpm start > ../web.log 2>&1 &
+        working-directory: web
+        env:
+          APP_BASE_URL: ${{ env.WEB_BASE_URL }}
+          AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
+          AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
+          AUTH0_SECRET: ${{ secrets.AUTH0_SECRET }}
+          AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
+          AUTH0_CALLBACK_URL: "${{ env.WEB_BASE_URL }}/account/callback"
+          AUTH0_AUDIENCE: ${{ secrets.AUTH0_AUDIENCE }}
+          NEXT_PUBLIC_API_SERVER_URL: ${{ env.API_BASE_URL }}
+
+      - name: Wait for web app to be ready
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fs "${{ env.WEB_BASE_URL }}" > /dev/null; then
+              echo "Web app is up"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Web app failed to become ready in time"
+          cat web.log || true
+          exit 1
+
+      - name: Authenticate Playwright test users
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ env.WEB_BASE_URL }}
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+          TEST_USER_2_EMAIL: ${{ secrets.TEST_USER_2_EMAIL }}
+          TEST_USER_2_PASSWORD: ${{ secrets.TEST_USER_2_PASSWORD }}
+        run: pnpm exec playwright test --project=setup
+        working-directory: web
+
+      - name: Grant admin role to the second test user
+        if: ${{ env.TEST_USER_2_EMAIL != '' }}
+        run: dotnet run --project StackDuel.Seeder -- --grant-admin test-admin
+        working-directory: server
+        env:
+          ConnectionStrings__DefaultConnection: ${{ env.DB_CONNECTION_STRING }}
+          TEST_USER_2_EMAIL: ${{ secrets.TEST_USER_2_EMAIL }}
+
+      - name: Run Playwright tests
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ env.WEB_BASE_URL }}
+          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+          TEST_USER_2_EMAIL: ${{ secrets.TEST_USER_2_EMAIL }}
+          TEST_USER_2_PASSWORD: ${{ secrets.TEST_USER_2_PASSWORD }}
+          PLAYWRIGHT_GREP: ${{ inputs.grep }}
+        run: |
+          if [ -n "$PLAYWRIGHT_GREP" ]; then
+            pnpm exec playwright test --project=chromium --grep "$PLAYWRIGHT_GREP"
+          else
+            pnpm exec playwright test --project=chromium
+          fi
+        working-directory: web
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: playwright-report
+          path: |
+            web/playwright-report/
+            web/test-results/
+          retention-days: 14

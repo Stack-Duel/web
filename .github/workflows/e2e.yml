@@ -1,0 +1,22 @@
+name: E2E Tests
+
+on:
+  schedule:
+    - cron: "0 11 * * *" # daily
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Grep tag to run, e.g. @smoke (blank = full suite)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    uses: ./.github/workflows/e2e-template.yml
+    with:
+      environment: Preview
+      grep: ${{ inputs.tag }}
+    secrets: inherit
