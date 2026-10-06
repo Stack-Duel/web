@@ -54,10 +54,11 @@ export const tenants: Record<TenantId, TenantConfig> = {
       "Stack Duel is an online competitive coding platform for code battles. Battle other developers head-to-head or solo, get instant results, and track your progress.",
     domain: "www.stackduel.dev",
     logo: {
-      light: "/stackduel-logo.svg",
-      dark: "/stackduel-logo.svg",
+      light:
+        "/Algowars_Logo/Logo/Algowars Logo_Horizontal/Algowars Logo_Original/Algowars-01.svg",
+      dark: "/Algowars_Logo/Logo/Algowars Logo_Inverse/Algowars-01.svg",
     },
-    favicon: "/stackduel-logo.svg",
+    favicon: "/Algowars_Logo/Icon/Algowars Icon_Original/Algowars-01.svg",
     googleAnalyticsId: "",
     social: {
       twitterHandle: "@algowarsdev",
