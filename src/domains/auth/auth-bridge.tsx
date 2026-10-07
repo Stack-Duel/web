@@ -27,8 +27,7 @@ export function AuthBridge({ session }: Readonly<Auth0BridgeProps>) {
     } else {
       userUnauthenticated();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.sub]);
+  }, [syncUser, user, user?.sub, userAuthenticated, userUnauthenticated]);
 
   return null;
 }
