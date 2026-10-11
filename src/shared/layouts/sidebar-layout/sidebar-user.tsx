@@ -9,12 +9,13 @@ import {
   useUserStore,
 } from "@/domains/user/state/user-store";
 import { useUserSync } from "@/domains/user/hooks/use-user-sync";
+import { cn } from "cn";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/shared/components/ui/avatar";
-import { Button } from "@/shared/components/ui/button";
+import { Button, buttonVariants } from "@/shared/components/ui/button";
 import {
   Card,
   CardContent,
@@ -187,16 +188,16 @@ export default function SidebarUser() {
             ) : null}
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Button
-                asChild
-                variant="ghost"
-                className="flex justify-start items-center"
+              <a
+                href={routerConfig.authLogOut.path}
+                className={cn(
+                  buttonVariants({ variant: "ghost" }),
+                  "w-full justify-start"
+                )}
               >
-                <a href={routerConfig.authLogOut.path}>
-                  <LogOut />
-                  Log Out
-                </a>
-              </Button>
+                <LogOut />
+                Log Out
+              </a>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
