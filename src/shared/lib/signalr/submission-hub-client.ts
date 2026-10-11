@@ -1,6 +1,6 @@
 import * as signalR from "@microsoft/signalr";
 import { env } from "@/env";
-import { getSharedAccessToken } from "@/shared/lib/get-shared-access-token";
+import { getSharedBearerToken } from "@/shared/lib/get-shared-access-token";
 
 /**
  * Payload the server pushes on the "SubmissionCompleted" hub method. Treated as a
@@ -23,7 +23,7 @@ const getConnection = (): signalR.HubConnection => {
 
   connection = new signalR.HubConnectionBuilder()
     .withUrl(`${env.NEXT_PUBLIC_API_SERVER_URL}${HUB_PATH}`, {
-      accessTokenFactory: async () => (await getSharedAccessToken()) ?? "",
+      accessTokenFactory: async () => await getSharedBearerToken(),
     })
     .withAutomaticReconnect()
     .configureLogging(signalR.LogLevel.Warning)

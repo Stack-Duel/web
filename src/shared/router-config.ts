@@ -68,7 +68,14 @@ export const routerConfig = {
   adminDailyChallenges: {
     path: "/admin/daily-challenges",
   },
-  authLogIn: { path: "/auth/login" },
+  authLogIn: {
+    path: "/auth/login",
+    // returnTo is dropped for "/" since Auth0 already lands there by default.
+    execute: (params?: { returnTo?: string | null }) =>
+      params?.returnTo && params.returnTo !== "/"
+        ? `/auth/login?returnTo=${encodeURIComponent(params.returnTo)}`
+        : "/auth/login",
+  },
   authSignUp: {
     path: "/auth/login?screen_hint=signup&returnTo=/user/setup",
   },

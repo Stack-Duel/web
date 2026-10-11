@@ -3,6 +3,7 @@
 import {
   selectAvatarUrl,
   selectDisplayName,
+  selectIsSessionExpired,
   selectIsUserLoading,
   selectUser,
   selectUserSyncFailed,
@@ -50,6 +51,7 @@ import {
   User,
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function SidebarUser() {
   const { user: authUser, isLoading } = useUser();
@@ -58,8 +60,10 @@ export default function SidebarUser() {
   const displayName = useUserStore(selectDisplayName);
   const avatarUrl = useUserStore(selectAvatarUrl);
   const syncFailed = useUserStore(selectUserSyncFailed);
+  const isSessionExpired = useUserStore(selectIsSessionExpired);
   const { retrySync } = useUserSync();
   const { isMobile } = useSidebar();
+  const pathname = usePathname();
 
   if (isLoading || isUserLoading) {
     return (
@@ -77,22 +81,35 @@ export default function SidebarUser() {
     );
   }
 
-  if (!authUser) {
+  // isSessionExpired covers the half-signed-in case: the Auth0 cookie still
+  // decodes (so authUser is set) but it can no longer produce an access token, so
+  // showing the signed-in menu would be a lie and "Retry" could never succeed.
+  if (!authUser || isSessionExpired) {
+    const logInHref = routerConfig.authLogIn.execute({ returnTo: pathname });
+
     return (
       <Card className="rounded">
         <CardHeader>
-          <CardTitle>Join the algowars community</CardTitle>
+          <CardTitle>
+            {isSessionExpired
+              ? "Your session expired"
+              : "Join the algowars community"}
+          </CardTitle>
           <CardDescription>
-            Sign up to track progress and solve problems.
+            {isSessionExpired
+              ? "Sign in again to pick up where you left off."
+              : "Sign up to track progress and solve problems."}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex gap-3">
           <Button asChild variant="outline" className="grow">
-            <a href={routerConfig.authLogIn.path}>Log In</a>
+            <a href={logInHref}>Log In</a>
           </Button>
-          <Button asChild variant="default" className="grow">
-            <a href={routerConfig.authSignUp.path}>Sign Up</a>
-          </Button>
+          {isSessionExpired ? null : (
+            <Button asChild variant="default" className="grow">
+              <a href={routerConfig.authSignUp.path}>Sign Up</a>
+            </Button>
+          )}
         </CardContent>
       </Card>
     );

@@ -34,3 +34,15 @@ export function extractErrorMessage(
 
   return fallback;
 }
+
+/**
+ * Thrown when the Auth0 session can no longer produce an access token, so the
+ * request was never sent (or came back 401 with no way to retry). Distinct from a
+ * transient API failure: callers should treat it as "signed out", not "retry me".
+ */
+export class SessionExpiredError extends Error {
+  constructor(message = "Your session expired. Sign in again to continue.") {
+    super(message);
+    this.name = "SessionExpiredError";
+  }
+}

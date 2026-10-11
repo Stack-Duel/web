@@ -1,6 +1,6 @@
 import * as signalR from "@microsoft/signalr";
 import { env } from "@/env";
-import { getSharedAccessToken } from "@/shared/lib/get-shared-access-token";
+import { getSharedBearerToken } from "@/shared/lib/get-shared-access-token";
 import type { SubmissionStatus } from "@/domains/submission/models/submission-status";
 
 /**
@@ -65,7 +65,7 @@ const getConnection = (): signalR.HubConnection => {
 
   connection = new signalR.HubConnectionBuilder()
     .withUrl(`${env.NEXT_PUBLIC_API_SERVER_URL}${HUB_PATH}`, {
-      accessTokenFactory: async () => (await getSharedAccessToken()) ?? "",
+      accessTokenFactory: async () => await getSharedBearerToken(),
     })
     .withAutomaticReconnect()
     .configureLogging(signalR.LogLevel.Warning)

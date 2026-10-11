@@ -30,11 +30,7 @@ export function AuthGuardFallback({
     <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
       <p className="text-sm font-medium">Sign in to view this content.</p>
       <Button asChild>
-        <a
-          href={`${routerConfig.authLogIn.path}?returnTo=${encodeURIComponent(
-            pathname ?? "/"
-          )}`}
-        >
+        <a href={routerConfig.authLogIn.execute({ returnTo: pathname })}>
           Sign in
         </a>
       </Button>

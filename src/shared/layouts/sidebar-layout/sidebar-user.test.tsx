@@ -10,6 +10,7 @@ import { buildAuthUser } from "@/test/factories/auth-user";
 import { routerConfig } from "@/shared/router-config";
 import { useUser } from "@auth0/nextjs-auth0";
 import { retrySyncMock } from "@/test/mocks/use-user-sync";
+import { usePathname } from "@/test/mocks/next-navigation";
 
 vi.mock(
   "@auth0/nextjs-auth0",
@@ -19,6 +20,7 @@ vi.mock(
   "@/domains/user/hooks/use-user-sync",
   () => import("@/test/mocks/use-user-sync")
 );
+vi.mock("next/navigation", () => import("@/test/mocks/next-navigation"));
 
 const mockUseUser = vi.mocked(useUser);
 
@@ -34,6 +36,7 @@ describe("SidebarUser", () => {
   beforeEach(() => {
     resetUserStore();
     retrySyncMock.mockClear();
+    usePathname.mockReturnValue("/");
     mockUseUser.mockReturnValue({
       user: undefined,
       isLoading: false,
@@ -138,5 +141,63 @@ describe("SidebarUser", () => {
     );
 
     expect(retrySyncMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("sends the signed-out log in link back to the current page", () => {
+    usePathname.mockReturnValue("/problems/two-sum");
+
+    renderSidebarUser();
+
+    expect(screen.getByRole("link", { name: "Log In" })).toHaveAttribute(
+      "href",
+      "/auth/login?returnTo=%2Fproblems%2Ftwo-sum"
+    );
+  });
+
+  it("shows the signed-out card for an expired session even though the Auth0 cookie still resolves", () => {
+    mockUseUser.mockReturnValue({
+      user: buildAuthUser(),
+      isLoading: false,
+      error: null,
+      invalidate: vi.fn(),
+    });
+    usePathname.mockReturnValue("/problems/two-sum");
+    useUserStore.getState().sessionExpired();
+
+    renderSidebarUser();
+
+    expect(screen.getByText("Your session expired")).toBeVisible();
+    expect(
+      screen.getByText("Sign in again to pick up where you left off.")
+    ).toBeVisible();
+    expect(screen.getByRole("link", { name: "Log In" })).toHaveAttribute(
+      "href",
+      "/auth/login?returnTo=%2Fproblems%2Ftwo-sum"
+    );
+    // Nothing to retry and nothing to sign up for — the account already exists.
+    expect(screen.queryByText("Profile unavailable")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Sign Up" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps the signed-in menu when the profile merely failed to load", async () => {
+    mockUseUser.mockReturnValue({
+      user: buildAuthUser(),
+      isLoading: false,
+      error: null,
+      invalidate: vi.fn(),
+    });
+    useUserStore.setState({
+      authProfile: buildAuthUser(),
+      user: null,
+      userError: "account down",
+      isSessionExpired: false,
+    });
+
+    renderSidebarUser();
+
+    expect(screen.getByText("Profile unavailable")).toBeVisible();
+    expect(screen.queryByText("Your session expired")).not.toBeInTheDocument();
   });
 });

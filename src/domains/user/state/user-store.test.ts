@@ -9,6 +9,7 @@ import {
   selectUserPermissions,
   selectUserRoles,
   selectUserStatus,
+  selectIsSessionExpired,
   selectUserSyncFailed,
   useUserStore,
 } from "./user-store";
@@ -267,5 +268,29 @@ describe("useUserStore selectors", () => {
       isLoading: true,
       error: "user failed",
     });
+  });
+
+  it("sessionExpired flags the dead session so the UI can stop showing a signed-in user", () => {
+    useUserStore.setState({ authProfile: buildAuthUser(), user: buildUser() });
+
+    useUserStore.getState().sessionExpired();
+
+    expect(useUserStore.getState().isSessionExpired).toBe(true);
+  });
+
+  it("userAuthenticated clears a previously expired session", () => {
+    useUserStore.getState().sessionExpired();
+
+    useUserStore.getState().userAuthenticated(buildAuthUser());
+
+    expect(useUserStore.getState().isSessionExpired).toBe(false);
+  });
+
+  it("selectIsSessionExpired reads the flag", () => {
+    expect(selectIsSessionExpired(useUserStore.getState())).toBe(false);
+
+    useUserStore.getState().sessionExpired();
+
+    expect(selectIsSessionExpired(useUserStore.getState())).toBe(true);
   });
 });

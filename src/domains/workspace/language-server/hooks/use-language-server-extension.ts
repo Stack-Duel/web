@@ -7,7 +7,7 @@ import {
   WebSocketTransport,
 } from "codemirror-languageserver";
 import { env } from "@/env";
-import { getSharedAccessToken } from "@/shared/lib/get-shared-access-token";
+import { getSharedBearerToken } from "@/shared/lib/get-shared-access-token";
 import { startLanguageServerSession } from "../api/start-language-server-session";
 import { endLanguageServerSession } from "../api/end-language-server-session";
 
@@ -45,7 +45,7 @@ export function useLanguageServerExtension(
 
         activeSessionId = session.sessionId;
 
-        const accessToken = (await getSharedAccessToken()) ?? "";
+        const accessToken = await getSharedBearerToken();
         const params = new URLSearchParams({
           sessionId: session.sessionId,
           access_token: accessToken,

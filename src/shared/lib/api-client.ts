@@ -1,6 +1,10 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { env } from "@/env";
-import { extractErrorMessage, type ProblemDetailsBody } from "./api-error";
+import {
+  extractErrorMessage,
+  SessionExpiredError,
+  type ProblemDetailsBody,
+} from "./api-error";
 import { getSharedAccessToken } from "./get-shared-access-token";
 
 function resolveRequestUrl(config: InternalAxiosRequestConfig): string {
@@ -22,37 +26,49 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(async (config) => {
   if (!isApiServerRequest(config)) return config;
 
-  const accessToken = await getSharedAccessToken();
-  if (accessToken) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
+  const result = await getSharedAccessToken();
+
+  // Don't bother sending a request we already know will come back 401.
+  if (result.status === "session-expired") throw new SessionExpiredError();
+
+  if (result.status === "token") {
+    config.headers.Authorization = `Bearer ${result.token}`;
   }
   return config;
 });
 
 apiClient.interceptors.response.use(
   (response) => response,
-  async (error: AxiosError<ProblemDetailsBody>) => {
+  async (error: unknown) => {
     if (axios.isCancel(error)) throw error;
 
-    const original = error.config as
+    // Axios routes request-interceptor rejections through here too, so the typed
+    // error has to be passed along before it gets flattened into a message.
+    if (error instanceof SessionExpiredError) throw error;
+
+    const axiosError = error as AxiosError<ProblemDetailsBody>;
+
+    const original = axiosError.config as
       (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
 
     if (
-      error.response?.status === 401 &&
+      axiosError.response?.status === 401 &&
       original &&
       isApiServerRequest(original) &&
       !original._retry
     ) {
       original._retry = true;
-      const accessToken = await getSharedAccessToken();
-      if (accessToken) {
-        original.headers.Authorization = `Bearer ${accessToken}`;
+      const result = await getSharedAccessToken();
+      if (result.status === "token") {
+        original.headers.Authorization = `Bearer ${result.token}`;
         return apiClient(original);
       }
 
-      throw new Error("Session expired. Please sign in again.");
+      throw new SessionExpiredError();
     }
 
-    throw new Error(extractErrorMessage(error.response?.data, error.message));
+    throw new Error(
+      extractErrorMessage(axiosError.response?.data, axiosError.message)
+    );
   }
 );

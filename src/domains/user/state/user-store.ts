@@ -10,6 +10,14 @@ interface UserState {
   isAuthLoading: boolean;
   isUserLoading: boolean;
 
+  /**
+   * True once the Auth0 session can no longer produce an access token (expired or
+   * revoked refresh token). The session cookie is still readable at that point, so
+   * getSession() keeps handing AuthBridge a user; this flag is what lets the UI tell
+   * "signed in" apart from "holding a dead cookie".
+   */
+  isSessionExpired: boolean;
+
   authError: string | null;
   userError: string | null;
 
@@ -33,6 +41,7 @@ const initialState = {
   user: null,
   isAuthLoading: false,
   isUserLoading: false,
+  isSessionExpired: false,
   authError: null,
   userError: null,
 } satisfies Partial<UserState>;
@@ -43,7 +52,12 @@ export const useUserStore = create<UserState>((set) => ({
   authCheckStarted: () => set({ isAuthLoading: true, authError: null }),
 
   userAuthenticated: (user) =>
-    set({ authProfile: user, isAuthLoading: false, authError: null }),
+    set({
+      authProfile: user,
+      isAuthLoading: false,
+      authError: null,
+      isSessionExpired: false,
+    }),
 
   userUnauthenticated: () =>
     set({ authProfile: null, user: null, isAuthLoading: false }),
@@ -51,7 +65,7 @@ export const useUserStore = create<UserState>((set) => ({
   authCheckFailed: (message) =>
     set({ authError: message, isAuthLoading: false }),
 
-  sessionExpired: () => set(initialState),
+  sessionExpired: () => set({ ...initialState, isSessionExpired: true }),
 
   userSyncStarted: () => set({ isUserLoading: true, userError: null }),
 
@@ -76,6 +90,7 @@ export const selectUserPermissions = (s: UserState) =>
   s.user?.permissions ?? EMPTY_PERMISSIONS;
 export const selectIsAuthLoading = (s: UserState) => s.isAuthLoading;
 export const selectIsUserLoading = (s: UserState) => s.isUserLoading;
+export const selectIsSessionExpired = (s: UserState) => s.isSessionExpired;
 export const selectAuthError = (s: UserState) => s.authError;
 export const selectUserError = (s: UserState) => s.userError;
 

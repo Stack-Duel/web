@@ -68,4 +68,24 @@ describe("routerConfig", () => {
     expect(routerConfig.settingsProfile.path).toBe("/settings/profile");
     expect(routerConfig.userSetup.path).toBe("/user/setup");
   });
+
+  it("builds the log in path without a returnTo when there is nothing to return to", () => {
+    expect(routerConfig.authLogIn.execute()).toBe("/auth/login");
+    expect(routerConfig.authLogIn.execute({})).toBe("/auth/login");
+    expect(routerConfig.authLogIn.execute({ returnTo: null })).toBe(
+      "/auth/login"
+    );
+  });
+
+  it("omits returnTo for the home path, which Auth0 already defaults to", () => {
+    expect(routerConfig.authLogIn.execute({ returnTo: "/" })).toBe(
+      "/auth/login"
+    );
+  });
+
+  it("builds the log in path with an encoded returnTo", () => {
+    expect(
+      routerConfig.authLogIn.execute({ returnTo: "/problems/two sum?tab=a" })
+    ).toBe("/auth/login?returnTo=%2Fproblems%2Ftwo%20sum%3Ftab%3Da");
+  });
 });
