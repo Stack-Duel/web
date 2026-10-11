@@ -77,7 +77,7 @@ export default function SidebarUser() {
   }
 
   if (!authUser) {
-a    return (
+    return (
       <Card className="rounded">
         <CardHeader>
           <CardTitle>Join the algowars community</CardTitle>
