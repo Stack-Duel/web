@@ -29,11 +29,14 @@ import {
 } from "@/domains/workspace/state/workspace-store";
 import {
   useGameSessionStore,
-  selectPendingNextProblemId,
+  selectHasSolvedCurrentProblem,
+  selectNextProblemId,
   selectViewingProblemId,
 } from "../../state/game-session-store";
 import { useRampSubmission } from "../../hooks/use-ramp-submission";
 import { useLoadNextProblem } from "../../hooks/use-load-next-problem";
+import { useGradingProblemId } from "../../hooks/use-grading-problem-id";
+import { isCurrentProblemAccepted } from "../../lib/current-problem";
 import { useSubmitSolution } from "@/domains/workspace/hooks/use-submit-solution";
 import { useUserStore, selectUser } from "@/domains/user/state/user-store";
 import GameScoreHeader from "@/domains/game/components/game-score-header";
@@ -54,7 +57,10 @@ export default function RampWorkspaceHeader({
   );
   const selectedVersionId = useWorkspaceStore(selectSelectedVersionId);
   const selectVersion = useWorkspaceStore((s) => s.selectVersion);
-  const pendingNextProblemId = useGameSessionStore(selectPendingNextProblemId);
+  const hasSolvedCurrentProblem = useGameSessionStore(
+    selectHasSolvedCurrentProblem
+  );
+  const nextProblemId = useGameSessionStore(selectNextProblemId);
   const viewingProblemId = useGameSessionStore(selectViewingProblemId);
   const isViewingHistory = viewingProblemId !== null;
 
@@ -62,6 +68,8 @@ export default function RampWorkspaceHeader({
   const loadNextProblem = useLoadNextProblem();
   const { runCode } = useSubmitSolution(problemSetup?.id ?? null);
   const onTimeExpired = useGameTimeExpired(game.gameId);
+  const gradingProblemId = useGradingProblemId(game);
+  const isGradingInFlight = Boolean(gradingProblemId);
 
   const isSolo = game.participants.length <= 1;
 
@@ -75,20 +83,24 @@ export default function RampWorkspaceHeader({
   };
 
   const onNextProblem = () => {
-    void loadNextProblem(pendingNextProblemId);
+    void loadNextProblem(nextProblemId);
   };
 
-  const problemSolved = pendingNextProblemId !== undefined && !isViewingHistory;
+  const hasAcceptedCurrentProblem = isCurrentProblemAccepted(game, user?.id);
+  const problemSolved = hasSolvedCurrentProblem && !isViewingHistory;
   const canSubmitSolution =
     !!problemSetup &&
     !isProblemSetupLoading &&
     !isSubmittingSubmission &&
     !problemSolved &&
+    !hasAcceptedCurrentProblem &&
+    !isGradingInFlight &&
     !isViewingHistory;
   const canRunCode = canSubmitSolution;
 
   const runLabel = isSubmittingSubmission ? "Running..." : "Run";
-  const submitLabel = isSubmittingSubmission ? "Submitting..." : "Submit";
+  const submitLabel =
+    isSubmittingSubmission || isGradingInFlight ? "Submitting..." : "Submit";
 
   useKeyboardCommand({
     key: "Enter",
