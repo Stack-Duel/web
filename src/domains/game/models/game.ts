@@ -1,10 +1,24 @@
 import { GameModeKey } from "./game-mode";
+import type { SubmissionStatus } from "@/domains/submission/models/submission-status";
 
 export enum GameStatus {
   Pending = "Pending",
   Running = "Running",
   Completed = "Completed",
   Cancelled = "Cancelled",
+}
+
+export interface GameParticipantLatestSubmission {
+  submissionId: string;
+  status: SubmissionStatus;
+  createdAt: string;
+}
+
+export interface GameParticipantCurrentProblem {
+  problemId: string;
+  /** The most recent submission against this problem, for the requesting
+   *  user's own participant only (always null for other players). */
+  latestSubmission?: GameParticipantLatestSubmission | null;
 }
 
 export interface GameParticipant {
@@ -14,9 +28,7 @@ export interface GameParticipant {
   seatNumber: number;
   joinedAt: Date;
   score: number;
-  currentProblem?: {
-    problemId: string;
-  } | null;
+  currentProblem?: GameParticipantCurrentProblem | null;
   hasForfeited: boolean;
   hasFinishedProblems: boolean;
   skipsRemaining?: number;

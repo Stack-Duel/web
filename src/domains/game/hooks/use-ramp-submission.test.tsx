@@ -5,9 +5,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRampSubmission } from "./use-ramp-submission";
 import { useSubmitGameProblem } from "../api/submit-game-problem";
-import { useCompleteProblem } from "../api/complete-problem";
 import { useGameSessionStore } from "../state/game-session-store";
 import { useWorkspaceStore } from "@/domains/workspace/state/workspace-store";
+import { useUserStore } from "@/domains/user/state/user-store";
 import { waitForTerminalSubmission } from "@/domains/submission/api/wait-for-terminal-submission";
 import { GameModeKey } from "../models/game-mode";
 import { GameStatus } from "../models/game";
@@ -17,26 +17,18 @@ vi.mock("@/env", () => import("@/test/mocks/env"));
 vi.mock("../api/submit-game-problem", () => ({
   useSubmitGameProblem: vi.fn(),
 }));
-vi.mock("../api/complete-problem", () => ({ useCompleteProblem: vi.fn() }));
 vi.mock("@/domains/submission/api/wait-for-terminal-submission", () => ({
   waitForTerminalSubmission: vi.fn(),
 }));
 vi.mock("sonner", () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
 
 const mockedUseSubmitGameProblem = vi.mocked(useSubmitGameProblem);
-const mockedUseCompleteProblem = vi.mocked(useCompleteProblem);
 const mockedWaitForTerminalSubmission = vi.mocked(waitForTerminalSubmission);
 
-function createWrapper() {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-  return {
-    queryClient,
-    Wrapper: ({ children }: { children: ReactNode }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    ),
-  };
+function createWrapper(queryClient: QueryClient) {
+  return ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
 }
 
 function buildGame(overrides: Partial<Game> = {}): Game {
@@ -60,6 +52,7 @@ describe("useRampSubmission", () => {
     useGameSessionStore.getState().reset();
     useWorkspaceStore.getState().reset();
     useWorkspaceStore.getState().setCode("print(1)");
+    useUserStore.setState({ user: { id: "user-1" } as never });
   });
 
   it("submits the current code and stores the resulting submission id", async () => {
@@ -67,16 +60,15 @@ describe("useRampSubmission", () => {
     mockedUseSubmitGameProblem.mockReturnValue({
       mutateAsync: submitGameProblem,
     } as never);
-    mockedUseCompleteProblem.mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as never);
     mockedWaitForTerminalSubmission.mockResolvedValue({
       status: "WrongAnswer",
     } as never);
 
-    const { Wrapper } = createWrapper();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
     const { result } = renderHook(() => useRampSubmission(), {
-      wrapper: Wrapper,
+      wrapper: createWrapper(queryClient),
     });
 
     await result.current.submit({
@@ -95,23 +87,37 @@ describe("useRampSubmission", () => {
     );
   });
 
-  it("completes the problem and marks it solved once the submission is accepted", async () => {
+  it("marks the problem solved from the refreshed game once the submission is accepted", async () => {
     mockedUseSubmitGameProblem.mockReturnValue({
       mutateAsync: vi.fn().mockResolvedValue("submission-1"),
-    } as never);
-    const completeProblem = vi
-      .fn()
-      .mockResolvedValue({ newScore: 10, nextProblemId: "problem-2" });
-    mockedUseCompleteProblem.mockReturnValue({
-      mutateAsync: completeProblem,
     } as never);
     mockedWaitForTerminalSubmission.mockResolvedValue({
       status: "Accepted",
     } as never);
 
-    const { Wrapper } = createWrapper();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    queryClient.setQueryData(["game", "game-1"], buildGame());
+    const fetchQuerySpy = vi.spyOn(queryClient, "fetchQuery").mockResolvedValue(
+      buildGame({
+        participants: [
+          {
+            userId: "user-1",
+            username: "user-1",
+            seatNumber: 0,
+            joinedAt: new Date(),
+            score: 10,
+            currentProblem: { problemId: "problem-2" },
+            hasForfeited: false,
+            hasFinishedProblems: false,
+          },
+        ],
+      }) as never
+    );
+
     const { result } = renderHook(() => useRampSubmission(), {
-      wrapper: Wrapper,
+      wrapper: createWrapper(queryClient),
     });
 
     await result.current.submit({
@@ -120,31 +126,26 @@ describe("useRampSubmission", () => {
       problemSetupId: "setup-1",
     });
 
-    expect(completeProblem).toHaveBeenCalledWith({
-      gameId: "game-1",
-      problemId: "problem-1",
-      body: { submissionId: "submission-1" },
-    });
-    expect(useGameSessionStore.getState().pendingNextProblemId).toBe(
-      "problem-2"
-    );
+    expect(fetchQuerySpy).toHaveBeenCalled();
+    expect(useGameSessionStore.getState().hasSolvedCurrentProblem).toBe(true);
+    expect(useGameSessionStore.getState().nextProblemId).toBe("problem-2");
   });
 
-  it("does not complete the problem when the submission is not accepted", async () => {
+  it("does not mark the problem solved when the submission is not accepted", async () => {
     mockedUseSubmitGameProblem.mockReturnValue({
       mutateAsync: vi.fn().mockResolvedValue("submission-1"),
-    } as never);
-    const completeProblem = vi.fn();
-    mockedUseCompleteProblem.mockReturnValue({
-      mutateAsync: completeProblem,
     } as never);
     mockedWaitForTerminalSubmission.mockResolvedValue({
       status: "WrongAnswer",
     } as never);
 
-    const { Wrapper } = createWrapper();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const fetchQuerySpy = vi.spyOn(queryClient, "fetchQuery");
+
     const { result } = renderHook(() => useRampSubmission(), {
-      wrapper: Wrapper,
+      wrapper: createWrapper(queryClient),
     });
 
     await result.current.submit({
@@ -153,21 +154,151 @@ describe("useRampSubmission", () => {
       problemSetupId: "setup-1",
     });
 
-    expect(completeProblem).not.toHaveBeenCalled();
-    expect(useGameSessionStore.getState().pendingNextProblemId).toBeUndefined();
+    expect(fetchQuerySpy).not.toHaveBeenCalled();
+    expect(useGameSessionStore.getState().hasSolvedCurrentProblem).toBe(false);
+  });
+
+  it("does not advance or report game over while the refetched game still shows the same current problem", async () => {
+    mockedUseSubmitGameProblem.mockReturnValue({
+      mutateAsync: vi.fn().mockResolvedValue("submission-1"),
+    } as never);
+    mockedWaitForTerminalSubmission.mockResolvedValue({
+      status: "Accepted",
+    } as never);
+
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    queryClient.setQueryData(["game", "game-1"], buildGame());
+    vi.spyOn(queryClient, "fetchQuery").mockResolvedValue(
+      buildGame({
+        participants: [
+          {
+            userId: "user-1",
+            username: "user-1",
+            seatNumber: 0,
+            joinedAt: new Date(),
+            score: 10,
+            currentProblem: { problemId: "problem-1" },
+            hasForfeited: false,
+            hasFinishedProblems: false,
+          },
+        ],
+      }) as never
+    );
+
+    const { result } = renderHook(() => useRampSubmission(), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await result.current.submit({
+      game: buildGame(),
+      problemId: "problem-1",
+      problemSetupId: "setup-1",
+    });
+
+    expect(useGameSessionStore.getState().hasSolvedCurrentProblem).toBe(
+      false
+    );
+    expect(useGameSessionStore.getState().nextProblemId).toBeNull();
+  });
+
+  it("reports game over with a null next problem when the participant has finished all problems", async () => {
+    mockedUseSubmitGameProblem.mockReturnValue({
+      mutateAsync: vi.fn().mockResolvedValue("submission-1"),
+    } as never);
+    mockedWaitForTerminalSubmission.mockResolvedValue({
+      status: "Accepted",
+    } as never);
+
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    queryClient.setQueryData(["game", "game-1"], buildGame());
+    vi.spyOn(queryClient, "fetchQuery").mockResolvedValue(
+      buildGame({
+        participants: [
+          {
+            userId: "user-1",
+            username: "user-1",
+            seatNumber: 0,
+            joinedAt: new Date(),
+            score: 10,
+            currentProblem: null,
+            hasForfeited: false,
+            hasFinishedProblems: true,
+          },
+        ],
+      }) as never
+    );
+
+    const { result } = renderHook(() => useRampSubmission(), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await result.current.submit({
+      game: buildGame(),
+      problemId: "problem-1",
+      problemSetupId: "setup-1",
+    });
+
+    expect(useGameSessionStore.getState().hasSolvedCurrentProblem).toBe(true);
+    expect(useGameSessionStore.getState().nextProblemId).toBeNull();
+  });
+
+  it("reports game over when the participant has no current problem even though they have not formally finished", async () => {
+    mockedUseSubmitGameProblem.mockReturnValue({
+      mutateAsync: vi.fn().mockResolvedValue("submission-1"),
+    } as never);
+    mockedWaitForTerminalSubmission.mockResolvedValue({
+      status: "Accepted",
+    } as never);
+
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    queryClient.setQueryData(["game", "game-1"], buildGame());
+    vi.spyOn(queryClient, "fetchQuery").mockResolvedValue(
+      buildGame({
+        participants: [
+          {
+            userId: "user-1",
+            username: "user-1",
+            seatNumber: 0,
+            joinedAt: new Date(),
+            score: 10,
+            currentProblem: null,
+            hasForfeited: false,
+            hasFinishedProblems: false,
+          },
+        ],
+      }) as never
+    );
+
+    const { result } = renderHook(() => useRampSubmission(), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    await result.current.submit({
+      game: buildGame(),
+      problemId: "problem-1",
+      problemSetupId: "setup-1",
+    });
+
+    expect(useGameSessionStore.getState().hasSolvedCurrentProblem).toBe(true);
+    expect(useGameSessionStore.getState().nextProblemId).toBeNull();
   });
 
   it("toasts an error and stops submitting when the submit call throws", async () => {
     mockedUseSubmitGameProblem.mockReturnValue({
       mutateAsync: vi.fn().mockRejectedValue(new Error("network down")),
     } as never);
-    mockedUseCompleteProblem.mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as never);
 
-    const { Wrapper } = createWrapper();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
     const { result } = renderHook(() => useRampSubmission(), {
-      wrapper: Wrapper,
+      wrapper: createWrapper(queryClient),
     });
 
     await result.current.submit({
@@ -180,6 +311,7 @@ describe("useRampSubmission", () => {
     await waitFor(() =>
       expect(useWorkspaceStore.getState().isSubmittingSubmission).toBe(false)
     );
+    expect(useGameSessionStore.getState().gradingProblemId).toBeNull();
   });
 
   it("focuses the Submission tab as soon as the submission starts, before the request resolves", () => {
@@ -189,13 +321,12 @@ describe("useRampSubmission", () => {
         () => new Promise<string>((resolve) => (resolveSubmit = resolve))
       ),
     } as never);
-    mockedUseCompleteProblem.mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as never);
 
-    const { Wrapper } = createWrapper();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
     const { result } = renderHook(() => useRampSubmission(), {
-      wrapper: Wrapper,
+      wrapper: createWrapper(queryClient),
     });
 
     void result.current.submit({
@@ -208,6 +339,9 @@ describe("useRampSubmission", () => {
       root: 3,
       execution: 1,
     });
+    expect(useGameSessionStore.getState().gradingProblemId).toBe(
+      "problem-1"
+    );
 
     resolveSubmit("submission-1");
   });
@@ -216,13 +350,12 @@ describe("useRampSubmission", () => {
     mockedUseSubmitGameProblem.mockReturnValue({
       mutateAsync: vi.fn().mockRejectedValue(new Error("network down")),
     } as never);
-    mockedUseCompleteProblem.mockReturnValue({
-      mutateAsync: vi.fn(),
-    } as never);
 
-    const { Wrapper } = createWrapper();
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
     const { result } = renderHook(() => useRampSubmission(), {
-      wrapper: Wrapper,
+      wrapper: createWrapper(queryClient),
     });
 
     await result.current.submit({

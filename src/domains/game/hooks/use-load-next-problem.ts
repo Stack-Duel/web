@@ -8,20 +8,16 @@ import { useGameSessionStore } from "../state/game-session-store";
 
 /**
  * Loads the next problem into the workspace after the player clicks "Next
- * Problem" following an accepted submission. Replaces the
- * `nextProblemRequested` listener effect.
+ * Problem" following an accepted submission.
  */
 export function useLoadNextProblem() {
   const queryClient = useQueryClient();
   const initializeProblem = useInitializeProblem();
   const nextProblemLoading = useGameSessionStore((s) => s.nextProblemLoading);
 
-  return async (nextProblemId: string | null | undefined) => {
+  return async (nextProblemId: string | null) => {
     if (!nextProblemId) return;
 
-    // Mirrors the old reducer: flip pendingNextProblemId back to "not yet
-    // solved" as soon as the load is requested, so the "Next Problem" button
-    // disappears immediately rather than staying up while the fetch runs.
     nextProblemLoading();
 
     try {

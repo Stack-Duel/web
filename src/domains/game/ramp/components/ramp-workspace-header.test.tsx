@@ -195,6 +195,64 @@ describe("RampWorkspaceHeader", () => {
     expect(submit).toHaveBeenCalledTimes(1);
   });
 
+  it("disables Run and Submit when the current problem has already been accepted", () => {
+    useUserStore.setState({ user: buildUser({ id: "user-1" }) });
+    useProblemSetupStore
+      .getState()
+      .initializeProblem({ id: "problem-1" } as never);
+
+    renderHeader(
+      buildGame({
+        participants: [
+          buildParticipant({
+            userId: "user-1",
+            currentProblem: {
+              problemId: "problem-1",
+              latestSubmission: {
+                submissionId: "sub-1",
+                status: "Accepted",
+                createdAt: "t1",
+              },
+            },
+          }),
+        ],
+      })
+    );
+
+    expect(screen.getByRole("button", { name: "Run" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Submit" })).toBeDisabled();
+  });
+
+  it("disables Run and Submit while a submission is out for grading, surviving a refresh", () => {
+    useUserStore.setState({ user: buildUser({ id: "user-1" }) });
+    useProblemSetupStore
+      .getState()
+      .initializeProblem({ id: "problem-1" } as never);
+
+    renderHeader(
+      buildGame({
+        participants: [
+          buildParticipant({
+            userId: "user-1",
+            currentProblem: {
+              problemId: "problem-1",
+              latestSubmission: {
+                submissionId: "sub-1",
+                status: "Running",
+                createdAt: "t1",
+              },
+            },
+          }),
+        ],
+      })
+    );
+
+    expect(screen.getByRole("button", { name: "Run" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Submitting..." })
+    ).toBeDisabled();
+  });
+
   it("shows your score badge next to the buttons and just the timer centered for Solo Rush", () => {
     useUserStore.setState({ user: buildUser({ id: "user-1" }) });
 
