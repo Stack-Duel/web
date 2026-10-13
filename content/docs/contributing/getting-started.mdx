@@ -1,0 +1,44 @@
+---
+title: Getting Started
+description: Set up Stack Duel locally — the web app and the API it talks to.
+---
+
+Stack Duel is two repos: `stack-duel/web` (this app, Next.js) and
+`stack-duel/server` (the .NET API it talks to over HTTP, plus SignalR for
+live game state). You generally need both running locally to do anything
+useful — the web app throws on startup if it can't reach the API's
+environment config.
+
+## Prerequisites
+
+- Node.js 24.5 and pnpm 11.10.0 (`corepack enable` picks up the pinned
+  version automatically) for `web`.
+- .NET 10 SDK, Docker, and the `dotnet-ef` CLI for `server`.
+
+## Setup order
+
+1. **Server first.** Follow `server/README.md` — `docker-compose up` for
+   Postgres/RabbitMQ, run the user-secrets setup script, apply migrations,
+   seed data, then `dotnet run --project StackDuel.Api`.
+2. **Then web.** Follow `web/README.md` — `pnpm i`, copy `.env.example` to
+   `.env`, fill in Auth0 and `NEXT_PUBLIC_API_SERVER_URL` (pointing at the
+   API from step 1), then `pnpm dev`.
+
+The exact commands and environment variables are maintained in those two
+READMEs, not duplicated here — this page is about how the pieces fit
+together; the READMEs are the source of truth for exact setup steps.
+
+## Running tests
+
+Each repo tests itself independently:
+
+- `web`: `pnpm test` (Vitest, unit) and `pnpm e2e` (Playwright, needs a real
+  running stack).
+- `server`: `dotnet test StackDuel.slnx` (needs Docker running, for the
+  integration project's disposable Postgres container).
+
+## Next step
+
+Once both are running, read
+[Architecture Overview](/docs/contributing/architecture-overview) for how
+the codebase is organized.

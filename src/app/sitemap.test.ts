@@ -8,6 +8,7 @@ import type { BlogPost } from "@/domains/blog/models/blog-post";
 
 const siteUrl = testTenant.url;
 const getPublishedPosts = vi.fn<() => BlogPost[]>().mockReturnValue([]);
+const getDocsPages = vi.fn<() => { url: string }[]>().mockReturnValue([]);
 
 vi.mock(
   "@/domains/tenant/lib/get-current-tenant",
@@ -16,6 +17,9 @@ vi.mock(
 vi.mock("@/env", () => import("@/test/mocks/env"));
 vi.mock("@/domains/blog/lib/get-posts", () => ({
   getPublishedPosts: () => getPublishedPosts(),
+}));
+vi.mock("@/shared/lib/docs-source", () => ({
+  docsSource: { getPages: () => getDocsPages() },
 }));
 
 function buildProblemPage(
@@ -66,6 +70,7 @@ describe("sitemap", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     getPublishedPosts.mockReturnValue([]);
+    getDocsPages.mockReturnValue([]);
   });
 
   it("includes the static routes plus one entry per problem returned by the API", async () => {
@@ -146,6 +151,28 @@ describe("sitemap", () => {
       {
         url: `${siteUrl}/blog/writing-code-in-the-age-of-ai`,
         lastModified: "2026-01-01",
+        changeFrequency: "monthly",
+        priority: 0.5,
+      },
+    ]);
+  });
+
+  it("includes one entry per docs page", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(buildProblemPage([])),
+      })
+    );
+    getDocsPages.mockReturnValue([{ url: "/docs/guides/creating-a-problem" }]);
+
+    const result = await sitemap();
+
+    expect(result).toEqual([
+      ...staticRoutes,
+      {
+        url: `${siteUrl}/docs/guides/creating-a-problem`,
         changeFrequency: "monthly",
         priority: 0.5,
       },

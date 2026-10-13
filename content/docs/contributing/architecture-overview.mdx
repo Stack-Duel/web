@@ -1,0 +1,48 @@
+---
+title: Architecture Overview
+description: How the web app and server are organized.
+---
+
+## Two repos, one product
+
+`web` (Next.js, App Router) renders the UI and calls `server` (.NET) over a
+REST API, plus SignalR hubs for live game state (submissions, lobby
+updates). Auth0 issues the tokens both sides trust.
+
+## `server` — Clean Architecture
+
+| Project                    | Owns                                                                          |
+| -------------------------- | ----------------------------------------------------------------------------- |
+| `StackDuel.Domain`         | Entities, value objects, domain logic — no framework dependencies.            |
+| `StackDuel.Application`    | Use cases / handlers that orchestrate domain objects.                         |
+| `StackDuel.Infrastructure` | EF Core, repositories, external services (Judge0, blob storage, message bus). |
+| `StackDuel.Api`            | HTTP endpoints, SignalR hubs, auth wiring — the thinnest layer.               |
+
+Dependencies only point inward (Api → Application → Domain); Infrastructure
+implements interfaces Domain/Application define, not the other way round.
+
+## `web` — domain folders
+
+Each feature area lives under `src/domains/<name>/` and typically contains
+its own `components/`, `lib/`, `models/`, `api/` (React Query hooks), and
+`forms/` — the domain owns everything specific to it. `src/shared/` is for
+code with no single owning domain: layouts, the shadcn-based `ui/`
+component library, the Markdown renderer, auth guards, and the
+`router-config.ts` single source of truth for every app route.
+
+Pages under `src/app/` are thin — they fetch/compose and delegate the actual
+UI to a `src/views/<area>/*-layout.tsx` component, which is what gets
+tested.
+
+## Where things diverge from a typical CRUD app
+
+- **Feature flags** are their own bounded context (`StackDuel.Domain/FeatureFlags`),
+  separate from RBAC — they're operational toggles, not permanent grants.
+  See `server/README.md` for the full evaluation precedence.
+- **Submissions are append-only.** Each attempt at a problem inserts a new
+  `Submission` row; nothing updates one in place. A participant's attempt
+  history is recovered by querying, not stored as a list anywhere.
+- **The content you're reading now** (`/docs`) and the blog (`/blog`) are
+  deliberately separate: different audiences, different content folders
+  (`content/docs` vs `src/content/blog`), different layouts. Neither reuses
+  the other's navigation.

@@ -79,6 +79,9 @@ export const routerConfig = {
   community: {
     path: "/community",
   },
+  docs: {
+    path: "/docs",
+  },
   blogPost: {
     path: "/blog/:slug",
     execute: ({ slug }: { slug: string }) =>
