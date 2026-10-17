@@ -1,7 +1,7 @@
 ---
 title: Why You Still Need to Write Code by Hand
 excerpt: AI can write your solution in three seconds. That's exactly why deliberate, unassisted practice matters more than it ever has, and why it has to be fun enough that you actually do it.
-author: Algowars Team
+author: StackDuel Team
 coverImage: /blog/zach-m-Tyt5Z03BoaI-unsplash.jpg
 tags: [career, ai]
 publishedAt: 2026-09-12
@@ -30,7 +30,7 @@ This isn't a mystery. It's the same reason a daily word puzzle gets finished by 
 
 Coding practice responds to the same trick. A problem you'd skip on a static list becomes worth solving the moment someone else is racing you to it.
 
-## Where Algowars fits in
+## Where StackDuel fits in
 
 That's the whole premise behind head-to-head duels and timed lobbies: you and a real opponent, the same problem, judged the instant you submit. There's no assistant in the room and no time to go looking for one. Just you, a clock, and the person one seat over already typing.
 
@@ -38,4 +38,4 @@ Play enough matches and the fundamentals come back whether you're chasing them o
 
 ## The takeaway
 
-Use AI to move faster at work. Just don't let it become the only way you know how to write code, and don't rely on willpower alone to keep up the practice that prevents that. Make the practice itself something you'd choose to do even if no one made you. Competition is a shortcut to that, and it's the whole reason Algowars is built around a clock and an opponent instead of a static problem list.
+Use AI to move faster at work. Just don't let it become the only way you know how to write code, and don't rely on willpower alone to keep up the practice that prevents that. Make the practice itself something you'd choose to do even if no one made you. Competition is a shortcut to that, and it's the whole reason StackDuel is built around a clock and an opponent instead of a static problem list.

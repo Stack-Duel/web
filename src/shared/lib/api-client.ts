@@ -16,7 +16,7 @@ function isApiServerRequest(config: InternalAxiosRequestConfig): boolean {
 export const apiClient = axios.create({
   baseURL: env.NEXT_PUBLIC_API_SERVER_URL,
   headers: { "Content-Type": "application/json" },
-  timeout: 15_000,
+  timeout: env.NEXT_PUBLIC_DISABLE_TIMEOUT ? undefined : 15_000,
 });
 
 apiClient.interceptors.request.use(async (config) => {

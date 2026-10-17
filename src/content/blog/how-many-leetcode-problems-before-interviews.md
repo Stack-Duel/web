@@ -1,7 +1,7 @@
 ---
 title: How Many LeetCode Problems Should You Solve Before Interviews?
 excerpt: The number people quote is almost always the wrong number for the question they're actually asking. Here's a better way to think about it.
-author: Algowars Team
+author: StackDuel Team
 coverImage: /blog/annie-spratt-QckxruozjRg-unsplash.jpg
 tags: [interview-prep]
 publishedAt: 2026-09-15

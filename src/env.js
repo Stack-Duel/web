@@ -22,8 +22,11 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    NEXT_PUBLIC_API_SERVER_URL: z.string(),
+    NEXT_PUBLIC_API_SERVER_URL: z
+      .string()
+      .transform((baseUrl) => baseUrl.replace(/\/+$/, "")),
     NEXT_PUBLIC_APPLICATIONINSIGHTS_CONNECTION_STRING: z.string().optional(),
+    NEXT_PUBLIC_DISABLE_TIMEOUT: z.stringbool().optional(),
   },
 
   /**
@@ -42,6 +45,7 @@ export const env = createEnv({
     NEXT_PUBLIC_AUTH_NAMESPACE: process.env.NEXT_PUBLIC_AUTH_NAMESPACE,
     NEXT_PUBLIC_APPLICATIONINSIGHTS_CONNECTION_STRING:
       process.env.NEXT_PUBLIC_APPLICATIONINSIGHTS_CONNECTION_STRING,
+    NEXT_PUBLIC_DISABLE_TIMEOUT: process.env.NEXT_PUBLIC_DISABLE_TIMEOUT,
   },
 
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,

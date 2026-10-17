@@ -21,14 +21,14 @@ export const discordLink: SocialLink = {
 
 const githubLink: SocialLink = {
   name: "GitHub",
-  href: "https://github.com/algowars",
+  href: "https://github.com/Stack-Duel",
   icon: GithubLogo,
   description: "Explore the code and contribute.",
 };
 
 const linkedinLink: SocialLink = {
   name: "LinkedIn",
-  href: "https://www.linkedin.com/company/106262028/",
+  href: "https://www.linkedin.com/company/146758046/",
   icon: LinkedinLogo,
   description: "Follow along for updates and announcements.",
 };

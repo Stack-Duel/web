@@ -1,15 +1,15 @@
 (function () {
   "use strict";
 
-  var React = window.__AlgowarsReact;
-  var ReactDOMClient = window.__AlgowarsReactDOMClient;
+  var React = window.__StackDuelReact;
+  var ReactDOMClient = window.__StackDuelReactDOMClient;
 
-  var INCOMING_MESSAGE_TYPE = "algowars-preview-code";
-  var READY_MESSAGE_TYPE = "algowars-preview-ready";
+  var INCOMING_MESSAGE_TYPE = "stackduel-preview-code";
+  var READY_MESSAGE_TYPE = "stackduel-preview-ready";
   var MAIN_MODULE_KEY = "__main__";
 
-  var errorEl = document.getElementById("algowars-preview-error");
-  var rootEl = document.getElementById("algowars-preview-root");
+  var errorEl = document.getElementById("stackduel-preview-error");
+  var rootEl = document.getElementById("stackduel-preview-root");
   var reactRoot = ReactDOMClient.createRoot(rootEl);
   var renderCount = 0;
 

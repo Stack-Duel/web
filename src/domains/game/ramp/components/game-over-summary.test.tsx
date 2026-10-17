@@ -76,7 +76,7 @@ describe("GameOverSummary", () => {
   beforeEach(() => {
     resetUserStore();
     localStorage.setItem(
-      "algowars:has-seen-first-game-feedback-prompt",
+      "stackduel:has-seen-first-game-feedback-prompt",
       "true"
     );
     mockedUseCreateGameAndPlay.mockReturnValue({

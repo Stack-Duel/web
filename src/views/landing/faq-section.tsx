@@ -7,14 +7,14 @@ import {
 
 const faqs = [
   {
-    question: "Is Algowars free to use?",
+    question: "Is StackDuel free to use?",
     answer:
       "Yes. You can create a free account, solve problems, and compete in games without paying anything.",
   },
   {
     question: "What programming languages are supported?",
     answer:
-      "We currently support 3 languages: Python, JavaScript, and SQLite. We plan to add many more languages in the future. If you have a language you'd like to see supported, please let us know.",
+      "We currently support 3 languages: Python, JavaScript, C++, Java, and SQLite. We plan to add many more languages in the future. If you have a language you'd like to see supported, please let us know.",
   },
   {
     question: "How are matches judged?",
@@ -27,7 +27,7 @@ const faqs = [
       "You can compete head-to-head, join a free-for-all lobby, or race solo against the clock.",
   },
   {
-    question: "Algowars is in alpha, what does that mean?",
+    question: "StackDuel is in alpha, what does that mean?",
     answer:
       "The platform is still under active development, so features may change and you may run into occasional bugs. Feedback is welcome.",
   },

@@ -1,7 +1,7 @@
 ---
 title: Best LeetCode Alternatives for Practicing With Friends
 excerpt: LeetCode is built for solving alone. If you want to practice DSA with other people in the room, here's how the real alternatives stack up.
-author: Algowars Team
+author: StackDuel Team
 coverImage: /blog/marvin-meyer-SYTO3xs06fU-unsplash.jpg
 tags: [comparisons]
 publishedAt: 2026-09-13
@@ -24,9 +24,9 @@ HackerRank's strength is breadth: interview kits, certifications, company-specif
 
 CodinGame gets the closest to "fun" of the traditional platforms, wrapping problems in game-like puzzles and clash-of-code events. It's the most game-like of the established options, and worth trying if you like a more visual, puzzle-driven style. The clash mode is timed and multiplayer, which is the right idea, but it's a side feature bolted onto a much bigger solo catalog rather than the whole point.
 
-## Algowars
+## StackDuel
 
-This is the one we're obviously biased about, so take it as such: Algowars is built entirely around the head-to-head loop. You and another player (or a full lobby) get the same problem, judged the instant either of you submits. No comparing notes afterward, no separate "multiplayer mode" tucked away from the main catalog. It's smaller than the platforms above right now. We're in alpha, we support three languages, and we're not trying to out-catalog LeetCode's company-tagged question bank. If what you actually want is to practice against a real person instead of a static list, that's the entire product.
+This is the one we're obviously biased about, so take it as such: StackDuel is built entirely around the head-to-head loop. You and another player (or a full lobby) get the same problem, judged the instant either of you submits. No comparing notes afterward, no separate "multiplayer mode" tucked away from the main catalog. It's smaller than the platforms above right now. We're in alpha, we support three languages, and we're not trying to out-catalog LeetCode's company-tagged question bank. If what you actually want is to practice against a real person instead of a static list, that's the entire product.
 
 ## The honest recommendation
 

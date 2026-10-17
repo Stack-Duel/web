@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "Settings",
-  description: "Manage your Algowars account and profile",
+  description: "Manage your StackDuel account and profile",
 };
 
 export default async function SettingsLayout({

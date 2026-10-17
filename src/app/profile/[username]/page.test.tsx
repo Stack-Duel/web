@@ -24,6 +24,6 @@ describe("generateMetadata", () => {
 
     expect(metadata.title).toBe("ada's Profile");
     expect(metadata.description).toContain("ada");
-    expect(metadata.description).toContain("Algowars");
+    expect(metadata.description).toContain("StackDuel");
   });
 });

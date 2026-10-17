@@ -8,7 +8,7 @@ export const generateMetadata = async ({
   const username = (await params).username;
   return {
     title: `${username}'s Profile`,
-    description: `View ${username}'s profile on Algowars, an online competitive coding platform. See game stats, submission history, and code battle results.`,
+    description: `View ${username}'s profile on StackDuel, an online competitive coding platform. See game stats, submission history, and code battle results.`,
   };
 };
 

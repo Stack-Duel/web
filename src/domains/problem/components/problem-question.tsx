@@ -98,7 +98,7 @@ export const ProblemQuestion = ({ problem }: ProblemQuestionProps) => {
         <div className="flex items-center justify-between gap-3">
           <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Copyright className="h-3.5 w-3.5" /> Copyright {currentYear}{" "}
-            algowars. All rights reserved.
+            StackDuel. All rights reserved.
           </p>
           <ContextFeedbackButton type="Problem" entityId={problem.id} />
         </div>

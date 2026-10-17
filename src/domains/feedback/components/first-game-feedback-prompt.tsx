@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { FeedbackDialog } from "./feedback-dialog";
 
-const STORAGE_KEY = "algowars:has-seen-first-game-feedback-prompt";
+const STORAGE_KEY = "stackduel:has-seen-first-game-feedback-prompt";
 
 type FirstGameFeedbackPromptProps = {
   gameId: string;
