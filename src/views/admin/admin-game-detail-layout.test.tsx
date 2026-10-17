@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useMyActiveGames } from "@/domains/game/api/get-my-active-games";
+import { buildGame as baseBuildGame } from "@/test/factories/game";
 vi.mock("@/domains/feature-flags/hooks/use-feature-flag", () => ({
   useFeatureFlag: () => true,
 }));
@@ -40,20 +41,16 @@ const mockUseAdminGamePlayerHistory = vi.mocked(useAdminGamePlayerHistory);
 const mockUseGameModes = vi.mocked(useGameModes);
 
 function buildGame(overrides: Partial<Game> = {}): Game {
-  return {
+  return baseBuildGame({
     gameId: "game_1",
     gameModeId: "mode_1",
     gameModeKey: "duel" as Game["gameModeKey"],
     status: GameStatus.Completed,
-    timeLimitInSeconds: 600,
     createdAt: new Date("2026-08-30T00:00:00.000Z"),
     startedAt: new Date("2026-08-30T00:00:05.000Z"),
     endedAt: new Date("2026-08-30T00:10:00.000Z"),
-    participants: [],
-    techStacks: [],
-    joinCode: "ABC1234",
     ...overrides,
-  };
+  });
 }
 
 const mockUseMyActiveGames = vi.mocked(useMyActiveGames);

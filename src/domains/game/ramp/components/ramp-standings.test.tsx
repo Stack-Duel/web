@@ -5,37 +5,20 @@ import { useUserStore } from "@/domains/user/state/user-store";
 import { resetUserStore } from "@/test/mocks/user-store";
 import { buildUser } from "@/test/factories/user";
 import { GameModeKey } from "../../models/game-mode";
-import { GameStatus } from "../../models/game";
 import type { Game, GameParticipant } from "../../models/game";
+import {
+  buildParticipant as baseBuildParticipant,
+  buildGame as baseBuildGame,
+} from "@/test/factories/game";
 
 function buildParticipant(
   overrides: Partial<GameParticipant> = {}
 ): GameParticipant {
-  return {
-    userId: "user-1",
-    username: "player",
-    seatNumber: 0,
-    joinedAt: new Date(),
-    score: 0,
-    hasForfeited: false,
-    hasFinishedProblems: false,
-    ...overrides,
-  };
+  return baseBuildParticipant({ username: "player", ...overrides });
 }
 
 function buildGame(overrides: Partial<Game> = {}): Game {
-  return {
-    gameId: "game-1",
-    gameModeId: "mode-1",
-    gameModeKey: GameModeKey.Ffa,
-    status: GameStatus.Running,
-    timeLimitInSeconds: 600,
-    createdAt: new Date(),
-    participants: [],
-    techStacks: [],
-    joinCode: "ABC1234",
-    ...overrides,
-  };
+  return baseBuildGame({ gameModeKey: GameModeKey.Ffa, ...overrides });
 }
 
 describe("RampStandings", () => {

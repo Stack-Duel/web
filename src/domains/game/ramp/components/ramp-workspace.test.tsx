@@ -8,8 +8,7 @@ import { useWorkspaceStore } from "@/domains/workspace/state/workspace-store";
 import { useGameSessionStore } from "../../state/game-session-store";
 import { useGameProblemHistory } from "../../api/get-game-problem-history";
 import { GameModeKey } from "../../models/game-mode";
-import { GameStatus } from "../../models/game";
-import type { Game } from "../../models/game";
+import { buildGame } from "@/test/factories/game";
 
 vi.mock("@/shared/hooks/use-mobile", () => ({ useIsMobile: vi.fn() }));
 vi.mock(
@@ -50,21 +49,6 @@ vi.mock("./ramp-activity-feed", () => ({
 
 const mockedUseIsMobile = vi.mocked(useIsMobile);
 const mockedUseGameProblemHistory = vi.mocked(useGameProblemHistory);
-
-function buildGame(overrides: Partial<Game> = {}): Game {
-  return {
-    gameId: "game-1",
-    gameModeId: "mode-1",
-    gameModeKey: GameModeKey.SoloRush,
-    status: GameStatus.Running,
-    timeLimitInSeconds: 600,
-    createdAt: new Date(),
-    participants: [],
-    techStacks: [],
-    joinCode: "ABC1234",
-    ...overrides,
-  };
-}
 
 describe("RampWorkspace", () => {
   beforeEach(() => {

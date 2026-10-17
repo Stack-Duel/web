@@ -13,6 +13,10 @@ import { routerMock } from "@/test/mocks/next-navigation";
 import { GameModeKey } from "../../models/game-mode";
 import { GameStatus } from "../../models/game";
 import type { Game, GameParticipant } from "../../models/game";
+import {
+  buildParticipant as baseBuildParticipant,
+  buildGame as baseBuildGame,
+} from "@/test/factories/game";
 
 vi.mock("next/navigation", () => import("@/test/mocks/next-navigation"));
 vi.mock("../../api/use-game-modes", () => ({ useGameModes: vi.fn() }));
@@ -26,31 +30,16 @@ const mockedUseStartGame = vi.mocked(useStartGame);
 function buildParticipant(
   overrides: Partial<GameParticipant> = {}
 ): GameParticipant {
-  return {
-    userId: "user-1",
-    username: "host",
-    seatNumber: 0,
-    joinedAt: new Date(),
-    score: 0,
-    hasForfeited: false,
-    hasFinishedProblems: false,
-    ...overrides,
-  };
+  return baseBuildParticipant({ username: "host", ...overrides });
 }
 
 function buildGame(overrides: Partial<Game> = {}): Game {
-  return {
-    gameId: "game-1",
-    gameModeId: "mode-1",
+  return baseBuildGame({
     gameModeKey: GameModeKey.Duel,
     status: GameStatus.Pending,
-    timeLimitInSeconds: 600,
-    createdAt: new Date(),
     participants: [buildParticipant()],
-    techStacks: [],
-    joinCode: "ABC1234",
     ...overrides,
-  };
+  });
 }
 
 describe("LobbyPanel", () => {

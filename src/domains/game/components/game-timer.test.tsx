@@ -1,24 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import GameTimer from "./game-timer";
-import { GameModeKey } from "../models/game-mode";
 import { GameStatus } from "../models/game";
-import type { Game } from "../models/game";
-
-function buildGame(overrides: Partial<Game> = {}): Game {
-  return {
-    gameId: "game-1",
-    gameModeId: "mode-1",
-    gameModeKey: GameModeKey.SoloRush,
-    status: GameStatus.Running,
-    timeLimitInSeconds: 600,
-    createdAt: new Date(),
-    participants: [],
-    techStacks: [],
-    joinCode: "ABC1234",
-    ...overrides,
-  };
-}
+import { buildGame } from "@/test/factories/game";
 
 describe("GameTimer", () => {
   it("shows the time limit and a not-started label while the game is Pending", () => {
