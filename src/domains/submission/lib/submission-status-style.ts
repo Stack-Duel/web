@@ -11,6 +11,14 @@ const destructiveStatuses = new Set<string>([
   "CompileError",
 ]);
 
+const terminalSubmissionStatuses = new Set<SubmissionStatus>([
+  "Accepted",
+  "WrongAnswer",
+]);
+
+export const isTerminalSubmissionStatus = (status: SubmissionStatus) =>
+  terminalSubmissionStatuses.has(status);
+
 export const getSubmissionStatusVariant = (
   status: SubmissionStatus | SubmissionResultStatus
 ) =>

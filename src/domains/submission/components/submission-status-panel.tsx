@@ -8,6 +8,7 @@ import { useSubmissionStatus } from "@/domains/submission/api/get-submission-sta
 import {
   getSubmissionStatusClassName,
   getSubmissionStatusVariant,
+  isTerminalSubmissionStatus,
 } from "@/domains/submission/lib/submission-status-style";
 import { Badge } from "@/shared/components/ui/badge";
 import {
@@ -19,21 +20,13 @@ import {
 import { Check, X } from "lucide-react";
 import type { WheelEvent } from "react";
 
-const terminalSubmissionStatuses = new Set<string>([
-  "Accepted",
-  "WrongAnswer",
-  "TimeLimitExceeded",
-  "MemoryLimitExceeded",
-  "RuntimeError",
-  "CompileError",
-]);
 const pendingResultStatuses = new Set<SubmissionResultStatus>([
   "Pending",
   "Processing",
 ]);
 
 const isPendingSubmissionStatus = (status: SubmissionStatus) =>
-  !terminalSubmissionStatuses.has(status);
+  !isTerminalSubmissionStatus(status);
 
 const isPendingResultStatus = (status: SubmissionResultStatus) =>
   pendingResultStatuses.has(status);

@@ -30,11 +30,16 @@ export type GameFeedEntry = GameFeedAttemptEntry | GameFeedReactionEntry;
 const MAX_FEED_ENTRIES = 50;
 
 interface GameSessionState {
-  /** Set after a problem is solved. `string` = next problem ID ready to load;
-   *  `null` = last problem solved, game over. `undefined` = not yet solved. */
-  pendingNextProblemId: string | null | undefined;
+  /** True once the current problem is solved and the player has not moved on yet. */
+  hasSolvedCurrentProblem: boolean;
+
+  /** The next problem ready to load, or `null` when the solve was the last one. */
+  nextProblemId: string | null;
 
   viewingProblemId: string | null;
+
+  /** The problem ID whose submission is currently out for grading, or `null` when nothing is in flight. */
+  gradingProblemId: string | null;
 
   /** Newest first. Populated purely from SignalR pushes ("GameParticipantAttempted",
    *  "GameParticipantReacted"). There's no REST endpoint backing this, so it starts empty on
@@ -46,19 +51,27 @@ interface GameSessionState {
   viewProblem: (problemId: string) => void;
   returnToCurrentProblem: () => void;
   addFeedEntry: (entry: GameFeedEntry) => void;
+  gradingStarted: (problemId: string) => void;
+  gradingSettled: () => void;
   reset: () => void;
 }
 
 export const useGameSessionStore = create<GameSessionState>((set) => ({
-  pendingNextProblemId: undefined,
+  hasSolvedCurrentProblem: false,
+  nextProblemId: null,
   viewingProblemId: null,
+  gradingProblemId: null,
   feed: [],
 
   problemSolved: (nextProblemId) =>
-    set({ pendingNextProblemId: nextProblemId }),
+    set({ hasSolvedCurrentProblem: true, nextProblemId }),
 
   nextProblemLoading: () =>
-    set({ pendingNextProblemId: undefined, viewingProblemId: null }),
+    set({
+      hasSolvedCurrentProblem: false,
+      nextProblemId: null,
+      viewingProblemId: null,
+    }),
 
   viewProblem: (problemId) => set({ viewingProblemId: problemId }),
 
@@ -69,14 +82,29 @@ export const useGameSessionStore = create<GameSessionState>((set) => ({
       feed: [entry, ...state.feed].slice(0, MAX_FEED_ENTRIES),
     })),
 
+  gradingStarted: (problemId) => set({ gradingProblemId: problemId }),
+
+  gradingSettled: () => set({ gradingProblemId: null }),
+
   reset: () =>
-    set({ pendingNextProblemId: undefined, viewingProblemId: null, feed: [] }),
+    set({
+      hasSolvedCurrentProblem: false,
+      nextProblemId: null,
+      viewingProblemId: null,
+      gradingProblemId: null,
+      feed: [],
+    }),
 }));
 
-export const selectPendingNextProblemId = (s: GameSessionState) =>
-  s.pendingNextProblemId;
+export const selectHasSolvedCurrentProblem = (s: GameSessionState) =>
+  s.hasSolvedCurrentProblem;
+
+export const selectNextProblemId = (s: GameSessionState) => s.nextProblemId;
 
 export const selectViewingProblemId = (s: GameSessionState) =>
   s.viewingProblemId;
+
+export const selectGradingProblemId = (s: GameSessionState) =>
+  s.gradingProblemId;
 
 export const selectFeed = (s: GameSessionState) => s.feed;

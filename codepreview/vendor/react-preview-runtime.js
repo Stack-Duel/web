@@ -12641,8 +12641,8 @@ Error generating stack: ` +
   });
   var b2 = Ni(dn()),
     z2 = Ni(zm());
-  window.__AlgowarsReact = b2;
-  window.__AlgowarsReactDOMClient = z2;
+  window.__StackDuelReact = b2;
+  window.__StackDuelReactDOMClient = z2;
 })();
 /*! Bundled license information:
 

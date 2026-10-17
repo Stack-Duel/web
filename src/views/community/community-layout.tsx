@@ -9,7 +9,7 @@ export default function CommunityLayout() {
         <div className="mx-auto max-w-3xl px-4 text-center">
           <h1 className="text-3xl font-bold md:text-4xl">Join the community</h1>
           <p className="mt-4 text-muted-foreground">
-            Algowars is more fun with other people. Jump into Discord to find
+            StackDuel is more fun with other people. Jump into Discord to find
             opponents, get help, and talk shop with other developers.
           </p>
         </div>

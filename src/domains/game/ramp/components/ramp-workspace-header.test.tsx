@@ -15,8 +15,13 @@ import { useUserStore } from "@/domains/user/state/user-store";
 import { resetUserStore } from "@/test/mocks/user-store";
 import { buildUser } from "@/test/factories/user";
 import { GameModeKey } from "../../models/game-mode";
-import { GameStatus } from "../../models/game";
-import type { Game, GameParticipant } from "../../models/game";
+import type { GameParticipant } from "../../models/game";
+import {
+  buildParticipant as baseBuildParticipant,
+  buildCurrentProblem,
+  buildGame,
+  buildLatestSubmission,
+} from "@/test/factories/game";
 
 vi.mock("@/env", () => import("@/test/mocks/env"));
 vi.mock("@/domains/game/components/forfeit-button", () => ({
@@ -55,34 +60,10 @@ const mockedUseRampSubmission = vi.mocked(useRampSubmission);
 const mockedUseLoadNextProblem = vi.mocked(useLoadNextProblem);
 const mockedUseSubmitSolution = vi.mocked(useSubmitSolution);
 
-function buildGame(overrides: Partial<Game> = {}): Game {
-  return {
-    gameId: "game-1",
-    gameModeId: "mode-1",
-    gameModeKey: GameModeKey.SoloRush,
-    status: GameStatus.Running,
-    timeLimitInSeconds: 600,
-    createdAt: new Date(),
-    participants: [],
-    techStacks: [],
-    joinCode: "ABC1234",
-    ...overrides,
-  };
-}
-
 function buildParticipant(
   overrides: Partial<GameParticipant> = {}
 ): GameParticipant {
-  return {
-    userId: "user-1",
-    username: "me",
-    seatNumber: 0,
-    joinedAt: new Date(),
-    score: 0,
-    hasForfeited: false,
-    hasFinishedProblems: false,
-    ...overrides,
-  };
+  return baseBuildParticipant({ username: "me", ...overrides });
 }
 
 function renderHeader(game = buildGame()) {
@@ -194,6 +175,39 @@ describe("RampWorkspaceHeader", () => {
 
     expect(submit).toHaveBeenCalledTimes(1);
   });
+
+  // Both cases come from the server's own-participant state, so they also cover
+  // the buttons staying disabled across a refresh.
+  it.each([
+    ["Accepted", "Submit"],
+    ["Running", "Submitting..."],
+  ] as const)(
+    "a server-reported latest submission of %s disables Run and %s",
+    (status, submitButtonName) => {
+      useUserStore.setState({ user: buildUser({ id: "user-1" }) });
+      useProblemSetupStore
+        .getState()
+        .initializeProblem({ id: "problem-1" } as never);
+
+      renderHeader(
+        buildGame({
+          participants: [
+            buildParticipant({
+              userId: "user-1",
+              currentProblem: buildCurrentProblem({
+                latestSubmission: buildLatestSubmission({ status }),
+              }),
+            }),
+          ],
+        })
+      );
+
+      expect(screen.getByRole("button", { name: "Run" })).toBeDisabled();
+      expect(
+        screen.getByRole("button", { name: submitButtonName })
+      ).toBeDisabled();
+    }
+  );
 
   it("shows your score badge next to the buttons and just the timer centered for Solo Rush", () => {
     useUserStore.setState({ user: buildUser({ id: "user-1" }) });

@@ -20,7 +20,7 @@ export const useEditorSettingsStore = create<EditorSettingsState>()(
       setTabSize: (tabSize) => set({ tabSize }),
       setIndentType: (indentType) => set({ indentType }),
     }),
-    { name: "algowars-editor-settings" }
+    { name: "stackduel-editor-settings" }
   )
 );
 
