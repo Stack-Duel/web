@@ -7,6 +7,10 @@ vi.mock(
   "@auth0/nextjs-auth0",
   () => import("@/test/mocks/nextjs-auth0-client")
 );
+vi.mock(
+  "@/domains/tenant/lib/get-current-tenant",
+  () => import("@/test/mocks/tenant")
+);
 
 const mockUseUser = vi.mocked(useUser);
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 import Logo from "@/shared/logo/logo";
 import { routerConfig } from "@/shared/router-config";
 import { socialLinks } from "@/shared/lib/social-links";
+import { getCurrentTenant } from "@/domains/tenant/lib/get-current-tenant";
 
 const platformLinks = [
   { name: "Problems", href: routerConfig.problems.path },
@@ -19,7 +20,9 @@ const accountLinks = [
   { name: "Profile Settings", href: routerConfig.profileSettings.path },
 ];
 
-export default function Footer() {
+export default async function Footer() {
+  const tenant = await getCurrentTenant();
+
   return (
     <footer className="relative w-full overflow-hidden border-t">
       <div
@@ -28,10 +31,10 @@ export default function Footer() {
       />
       <div className="relative max-w-7xl mx-auto px-4 py-12 grid grid-cols-2 gap-8 sm:grid-cols-5">
         <div className="col-span-2 flex flex-col gap-3">
-          <Logo className="h-10" />
+          <Logo className="h-8" />
           <p className="text-muted-foreground max-w-xs text-sm">
-            StackDuel is an open source competitive coding platform. Practice
-            through competition.
+            {tenant.name} is an open source competitive coding platform.
+            Practice through competition.
           </p>
           <ul className="flex items-center gap-3 mt-1">
             {socialLinks.map(({ name, href, icon: Icon }) => (
@@ -114,7 +117,7 @@ export default function Footer() {
       <div className="relative">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <p className="text-muted-foreground text-sm">
-            &copy; {new Date().getFullYear()} Algowars. Practice through
+            &copy; {new Date().getFullYear()} {tenant.name}. Practice through
             competition.
           </p>
         </div>

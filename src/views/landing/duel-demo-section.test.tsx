@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import DuelDemoSection from "./duel-demo-section";
+import {
+  defaultTenantId,
+  tenants,
+} from "@/domains/tenant/config/tenant-config";
 
-const DUEL_DEMO_ALT =
-  "A live Algowars duel: two players racing to solve the same coding problem, judged instantly";
+const DUEL_DEMO_ALT = `A live ${tenants[defaultTenantId].name} duel: two players racing to solve the same coding problem, judged instantly`;
 
 describe("DuelDemoSection", () => {
   it("shows the duel demo video by default", () => {

@@ -34,7 +34,7 @@ describe("editor-settings-store", () => {
     useEditorSettingsStore.getState().setTabSize(8);
 
     const stored = JSON.parse(
-      localStorage.getItem("algowars-editor-settings") ?? "{}"
+      localStorage.getItem("stackduel-editor-settings") ?? "{}"
     );
     expect(stored.state.tabSize).toBe(8);
   });

@@ -119,9 +119,7 @@ describe("useGameSessionStore", () => {
   it("records the problem id out for grading when grading starts", () => {
     useGameSessionStore.getState().gradingStarted("problem-1");
 
-    expect(useGameSessionStore.getState().gradingProblemId).toBe(
-      "problem-1"
-    );
+    expect(useGameSessionStore.getState().gradingProblemId).toBe("problem-1");
   });
 
   it("clears the grading problem id once grading settles", () => {

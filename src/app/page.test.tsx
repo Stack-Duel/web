@@ -1,12 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import Home, { metadata } from "./page";
+import Home, { generateMetadata } from "./page";
 import { auth0 } from "@/test/mocks/auth0";
 import { buildSessionData } from "@/test/factories/session";
-import { siteName } from "@/test/mocks/site";
+import { testTenant } from "@/test/mocks/tenant";
 
 vi.mock("@/shared/lib/auth0", () => import("@/test/mocks/auth0"));
-vi.mock("@/shared/lib/site", () => import("@/test/mocks/site"));
+vi.mock(
+  "@/domains/tenant/lib/get-current-tenant",
+  () => import("@/test/mocks/tenant")
+);
 vi.mock("@/views/dashboard/dashboard-layout", () => ({
   default: () => <div>Dashboard Layout</div>,
 }));
@@ -18,6 +21,9 @@ vi.mock("@/shared/layouts/layout/layout", () => ({
 vi.mock("@/views/landing/hero", () => ({ default: () => <div>Hero</div> }));
 vi.mock("@/views/landing/features-section", () => ({
   default: () => <div>Features</div>,
+}));
+vi.mock("@/views/landing/faq-section", () => ({
+  default: () => <div>Faq</div>,
 }));
 vi.mock("@/views/landing/cta-section", () => ({
   default: () => <div>Cta</div>,
@@ -43,14 +49,17 @@ describe("Home", () => {
 
     expect(screen.getByText("Hero")).toBeVisible();
     expect(screen.getByText("Features")).toBeVisible();
+    expect(screen.getByText("Faq")).toBeVisible();
     expect(screen.getByText("Cta")).toBeVisible();
   });
 });
 
 describe("metadata", () => {
-  it("sets an absolute title so the brand name isn't suffixed twice", () => {
+  it("sets an absolute title so the brand name isn't suffixed twice", async () => {
+    const metadata = await generateMetadata();
+
     expect(metadata.title).toEqual({
-      absolute: `${siteName} - Real-Time Coding Duels & DSA Practice`,
+      absolute: `${testTenant.name} - Real-Time Coding Duels & DSA Practice`,
     });
   });
 });

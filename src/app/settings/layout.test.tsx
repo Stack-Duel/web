@@ -8,6 +8,10 @@ import { routerConfig } from "@/shared/router-config";
 
 vi.mock("next/navigation", () => import("@/test/mocks/next-navigation"));
 vi.mock("@/shared/lib/auth0", () => import("@/test/mocks/auth0"));
+vi.mock(
+  "@/domains/tenant/lib/get-current-tenant",
+  () => import("@/test/mocks/tenant")
+);
 vi.mock("@/views/settings/settings-layout", () => ({
   default: ({ children }: { children: React.ReactNode }) => (
     <div>Settings Shell: {children}</div>

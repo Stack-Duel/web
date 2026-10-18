@@ -9,7 +9,7 @@ Web application built for Stack Duel. This project uses Nextjs, tailwindcss, sha
 ### Prerequisites
 
 - Node.js 24.5 (matches CI).
-- pnpm 11.10.0 — pinned via `packageManager` in `package.json`; `corepack enable` will pick it up automatically.
+- pnpm 11.10.0 - pinned via `packageManager` in `package.json`; `corepack enable` will pick it up automatically.
 - A running [`stack-duel/server`](https://github.com/Stack-Duel/server) API, unless you're pointing `NEXT_PUBLIC_API_SERVER_URL` at a shared dev environment instead. See [`playwright/README.md`](./playwright/README.md#prerequisites) for the local Postgres/RabbitMQ/API bootstrap steps.
 
 ### Installation
@@ -30,10 +30,10 @@ cp .env.example .env
 
 And this will make a copy of the empty .env file. Then fill in:
 
-- `AUTH0_*` — go into Auth0 and create a Next.js web application and an API, then fill in the resulting values. `AUTH0_SECRET` can be generated with `openssl rand -hex 32`.
-- `NEXT_PUBLIC_API_SERVER_URL` — where the `stack Duel/server` API is reachable (`http://localhost:5041` for a locally-running instance).
-- `NEXT_PUBLIC_CODEPREVIEW_ORIGIN` — the origin serving the React-component-preview iframe runtime (see `codepreview/`). This is **required**: the app throws on startup if it's unset. Unless you're specifically working on that feature, point it at the shared dev deployment — ask a teammate for the current URL, or check the `Preview` GitHub Environment's variables.
-- `NEXT_PUBLIC_APPLICATIONINSIGHTS_CONNECTION_STRING` is optional — telemetry is skipped when it's unset.
+- `AUTH0_*` - go into Auth0 and create a Next.js web application and an API, then fill in the resulting values. `AUTH0_SECRET` can be generated with `openssl rand -hex 32`.
+- `NEXT_PUBLIC_API_SERVER_URL` - where the `stack Duel/server` API is reachable (`http://localhost:5041` for a locally-running instance).
+- `NEXT_PUBLIC_CODEPREVIEW_ORIGIN` - the origin serving the React-component-preview iframe runtime (see `codepreview/`). This is **required**: the app throws on startup if it's unset. Unless you're specifically working on that feature, point it at the shared dev deployment - ask a teammate for the current URL, or check the `Preview` GitHub Environment's variables.
+- `NEXT_PUBLIC_APPLICATIONINSIGHTS_CONNECTION_STRING` is optional - telemetry is skipped when it's unset.
 
 ### Running the app
 
