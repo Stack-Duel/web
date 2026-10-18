@@ -18,11 +18,11 @@ with [CQRS](https://martinfowler.com/bliki/CQRS.html), and
 The solution is broken up into these projects:
 
 | Project                    | Owns                                                                          |
-| --------------------------- | ----------------------------------------------------------------------------- |
-| `StackDuel.Domain`         | Entities, value objects, domain logic - no framework dependencies.           |
-| `StackDuel.Application`    | Use cases / handlers that orchestrate domain objects.                        |
-| `StackDuel.Infrastructure` | EF Core, repositories, external services (Judge0, blob storage, message bus).|
-| `StackDuel.Api`            | HTTP endpoints, SignalR hubs, and auth wiring                                |
+| -------------------------- | ----------------------------------------------------------------------------- |
+| `StackDuel.Domain`         | Entities, value objects, domain logic - no framework dependencies.            |
+| `StackDuel.Application`    | Use cases / handlers that orchestrate domain objects.                         |
+| `StackDuel.Infrastructure` | EF Core, repositories, external services (Judge0, blob storage, message bus). |
+| `StackDuel.Api`            | HTTP endpoints, SignalR hubs, and auth wiring                                 |
 
 <Accordions type="multiple">
 <Accordion title="StackDuel.Domain">
