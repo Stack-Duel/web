@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPostBySlug } from "@/domains/blog/lib/get-posts";
 import { routerConfig } from "@/shared/router-config";
-import { siteName } from "@/shared/lib/site";
+import { getCurrentTenant } from "@/domains/tenant/lib/get-current-tenant";
 import BlogPostLayout from "@/views/blog/blog-post-layout";
 
 export const dynamic = "force-dynamic";
@@ -16,9 +16,10 @@ export const generateMetadata = async ({
   const post = getPostBySlug(slug);
 
   if (!post) {
+    const tenant = await getCurrentTenant();
     return {
       title: "Post not found",
-      description: `This blog post could not be found on ${siteName}.`,
+      description: `This blog post could not be found on ${tenant.name}.`,
     };
   }
 

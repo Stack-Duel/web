@@ -21,12 +21,14 @@ import { routerConfig } from "@/shared/router-config";
 import { ModeToggle } from "@/shared/theme/mode-toggle";
 import SocialLinkButton from "@/shared/components/social-link-button";
 import { discordLink } from "@/shared/lib/social-links";
+import { useTenant } from "@/domains/tenant/state/tenant-store";
 import { useUser } from "@auth0/nextjs-auth0";
 import { MenuIcon } from "lucide-react";
 import Link from "next/link";
 
 export default function Navbar() {
   const { user } = useUser();
+  const tenant = useTenant();
   const defaultRoutes = [
     { name: "Home", href: routerConfig.home.path },
     { name: "Problems", href: routerConfig.problems.path },
@@ -67,7 +69,7 @@ export default function Navbar() {
   return (
     <nav className="fixed inset-x-0 top-4 z-50 px-4">
       <div className="max-w-6xl py-3 mx-auto grid grid-cols-2 lg:grid-cols-3 gap-3 px-6 rounded-full border bg-background/60 shadow-lg backdrop-blur-md">
-        <Logo className="h-9" />
+        <Logo className="h-7" />
         <ul className="hidden justify-self-center lg:flex items-center gap-3 text-muted-foreground">
           {defaultRoutes.map((route) => (
             <li key={route.href} className="hidden lg:block">
@@ -102,7 +104,7 @@ export default function Navbar() {
               <SheetContent>
                 <SheetHeader>
                   <SheetTitle>
-                    <Logo className="h-9" />
+                    <Logo className="h-7" />
                   </SheetTitle>
                 </SheetHeader>
                 <div className="px-2">
@@ -128,7 +130,7 @@ export default function Navbar() {
                   ) : (
                     <Card className="rounded">
                       <CardHeader>
-                        <CardTitle>Join the algowars community</CardTitle>
+                        <CardTitle>Join the {tenant.name} community</CardTitle>
                         <CardDescription>
                           Sign up to track progress, solve problems, and
                           compete.

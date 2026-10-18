@@ -72,7 +72,7 @@ describe("useUserSync", () => {
 
     expect(upsertUser).toHaveBeenCalledWith({
       sub: "auth0|123",
-      tenantId: "algowars",
+      tenantId: "stackduel",
     });
     expect(useUserStore.getState().user).toEqual(account);
     expect(useUserStore.getState().userError).toBeNull();
@@ -182,7 +182,7 @@ describe("useUserSync", () => {
     await waitFor(() => {
       expect(upsertUser).toHaveBeenCalledWith({
         sub: "auth0|retry",
-        tenantId: "algowars",
+        tenantId: "stackduel",
       });
     });
   });

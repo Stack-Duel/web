@@ -11,7 +11,10 @@ vi.mock("@/domains/feature-flags/api/feature-flags-server-api", () => ({
 vi.mock("@/views/leaderboards/leaderboards-layout", () => ({
   default: () => <div>Leaderboards Layout</div>,
 }));
-vi.mock("@/shared/lib/site", () => import("@/test/mocks/site"));
+vi.mock(
+  "@/domains/tenant/lib/get-current-tenant",
+  () => import("@/test/mocks/tenant")
+);
 
 const mockFetchFeatureFlags = vi.mocked(fetchFeatureFlags);
 

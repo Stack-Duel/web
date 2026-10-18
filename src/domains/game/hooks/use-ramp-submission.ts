@@ -47,11 +47,12 @@ function resolveNextProblemOutcome(
   return { kind: "stillGrading" };
 }
 
-/**
- * Orchestrates a ramp-workspace submission: submit the current code, wait
- * for a terminal result, then refetch the game and advance to the player's
- * next problem if the server has moved them on.
- */
+const delay = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+const STILL_GRADING_POLL_INTERVAL_MS = 700;
+const STILL_GRADING_MAX_ATTEMPTS = 6;
+
 export function useRampSubmission() {
   const queryClient = useQueryClient();
   const isSubmitting = useWorkspaceStore(selectIsSubmittingSubmission);
@@ -102,20 +103,31 @@ export function useRampSubmission() {
         return;
       }
 
-      const refreshed = await queryClient.fetchQuery({
-        ...gameQueryOptions({ gameId: game.gameId }),
-        staleTime: 0,
-      });
+      let outcome: NextProblemOutcome = { kind: "stillGrading" };
+      for (let attempt = 0; attempt < STILL_GRADING_MAX_ATTEMPTS; attempt++) {
+        const refreshed = await queryClient.fetchQuery({
+          ...gameQueryOptions({ gameId: game.gameId }),
+          staleTime: 0,
+        });
 
-      const participant = refreshed.participants.find(
-        (p) => p.userId === user?.id
-      );
+        const participant = refreshed.participants.find(
+          (p) => p.userId === user?.id
+        );
 
-      const outcome = resolveNextProblemOutcome(participant, problemId);
+        outcome = resolveNextProblemOutcome(participant, problemId);
+        if (outcome.kind !== "stillGrading") break;
+
+        await delay(STILL_GRADING_POLL_INTERVAL_MS);
+      }
+
       if (outcome.kind === "gameOver") {
         problemSolved(null);
       } else if (outcome.kind === "advanced") {
         problemSolved(outcome.problemId);
+      } else {
+        toast.error(
+          "Your solution was accepted, but the game hasn't advanced yet. It'll update shortly."
+        );
       }
 
       void queryClient.invalidateQueries({

@@ -9,7 +9,10 @@ vi.mock("../../../views/problems/problem/problem-page-client", () => ({
 vi.mock("@/domains/problem/api/problem-server-api", () => ({
   fetchProblemBySlug: vi.fn(),
 }));
-vi.mock("@/shared/lib/site", () => import("@/test/mocks/site"));
+vi.mock(
+  "@/domains/tenant/lib/get-current-tenant",
+  () => import("@/test/mocks/tenant")
+);
 
 const mockFetchProblemBySlug = vi.mocked(fetchProblemBySlug);
 

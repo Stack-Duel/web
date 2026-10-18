@@ -40,6 +40,7 @@ import {
 } from "@/shared/components/ui/sidebar";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import { routerConfig } from "@/shared/router-config";
+import { useTenant } from "@/domains/tenant/state/tenant-store";
 import { useUser } from "@auth0/nextjs-auth0";
 import {
   AlertCircle,
@@ -60,6 +61,7 @@ export default function SidebarUser() {
   const syncFailed = useUserStore(selectUserSyncFailed);
   const { retrySync } = useUserSync();
   const { isMobile } = useSidebar();
+  const tenant = useTenant();
 
   if (isLoading || isUserLoading) {
     return (
@@ -81,7 +83,7 @@ export default function SidebarUser() {
     return (
       <Card className="rounded">
         <CardHeader>
-          <CardTitle>Join the algowars community</CardTitle>
+          <CardTitle>Join the {tenant.name} community</CardTitle>
           <CardDescription>
             Sign up to track progress and solve problems.
           </CardDescription>

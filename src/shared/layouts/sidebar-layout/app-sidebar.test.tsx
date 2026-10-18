@@ -113,8 +113,8 @@ describe("AppSidebar", () => {
 
     for (const [name, href] of [
       ["Discord", "https://discord.gg/3mW6Y9N5xZ"],
-      ["GitHub", "https://github.com/algowars"],
-      ["LinkedIn", "https://www.linkedin.com/company/106262028/"],
+      ["GitHub", "https://github.com/Stack-Duel"],
+      ["LinkedIn", "https://www.linkedin.com/company/146758046/"],
     ]) {
       const link = screen.getByRole("link", { name: new RegExp(name) });
       expect(link).toHaveAttribute("href", href);
@@ -247,7 +247,7 @@ describe("AppSidebar", () => {
   it("shows the tenant logo linking to the dashboard", () => {
     renderSidebar();
 
-    const images = screen.getAllByAltText("Algowars");
+    const images = screen.getAllByAltText("Stack Duel");
     expect(images[0].closest("a")).toHaveAttribute(
       "href",
       routerConfig.dashboard.path

@@ -1,18 +1,24 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import FaqSection from "./faq-section";
+import { testTenant } from "@/test/mocks/tenant";
+
+vi.mock(
+  "@/domains/tenant/lib/get-current-tenant",
+  () => import("@/test/mocks/tenant")
+);
 
 describe("FaqSection", () => {
-  it("renders every FAQ question as a collapsed accordion trigger", () => {
-    render(<FaqSection />);
+  it("renders every FAQ question as a collapsed accordion trigger", async () => {
+    render(await FaqSection());
 
     const questions = [
-      "Is Algowars free to use?",
+      `Is ${testTenant.name} free to use?`,
       "What programming languages are supported?",
       "How are matches judged?",
       "What game modes are available?",
-      "Algowars is in alpha, what does that mean?",
+      `${testTenant.name} is in alpha, what does that mean?`,
     ];
 
     for (const question of questions) {
@@ -24,7 +30,7 @@ describe("FaqSection", () => {
 
   it("reveals an answer when its question is clicked", async () => {
     const user = userEvent.setup();
-    render(<FaqSection />);
+    render(await FaqSection());
 
     expect(
       screen.queryByText(/We currently support 3 languages/)
@@ -41,13 +47,13 @@ describe("FaqSection", () => {
 
   it("only keeps one answer open at a time", async () => {
     const user = userEvent.setup();
-    render(<FaqSection />);
+    render(await FaqSection());
 
-    await user.click(
-      screen.getByRole("button", { name: "Is Algowars free to use?" })
-    );
+    const freeToUseQuestion = `Is ${testTenant.name} free to use?`;
+
+    await user.click(screen.getByRole("button", { name: freeToUseQuestion }));
     expect(
-      screen.getByRole("button", { name: "Is Algowars free to use?" })
+      screen.getByRole("button", { name: freeToUseQuestion })
     ).toHaveAttribute("aria-expanded", "true");
 
     await user.click(
@@ -58,7 +64,7 @@ describe("FaqSection", () => {
       screen.getByRole("button", { name: "How are matches judged?" })
     ).toHaveAttribute("aria-expanded", "true");
     expect(
-      screen.getByRole("button", { name: "Is Algowars free to use?" })
+      screen.getByRole("button", { name: freeToUseQuestion })
     ).toHaveAttribute("aria-expanded", "false");
   });
 });

@@ -136,16 +136,80 @@ describe("useRampSubmission", () => {
     expect(useGameSessionStore.getState().hasSolvedCurrentProblem).toBe(false);
   });
 
-  it("does not advance or report game over while the refetched game still shows the same current problem", async () => {
-    const { submit } = setupRampSubmission({
+  it("polls while the refetched game still shows the same current problem, then gives up and toasts", async () => {
+    vi.useFakeTimers();
+    const { fetchQuerySpy, submit } = setupRampSubmission({
       terminalStatus: "Accepted",
       refreshedParticipant: { currentProblem: { problemId: "problem-1" } },
     });
 
-    await submit();
+    const submitPromise = submit();
+    await vi.advanceTimersByTimeAsync(10_000);
+    await submitPromise;
 
+    expect(fetchQuerySpy).toHaveBeenCalledTimes(6);
     expect(useGameSessionStore.getState().hasSolvedCurrentProblem).toBe(false);
     expect(useGameSessionStore.getState().nextProblemId).toBeNull();
+    expect(toast.error).toHaveBeenCalledWith(
+      "Your solution was accepted, but the game hasn't advanced yet. It'll update shortly."
+    );
+
+    vi.useRealTimers();
+  });
+
+  it("stops polling as soon as the refetched game shows the next problem", async () => {
+    vi.useFakeTimers();
+    const submitGameProblem = vi.fn().mockResolvedValue("submission-1");
+    mockedUseSubmitGameProblem.mockReturnValue({
+      mutateAsync: submitGameProblem,
+    } as never);
+    mockedWaitForTerminalSubmission.mockResolvedValue({
+      status: "Accepted",
+    } as never);
+
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const fetchQuerySpy = vi
+      .spyOn(queryClient, "fetchQuery")
+      .mockResolvedValueOnce(
+        buildGame({
+          participants: [
+            buildParticipant({
+              score: 10,
+              currentProblem: { problemId: "problem-1" },
+            }),
+          ],
+        }) as never
+      )
+      .mockResolvedValue(
+        buildGame({
+          participants: [
+            buildParticipant({
+              score: 10,
+              currentProblem: { problemId: "problem-2" },
+            }),
+          ],
+        }) as never
+      );
+
+    const { result } = renderHook(() => useRampSubmission(), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    const submitPromise = result.current.submit({
+      game: buildGame(),
+      problemId: "problem-1",
+      problemSetupId: "setup-1",
+    });
+    await vi.advanceTimersByTimeAsync(10_000);
+    await submitPromise;
+
+    expect(fetchQuerySpy).toHaveBeenCalledTimes(2);
+    expect(useGameSessionStore.getState().hasSolvedCurrentProblem).toBe(true);
+    expect(useGameSessionStore.getState().nextProblemId).toBe("problem-2");
+
+    vi.useRealTimers();
   });
 
   it("reports game over with a null next problem when the participant has finished all problems", async () => {

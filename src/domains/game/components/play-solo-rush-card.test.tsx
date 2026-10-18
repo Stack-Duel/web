@@ -79,6 +79,41 @@ describe("PlaySoloRushCard", () => {
     });
   });
 
+  it("shows a skeleton loader and disables the start button while tracks are still loading", async () => {
+    mockedUseGameModes.mockReturnValue({
+      data: [
+        {
+          id: "mode-1",
+          key: GameModeKey.SoloRush,
+          name: "Solo Rush",
+          description: "",
+          minPlayers: 1,
+          maxPlayers: 1,
+          timeOptions: [{ durationSeconds: 300, isDefault: true }],
+        },
+      ],
+      isLoading: false,
+    } as never);
+    mockedUseTracks.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+    } as never);
+    mockedUseCreateGameAndPlay.mockReturnValue({
+      createGame: vi.fn(),
+      isCreating: false,
+    });
+    const user = userEvent.setup();
+
+    render(<PlaySoloRushCard />);
+    await user.click(screen.getByRole("button", { name: /Play now/ }));
+
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Start game" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Loading/ })).toBeDisabled();
+  });
+
   it("toasts an error when no tracks are available to select", async () => {
     mockedUseGameModes.mockReturnValue({
       data: [

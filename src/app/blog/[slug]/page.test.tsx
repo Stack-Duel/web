@@ -14,7 +14,10 @@ vi.mock("@/views/blog/blog-post-layout", () => ({
     <div>blog-post-layout:{post.title}</div>
   ),
 }));
-vi.mock("@/shared/lib/site", () => import("@/test/mocks/site"));
+vi.mock(
+  "@/domains/tenant/lib/get-current-tenant",
+  () => import("@/test/mocks/tenant")
+);
 
 const mockGetPostBySlug = vi.mocked(getPostBySlug);
 

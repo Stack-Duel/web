@@ -58,7 +58,7 @@ describe("SidebarUser", () => {
   it("shows a join prompt when there is no authenticated user", () => {
     renderSidebarUser();
 
-    expect(screen.getByText("Join the algowars community")).toBeVisible();
+    expect(screen.getByText("Join the Stack Duel community")).toBeVisible();
     expect(screen.getByRole("link", { name: "Log In" })).toHaveAttribute(
       "href",
       routerConfig.authLogIn.path

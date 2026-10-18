@@ -10,6 +10,10 @@ vi.mock(
 vi.mock("@/domains/user/forms/user-setup-form", () => ({
   default: () => <div>user-setup-form</div>,
 }));
+vi.mock(
+  "@/domains/tenant/lib/get-current-tenant",
+  () => import("@/test/mocks/tenant")
+);
 
 const mockUseUser = vi.mocked(useUser);
 

@@ -12,7 +12,7 @@ function sendReadyMessage(
 ) {
   window.dispatchEvent(
     new MessageEvent("message", {
-      data: { type: "algowars-preview-ready" },
+      data: { type: "stackduel-preview-ready" },
       origin: overrides.origin ?? CODEPREVIEW_ORIGIN,
       source: "source" in overrides ? overrides.source : iframe.contentWindow,
     })
@@ -56,7 +56,7 @@ describe("ReactPreview", () => {
     await waitFor(() =>
       expect(postMessage).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: "algowars-preview-code",
+          type: "stackduel-preview-code",
           code: "const x = 1;",
           functionName: "Solution",
         }),

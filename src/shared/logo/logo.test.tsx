@@ -7,7 +7,7 @@ describe("Logo", () => {
   it("renders the tenant's light and dark logos", () => {
     render(<Logo />);
 
-    const images = screen.getAllByAltText(tenants.algowars.name);
+    const images = screen.getAllByAltText(tenants.stackduel.name);
     expect(images).toHaveLength(2);
   });
 });

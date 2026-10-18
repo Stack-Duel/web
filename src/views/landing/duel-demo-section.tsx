@@ -3,12 +3,12 @@
 import { useState } from "react";
 import Image from "next/image";
 import { BrowserMockup } from "@/shared/components/ui/browser-mockup";
-
-const DUEL_DEMO_ALT =
-  "A live StackDuel duel: two players racing to solve the same coding problem, judged instantly";
+import { useTenant } from "@/domains/tenant/state/tenant-store";
 
 export default function DuelDemoSection() {
+  const tenant = useTenant();
   const [videoDisabled, setVideoDisabled] = useState(false);
+  const DUEL_DEMO_ALT = `A live ${tenant.name} duel: two players racing to solve the same coding problem, judged instantly`;
 
   return (
     <section className="px-4 pb-16">
