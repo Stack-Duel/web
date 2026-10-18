@@ -1,31 +1,31 @@
 ---
 title: Getting Started
-description: Set up Stack Duel locally — the web app and the API it talks to.
+description: Set up Stack Duel locally - the web app and the API it talks to.
 ---
 
-Stack Duel is two repos: `stack-duel/web` (this app, Next.js) and
-`stack-duel/server` (the .NET API it talks to over HTTP, plus SignalR for
-live game state). You generally need both running locally to do anything
-useful — the web app throws on startup if it can't reach the API's
-environment config.
+Stack Duel is served in two repos: `stack-duel/web` (the web application and this documentation site) and `stack-duel/server` (the .NET API).
+You need both applications running locally. You will also need to spin up postgresql database, rabbitMQ, and Azurite. These can all be installed
+using docker compose in the server repo. Finally you will need to setup an Auth0 tenant with a Nextjs application and an API. These values are set
+in the .env file of the web repo and the user secrets of the server repo.
+
+**Note**: If you run docker compose on the server with the default values, then you shouldn't need to set the database connetion string.
 
 ## Prerequisites
 
-- Node.js 24.5 and pnpm 11.10.0 (`corepack enable` picks up the pinned
-  version automatically) for `web`.
+- Node.js 24.5 and pnpm 11.10.0 for web.
 - .NET 10 SDK, Docker, and the `dotnet-ef` CLI for `server`.
 
 ## Setup order
 
-1. **Server first.** Follow `server/README.md` — `docker-compose up` for
+1. **Server first.** Follow `server/README.md` - `docker-compose up` for
    Postgres/RabbitMQ, run the user-secrets setup script, apply migrations,
    seed data, then `dotnet run --project StackDuel.Api`.
-2. **Then web.** Follow `web/README.md` — `pnpm i`, copy `.env.example` to
+2. **Then web.** Follow `web/README.md` - `pnpm i`, copy `.env.example` to
    `.env`, fill in Auth0 and `NEXT_PUBLIC_API_SERVER_URL` (pointing at the
    API from step 1), then `pnpm dev`.
 
 The exact commands and environment variables are maintained in those two
-READMEs, not duplicated here — this page is about how the pieces fit
+READMEs, not duplicated here - this page is about how the pieces fit
 together; the READMEs are the source of truth for exact setup steps.
 
 ## Running tests

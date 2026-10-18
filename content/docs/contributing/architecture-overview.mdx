@@ -3,46 +3,69 @@ title: Architecture Overview
 description: How the web app and server are organized.
 ---
 
-## Two repos, one product
+## Overview
 
-`web` (Next.js, App Router) renders the UI and calls `server` (.NET) over a
-REST API, plus SignalR hubs for live game state (submissions, lobby
-updates). Auth0 issues the tokens both sides trust.
+### Server
 
-## `server` — Clean Architecture
+The backend server is built based on [Clean Architecture](https://github.com/jasontaylordev/CleanArchitecture) with [CQRS](https://martinfowler.com/bliki/CQRS.html), and [domain driven design (DDD)](https://martinfowler.com/bliki/DomainDrivenDesign.html).
+The solution is broken up into these projects:
 
 | Project                    | Owns                                                                          |
 | -------------------------- | ----------------------------------------------------------------------------- |
-| `StackDuel.Domain`         | Entities, value objects, domain logic — no framework dependencies.            |
+| `StackDuel.Domain`         | Entities, value objects, domain logic - no framework dependencies.            |
 | `StackDuel.Application`    | Use cases / handlers that orchestrate domain objects.                         |
 | `StackDuel.Infrastructure` | EF Core, repositories, external services (Judge0, blob storage, message bus). |
-| `StackDuel.Api`            | HTTP endpoints, SignalR hubs, auth wiring — the thinnest layer.               |
+| `StackDuel.Api`            | HTTP endpoints, SignalR hubs, and auth wiring                                 |
 
-Dependencies only point inward (Api → Application → Domain); Infrastructure
-implements interfaces Domain/Application define, not the other way round.
+#### StackDuel.Domain
 
-## `web` — domain folders
+The `StackDuel.Domain` project owns the core business logic of the application. It has no external dependencies and can theoretically be lifted and shifted to a new solution.
+Each slice of the business (Domain) is divided by it's bounded context. For example, Games, Submissions, Users, Problems, Campaigns, and Acheivements are all separate business processess.
 
-Each feature area lives under `src/domains/<name>/` and typically contains
-its own `components/`, `lib/`, `models/`, `api/` (React Query hooks), and
-`forms/` — the domain owns everything specific to it. `src/shared/` is for
-code with no single owning domain: layouts, the shadcn-based `ui/`
-component library, the Markdown renderer, auth guards, and the
-`router-config.ts` single source of truth for every app route.
+`SeedWork` holds all the shared DDD primitives: Entity, AggregateRoot, IDomainEvent, DomainException, plus the interfaces IRepository/IUnitOfWork (not implementations - those live Infrastructure).
+We used a shared namespace so that all DDD building blocks behave consistently and have equal event-rasing behavior.
 
-Pages under `src/app/` are thin — they fetch/compose and delegate the actual
-UI to a `src/views/<area>/*-layout.tsx` component, which is what gets
-tested.
+Entities enforce invariants themselves. state transitions are methods on the aggregate, not something the application-layer handles or sets directly on the aggregate. The aggregate decides wether a
+transition is valid and raises domain events (`IAggregateRoot.PopDomainEvents()`) when something worth reacting to happened.
 
-## Where things diverge from a typical CRUD app
+Domain entities can be seen as the source of truth of how the business operates and names their business logic.
 
-- **Feature flags** are their own bounded context (`StackDuel.Domain/FeatureFlags`),
-  separate from RBAC — they're operational toggles, not permanent grants.
-  See `server/README.md` for the full evaluation precedence.
-- **Submissions are append-only.** Each attempt at a problem inserts a new
-  `Submission` row; nothing updates one in place. A participant's attempt
-  history is recovered by querying, not stored as a list anywhere.
-- **The content you're reading now** (`/docs`) and the blog (`/blog`) are
-  deliberately separate: different audiences, different content folders
-  (`content/docs` vs `src/content/blog`), different layouts. Neither reuses
-  the other's navigation.
+In short: `StackDuel.Domain` answers "what are the rules of the business", what a Game is allowed to do, when a Submission is complete, what makes a Campaign valid, with no opinion on HTTP, SQL, or messaging.
+`StackDuel.Application` orchestrates use cases against it, `StackDuel.Infrastructure` persists and transports it, but the domain layer itself stays framework-agnostic and, ideally, the one place you
+can trust to be correct just by reading the code.
+
+**Note**: The domain layer should NEVER reference outside of the project.
+
+#### StackDuel.Application
+
+The `StackDuel.Application` project owns how the business logic will be interacted with and implemented. It essentially what happens, in what order, and who gets told about it. This project can be seen
+as the layer used before the domain layer.
+
+This project is built on top of the **CQRS** design pattern via **MediatR**. A command handler's job is narrow: load the aggregate through a repository interface, call the domain method that actually enforces the rules
+(e.g. `game.RecordProblemSolved(...)`), persist via `IUnitOfWork`, and return a result.
+
+**Events** hold the `INotificationHandler` implementations to the domain events the aggregates raides, and where the side effects that aren't "the core use case". For example push notifications, derived projectsion like leaderboard updates,
+follow-on commands against other aggregates.
+
+**Services** are the application-level collaborators a handler reaches for when logic needs to span multiple aggregates/repositories. This also how the rest of the projects interact with the application.
+All the way to the API layer.
+
+So where `StackDuel.Domain` is "what's true and what's allowed," `StackDuel.Application` is "what happens, in what order, and who gets told about it" - it drives the domain model to fulfill a request, but isn't where the actual business
+invariants are decided.
+
+#### StackDuel.Infrastructure
+
+This projects references both the **Application** and **Domain**, and nothing references it back. Domain and application define interface implementations (IRepository, IUnitOfWork, IGameNotificationService, IGameProblemCompleter, etc.)
+without knowing how they're fulfilled. Infrastructure can use 3rd party resources, database contexts, messaging buses, to implement these interfaces. This is to help isolate all these dependencies from the business logic so it will be easier
+to replace them with another tool if needed.
+
+This project also contains the code execution engine, where it defines the integration with our 3rd party library [Judge0](https://judge0.com/).
+
+#### StackDuel.Api
+
+Main interface into the backend server. This contains Hubs as well for SignalR.
+
+### web
+
+The front end is built on top of Next.js to provide better SEO and performance. We also use Shadcn, Tailwindcss, React Query, and Zustand. This tech stack helps
+speed up our development by provide rapid prototyping, flexible state management, and plenty of out of the box components.
