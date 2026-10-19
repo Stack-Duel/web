@@ -9,7 +9,7 @@ import {
 import { createRelativeLink } from "fumadocs-ui/mdx";
 import { docsSource } from "@/shared/lib/docs-source";
 import { getDocsMdxComponents } from "@/shared/components/docs-mdx-components";
-import { siteName } from "@/shared/lib/site";
+import { getCurrentTenant } from "@/domains/tenant/lib/get-current-tenant";
 
 export const dynamic = "force-static";
 
@@ -53,9 +53,10 @@ export async function generateMetadata({
   const page = docsSource.getPage(slug);
 
   if (!page) {
+    const tenant = await getCurrentTenant();
     return {
       title: "Not found",
-      description: `This doc could not be found on ${siteName}.`,
+      description: `This doc could not be found on ${tenant.name}.`,
     };
   }
 
