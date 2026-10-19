@@ -58,7 +58,7 @@ export const tenants: Record<TenantId, TenantConfig> = {
       dark: "/logo/stack-duel-white-horizontal.svg",
     },
     favicon: "/logo/stack-duel-favicon.svg",
-    googleAnalyticsId: "",
+    googleAnalyticsId: "G-3471K2B10Q",
     social: {
       twitterHandle: "@algowarsdev",
       sameAs: [
