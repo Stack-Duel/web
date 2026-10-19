@@ -202,7 +202,7 @@ export default function AppSidebar(
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href={routerConfig.dashboard.path}>
-                <Logo className="h-9" />
+                <Logo className="h-8" />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

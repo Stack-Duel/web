@@ -3,7 +3,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useSubmitGameProblem } from "../api/submit-game-problem";
-import { useCompleteProblem } from "../api/complete-problem";
 import { gameQueryOptions } from "../api/get-game";
 import { gameProblemHistoryQueryOptions } from "../api/get-game-problem-history";
 import { waitForTerminalSubmission } from "@/domains/submission/api/wait-for-terminal-submission";
@@ -12,7 +11,8 @@ import {
   selectIsSubmittingSubmission,
 } from "@/domains/workspace/state/workspace-store";
 import { useGameSessionStore } from "../state/game-session-store";
-import type { Game } from "../models/game";
+import { useUserStore, selectUser } from "@/domains/user/state/user-store";
+import type { Game, GameParticipant } from "../models/game";
 
 type SubmitRampSolutionArgs = {
   game: Game;
@@ -20,16 +20,39 @@ type SubmitRampSolutionArgs = {
   problemSetupId: string;
 };
 
-/**
- * Orchestrates a ramp-workspace submission: focus the Submission tab -> submit
- * the current code -> wait for the submission to reach a terminal state
- * (SignalR push, 60s timeout fallback) -> if accepted, complete the problem,
- * flip the local "solved" flag so the "Next Problem" button appears
- * immediately, and invalidate the game query so score/next-problem come from
- * the server. Mode-agnostic: used by every mode's ramp workspace (Solo Rush,
- * Duel, FFA), since the submit-and-advance loop is identical per participant
- * regardless of how many other players are in the game.
- */
+type NextProblemOutcome =
+  | { kind: "gameOver" }
+  | { kind: "advanced"; problemId: string }
+  | { kind: "stillGrading" };
+
+function resolveNextProblemOutcome(
+  participant: GameParticipant | undefined,
+  submittedProblemId: string
+): NextProblemOutcome {
+  if (
+    !participant ||
+    participant.hasFinishedProblems ||
+    !participant.currentProblem
+  ) {
+    return { kind: "gameOver" };
+  }
+
+  if (participant.currentProblem.problemId !== submittedProblemId) {
+    return {
+      kind: "advanced",
+      problemId: participant.currentProblem.problemId,
+    };
+  }
+
+  return { kind: "stillGrading" };
+}
+
+const delay = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+const STILL_GRADING_POLL_INTERVAL_MS = 700;
+const STILL_GRADING_MAX_ATTEMPTS = 6;
+
 export function useRampSubmission() {
   const queryClient = useQueryClient();
   const isSubmitting = useWorkspaceStore(selectIsSubmittingSubmission);
@@ -42,9 +65,11 @@ export function useRampSubmission() {
   );
   const setActiveTab = useWorkspaceStore((s) => s.setActiveTab);
   const problemSolved = useGameSessionStore((s) => s.problemSolved);
+  const gradingStarted = useGameSessionStore((s) => s.gradingStarted);
+  const gradingSettled = useGameSessionStore((s) => s.gradingSettled);
+  const user = useUserStore(selectUser);
 
   const { mutateAsync: submitGameProblem } = useSubmitGameProblem();
-  const { mutateAsync: completeProblem } = useCompleteProblem();
 
   const submit = async ({
     game,
@@ -55,6 +80,8 @@ export function useRampSubmission() {
 
     setActiveTab("root", 3);
     setActiveTab("execution", 1);
+
+    gradingStarted(problemId);
 
     const { code } = useWorkspaceStore.getState();
 
@@ -76,20 +103,33 @@ export function useRampSubmission() {
         return;
       }
 
-      const completion = await completeProblem({
-        gameId: game.gameId,
-        problemId,
-        body: { submissionId },
-      });
+      let outcome: NextProblemOutcome = { kind: "stillGrading" };
+      for (let attempt = 0; attempt < STILL_GRADING_MAX_ATTEMPTS; attempt++) {
+        const refreshed = await queryClient.fetchQuery({
+          ...gameQueryOptions({ gameId: game.gameId }),
+          staleTime: 0,
+        });
 
-      problemSolved(completion.nextProblemId);
+        const participant = refreshed.participants.find(
+          (p) => p.userId === user?.id
+        );
 
-      // Refetch rather than hand-patching the cache. The server is the
-      // source of truth for score/next-problem/final status, and the game
-      // query is cheap to re-fetch.
-      void queryClient.invalidateQueries({
-        queryKey: gameQueryOptions({ gameId: game.gameId }).queryKey,
-      });
+        outcome = resolveNextProblemOutcome(participant, problemId);
+        if (outcome.kind !== "stillGrading") break;
+
+        await delay(STILL_GRADING_POLL_INTERVAL_MS);
+      }
+
+      if (outcome.kind === "gameOver") {
+        problemSolved(null);
+      } else if (outcome.kind === "advanced") {
+        problemSolved(outcome.problemId);
+      } else {
+        toast.error(
+          "Your solution was accepted, but the game hasn't advanced yet. It'll update shortly."
+        );
+      }
+
       void queryClient.invalidateQueries({
         queryKey: gameProblemHistoryQueryOptions({ gameId: game.gameId })
           .queryKey,
@@ -100,6 +140,7 @@ export function useRampSubmission() {
       toast.error(message);
     } finally {
       setSubmittingSubmission(false);
+      gradingSettled();
     }
   };
 

@@ -4,6 +4,7 @@ import MultiplayerWorkspace from "./multiplayer-workspace";
 import { GameModeKey } from "../../models/game-mode";
 import { GameStatus } from "../../models/game";
 import type { Game } from "../../models/game";
+import { buildGame as baseBuildGame } from "@/test/factories/game";
 
 vi.mock("./lobby-workspace", () => ({
   default: () => <div>Lobby workspace</div>,
@@ -16,18 +17,11 @@ vi.mock("./game-starting-modal", () => ({
 }));
 
 function buildGame(overrides: Partial<Game> = {}): Game {
-  return {
-    gameId: "game-1",
-    gameModeId: "mode-1",
+  return baseBuildGame({
     gameModeKey: GameModeKey.Duel,
     status: GameStatus.Pending,
-    timeLimitInSeconds: 600,
-    createdAt: new Date(),
-    participants: [],
-    techStacks: [],
-    joinCode: "ABC1234",
     ...overrides,
-  };
+  });
 }
 
 describe("MultiplayerWorkspace", () => {

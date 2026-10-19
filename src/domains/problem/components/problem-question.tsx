@@ -17,12 +17,14 @@ import { Problem } from "../models/problem";
 import { Markdown } from "@/shared/components/markdown/markdown";
 import { ProblemReactionButtons } from "../problem-reactions/components/problem-reaction-buttons";
 import { ContextFeedbackButton } from "@/domains/feedback/components/context-feedback-button";
+import { useTenant } from "@/domains/tenant/state/tenant-store";
 
 type ProblemQuestionProps = {
   problem: Problem;
 };
 
 export const ProblemQuestion = ({ problem }: ProblemQuestionProps) => {
+  const tenant = useTenant();
   const tags = problem.tags ?? [];
   const authorName = problem.author?.username;
   const hasAuthor = Boolean(authorName);
@@ -98,7 +100,7 @@ export const ProblemQuestion = ({ problem }: ProblemQuestionProps) => {
         <div className="flex items-center justify-between gap-3">
           <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Copyright className="h-3.5 w-3.5" /> Copyright {currentYear}{" "}
-            algowars. All rights reserved.
+            {tenant.name}. All rights reserved.
           </p>
           <ContextFeedbackButton type="Problem" entityId={problem.id} />
         </div>

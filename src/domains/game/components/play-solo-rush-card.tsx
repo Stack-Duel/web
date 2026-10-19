@@ -1,7 +1,7 @@
 "use client";
 
 import PlayCard from "@/domains/game/components/play-card";
-import { Zap } from "lucide-react";
+import { Loader2Icon, Zap } from "lucide-react";
 import { ComponentProps, useState } from "react";
 import {
   Select,
@@ -12,6 +12,7 @@ import {
 } from "@/shared/components/ui/select";
 import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -50,13 +51,16 @@ export default function PlaySoloRushCard({
     resetToDefault,
     toggleTrack,
     toggleLanguage,
+    isLoading: isTracksLoading,
   } = useTrackSelection({ enabled: isDialogOpen });
-  const { data: gameModes } = useGameModes({
+  const { data: gameModes, isLoading: isGameModesLoading } = useGameModes({
     queryConfig: { enabled: !gameModeProp },
   });
   const gameMode =
     gameModeProp ??
     gameModes?.find((mode) => mode.key === GameModeKey.SoloRush);
+  const isModalDataLoading =
+    (!gameModeProp && isGameModesLoading) || isTracksLoading;
   const { createGame, isCreating } = useCreateGameAndPlay();
   const timeOptions = gameMode?.timeOptions ?? [];
   const defaultTimeOption = timeOptions.find((option) => option.isDefault);
@@ -132,33 +136,59 @@ export default function PlaySoloRushCard({
               limit below to start playing.
             </DialogDescription>
           </DialogHeader>
-          <Select
-            value={effectiveSelectedDuration ?? ""}
-            onValueChange={setSelectedDuration}
+          {isModalDataLoading ? (
+            <div className="flex flex-col gap-4">
+              <Skeleton className="h-8 w-full" />
+              <div className="flex flex-col gap-3">
+                <Skeleton className="h-5 w-36" />
+                <Skeleton className="h-5 w-44" />
+                <Skeleton className="h-5 w-32" />
+              </div>
+            </div>
+          ) : (
+            <>
+              <Select
+                value={effectiveSelectedDuration ?? ""}
+                onValueChange={setSelectedDuration}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Choose a time limit" />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  {timeOptions.map((option) => (
+                    <SelectItem
+                      key={option.durationSeconds}
+                      value={option.durationSeconds.toString()}
+                    >
+                      {formatDuration(option.durationSeconds)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <TrackCheckboxList
+                tracks={tracks}
+                selectedTracks={selectedTracks}
+                onToggleTrack={toggleTrack}
+                onToggleLanguage={toggleLanguage}
+                idPrefix="solo-rush-track"
+              />
+            </>
+          )}
+          <Button
+            type="button"
+            onClick={handleStart}
+            disabled={isCreating || isModalDataLoading}
           >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Choose a time limit" />
-            </SelectTrigger>
-            <SelectContent position="popper">
-              {timeOptions.map((option) => (
-                <SelectItem
-                  key={option.durationSeconds}
-                  value={option.durationSeconds.toString()}
-                >
-                  {formatDuration(option.durationSeconds)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <TrackCheckboxList
-            tracks={tracks}
-            selectedTracks={selectedTracks}
-            onToggleTrack={toggleTrack}
-            onToggleLanguage={toggleLanguage}
-            idPrefix="solo-rush-track"
-          />
-          <Button type="button" onClick={handleStart} disabled={isCreating}>
-            {isCreating ? "Starting..." : "Start game"}
+            {isModalDataLoading ? (
+              <>
+                <Loader2Icon className="size-4 animate-spin" />
+                Loading...
+              </>
+            ) : isCreating ? (
+              "Starting..."
+            ) : (
+              "Start game"
+            )}
           </Button>
         </DialogContent>
       </Dialog>

@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// Message max length mirrors Algowars.Domain.Feedback.ValueObjects.FeedbackMessage (2000 chars).
 export const submitFeedbackSchema = z
   .object({
     type: z.enum(["Bug", "FeatureRequest", "Question", "General"]),

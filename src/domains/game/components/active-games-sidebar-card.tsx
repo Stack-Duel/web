@@ -15,7 +15,7 @@ import { GameStatus } from "../models/game";
 import type { MyActiveGame } from "../models/my-active-game";
 import LeaveLobbyButton from "./leave-lobby-button";
 
-const DISMISSED_STORAGE_KEY = "algowars:dismissed-active-games";
+const DISMISSED_STORAGE_KEY = "stackduel:dismissed-active-games";
 
 function getDismissalKey(games: MyActiveGame[]) {
   return games

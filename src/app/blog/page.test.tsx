@@ -12,7 +12,10 @@ vi.mock("@/views/blog/blog-layout", () => ({
     <div>Blog posts: {posts.length}</div>
   ),
 }));
-vi.mock("@/shared/lib/site", () => import("@/test/mocks/site"));
+vi.mock(
+  "@/domains/tenant/lib/get-current-tenant",
+  () => import("@/test/mocks/tenant")
+);
 
 const mockGetPublishedPosts = vi.mocked(getPublishedPosts);
 

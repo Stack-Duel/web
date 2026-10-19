@@ -29,6 +29,17 @@ const tracks: Track[] = [
 ];
 
 describe("useTrackSelection", () => {
+  it("surfaces the underlying tracks query's loading state", () => {
+    mockedUseTracks.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+    } as never);
+
+    const { result } = renderHook(() => useTrackSelection());
+
+    expect(result.current.isLoading).toBe(true);
+  });
+
   it("starts with no tracks selected", () => {
     mockedUseTracks.mockReturnValue({ data: tracks } as never);
 

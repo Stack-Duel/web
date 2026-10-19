@@ -7,12 +7,18 @@ import FaqSection from "@/views/landing/faq-section";
 import CtaSection from "@/views/landing/cta-section";
 import Layout from "@/shared/layouts/layout/layout";
 import { auth0 } from "@/shared/lib/auth0";
-import { siteName } from "@/shared/lib/site";
+import { getCurrentTenant } from "@/domains/tenant/lib/get-current-tenant";
 
-export const metadata: Metadata = {
-  title: { absolute: `${siteName} - Real-Time Coding Duels & DSA Practice` },
-  alternates: { canonical: "/" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const tenant = await getCurrentTenant();
+
+  return {
+    title: {
+      absolute: `${tenant.name} - Real-Time Coding Duels & DSA Practice`,
+    },
+    alternates: { canonical: "/" },
+  };
+}
 
 export default async function Home() {
   const session = await auth0.getSession();

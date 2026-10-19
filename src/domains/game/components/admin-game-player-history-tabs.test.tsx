@@ -5,6 +5,7 @@ import AdminGamePlayerHistoryTabs from "./admin-game-player-history-tabs";
 import { useAdminGamePlayerHistory } from "@/domains/game/api/get-admin-game-player-history";
 import { AdminGameHistoryEventType } from "@/domains/game/models/admin-game-history";
 import type { GameParticipant } from "@/domains/game/models/game";
+import { buildParticipant as baseBuildParticipant } from "@/test/factories/game";
 
 vi.mock("@/env", () => import("@/test/mocks/env"));
 vi.mock("@/domains/game/api/get-admin-game-player-history");
@@ -14,16 +15,13 @@ const mockUseAdminGamePlayerHistory = vi.mocked(useAdminGamePlayerHistory);
 function buildParticipant(
   overrides: Partial<GameParticipant> = {}
 ): GameParticipant {
-  return {
+  return baseBuildParticipant({
     userId: "u1",
     username: "alice",
     seatNumber: 1,
-    joinedAt: new Date(),
     score: 3,
-    hasForfeited: false,
-    hasFinishedProblems: false,
     ...overrides,
-  };
+  });
 }
 
 describe("AdminGamePlayerHistoryTabs", () => {

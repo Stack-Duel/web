@@ -7,6 +7,10 @@ vi.mock(
   "@/shared/layouts/sidebar-layout/sidebar-layout",
   () => import("@/test/mocks/sidebar-layout")
 );
+vi.mock(
+  "@/domains/tenant/lib/get-current-tenant",
+  () => import("@/test/mocks/tenant")
+);
 
 const basePost: BlogPost = {
   slug: "hello-world",

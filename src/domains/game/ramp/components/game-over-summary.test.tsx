@@ -13,6 +13,10 @@ import { fireHighScoreConfetti } from "@/shared/lib/confetti";
 import { GameModeKey } from "@/domains/game/models/game-mode";
 import { GameStatus } from "@/domains/game/models/game";
 import type { Game, GameParticipant } from "@/domains/game/models/game";
+import {
+  buildParticipant as baseBuildParticipant,
+  buildGame as baseBuildGame,
+} from "@/test/factories/game";
 
 vi.mock("@/env", () => import("@/test/mocks/env"));
 vi.mock("@/domains/game/hooks/use-create-game-and-play", () => ({
@@ -34,31 +38,11 @@ const mockedFireHighScoreConfetti = vi.mocked(fireHighScoreConfetti);
 function buildParticipant(
   overrides: Partial<GameParticipant> = {}
 ): GameParticipant {
-  return {
-    userId: "user-1",
-    username: "player",
-    seatNumber: 0,
-    joinedAt: new Date(),
-    score: 0,
-    hasForfeited: false,
-    hasFinishedProblems: false,
-    ...overrides,
-  };
+  return baseBuildParticipant({ username: "player", ...overrides });
 }
 
 function buildGame(overrides: Partial<Game> = {}): Game {
-  return {
-    gameId: "game-1",
-    gameModeId: "mode-1",
-    gameModeKey: GameModeKey.SoloRush,
-    status: GameStatus.Completed,
-    timeLimitInSeconds: 600,
-    createdAt: new Date(),
-    participants: [],
-    techStacks: [],
-    joinCode: "ABC1234",
-    ...overrides,
-  };
+  return baseBuildGame({ status: GameStatus.Completed, ...overrides });
 }
 
 function renderSummary(game: Game) {
@@ -76,7 +60,7 @@ describe("GameOverSummary", () => {
   beforeEach(() => {
     resetUserStore();
     localStorage.setItem(
-      "algowars:has-seen-first-game-feedback-prompt",
+      "stackduel:has-seen-first-game-feedback-prompt",
       "true"
     );
     mockedUseCreateGameAndPlay.mockReturnValue({

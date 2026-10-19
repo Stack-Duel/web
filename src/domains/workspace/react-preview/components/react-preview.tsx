@@ -12,8 +12,8 @@ import {
 import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-const OUTGOING_MESSAGE_TYPE = "algowars-preview-code";
-const READY_MESSAGE_TYPE = "algowars-preview-ready";
+const OUTGOING_MESSAGE_TYPE = "stackduel-preview-code";
+const READY_MESSAGE_TYPE = "stackduel-preview-ready";
 const CODEPREVIEW_ORIGIN = process.env.NEXT_PUBLIC_CODEPREVIEW_ORIGIN;
 
 if (!CODEPREVIEW_ORIGIN) {

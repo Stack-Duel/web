@@ -1,11 +1,11 @@
-import { siteName } from "@/shared/lib/site";
 import type { Problem } from "../models/problem";
 
 const MAX_DESCRIPTION_TAGS = 3;
 const MAX_DESCRIPTION_LENGTH = 160;
 
 export function buildProblemDescription(
-  problem: Pick<Problem, "title" | "difficultyTier" | "tags">
+  problem: Pick<Problem, "title" | "difficultyTier" | "tags">,
+  siteName: string
 ): string {
   const base = `Solve "${problem.title}" (${problem.difficultyTier}) on ${siteName}, an online competitive coding platform for code battles and algorithm practice.`;
 

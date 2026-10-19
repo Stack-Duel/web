@@ -1,4 +1,4 @@
-const STORAGE_KEY_PREFIX = "algowars:user-sync:";
+const STORAGE_KEY_PREFIX = "stackduel:user-sync:";
 const SYNC_THROTTLE_MS = 30 * 60 * 1000;
 
 function storageKey(sub: string): string {

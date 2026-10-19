@@ -21,7 +21,7 @@ function defaultSelection(tracks: Track[] | undefined): TrackSelectionMap {
 }
 
 export function useTrackSelection(options?: { enabled?: boolean }) {
-  const { data: tracks } = useTracks({
+  const { data: tracks, isLoading } = useTracks({
     queryConfig: { enabled: options?.enabled },
   });
   const [selectedTracks, setSelectedTracks] = useState<TrackSelectionMap>(
@@ -97,5 +97,6 @@ export function useTrackSelection(options?: { enabled?: boolean }) {
     resetToDefault,
     toggleTrack,
     toggleLanguage,
+    isLoading,
   };
 }

@@ -6,7 +6,10 @@ import { fetchProblems } from "@/domains/problem/api/problem-server-api";
 vi.mock("@/views/problems/problems-layout", () => ({
   default: () => <div>Problems Layout</div>,
 }));
-vi.mock("@/shared/lib/site", () => import("@/test/mocks/site"));
+vi.mock(
+  "@/domains/tenant/lib/get-current-tenant",
+  () => import("@/test/mocks/tenant")
+);
 vi.mock("@/domains/problem/api/problem-server-api", () => ({
   fetchProblems: vi.fn(),
 }));

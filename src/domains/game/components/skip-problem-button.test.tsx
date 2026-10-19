@@ -6,9 +6,11 @@ import { useSkipProblem } from "@/domains/game/hooks/use-skip-problem";
 import { useUserStore } from "@/domains/user/state/user-store";
 import { resetUserStore } from "@/test/mocks/user-store";
 import { buildUser } from "@/test/factories/user";
-import { GameModeKey } from "../models/game-mode";
-import { GameStatus } from "../models/game";
 import type { Game, GameParticipant } from "../models/game";
+import {
+  buildParticipant as baseBuildParticipant,
+  buildGame as baseBuildGame,
+} from "@/test/factories/game";
 
 vi.mock("@/domains/game/hooks/use-skip-problem", () => ({
   useSkipProblem: vi.fn(),
@@ -19,33 +21,19 @@ const mockedUseSkipProblem = vi.mocked(useSkipProblem);
 function buildParticipant(
   overrides: Partial<GameParticipant> = {}
 ): GameParticipant {
-  return {
-    userId: "user-1",
+  return baseBuildParticipant({
     username: "me",
-    seatNumber: 0,
-    joinedAt: new Date(),
-    score: 0,
-    hasForfeited: false,
-    hasFinishedProblems: false,
     skipsRemaining: 3,
     ...overrides,
-  };
+  });
 }
 
 function buildGame(overrides: Partial<Game> = {}): Game {
-  return {
-    gameId: "game-1",
-    gameModeId: "mode-1",
-    gameModeKey: GameModeKey.SoloRush,
-    status: GameStatus.Running,
-    timeLimitInSeconds: 600,
-    createdAt: new Date(),
+  return baseBuildGame({
     participants: [buildParticipant()],
-    techStacks: [],
-    joinCode: "ABC1234",
     skipsEnabled: true,
     ...overrides,
-  };
+  });
 }
 
 describe("SkipProblemButton", () => {

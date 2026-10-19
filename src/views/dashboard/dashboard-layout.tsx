@@ -2,14 +2,9 @@
 
 import PlayDuelCard from "@/domains/game/components/play-duel-card";
 import PlayFFACard from "@/domains/game/components/play-ffa-card";
+import PlaySoloRushCard from "@/domains/game/components/play-solo-rush-card";
 import DashboardStatsCard from "@/domains/dashboard/components/dashboard-stats-card";
 import DailyChallengeCard from "@/domains/daily-challenge/components/daily-challenge-card";
-import dynamic from "next/dynamic";
-
-const PlaySoloRushCard = dynamic(
-  () => import("@/domains/game/components/play-solo-rush-card"),
-  { ssr: false }
-);
 import ProblemTable from "@/domains/problem/tables/problem-table";
 import {
   Card,

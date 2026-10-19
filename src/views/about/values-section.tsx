@@ -1,3 +1,5 @@
+import { getCurrentTenant } from "@/domains/tenant/lib/get-current-tenant";
+
 const values = [
   {
     title: "Free to start",
@@ -21,13 +23,15 @@ const values = [
   },
 ];
 
-export default function ValuesSection() {
+export default async function ValuesSection() {
+  const tenant = await getCurrentTenant();
+
   return (
     <section className="py-16">
       <div className="mx-auto max-w-7xl px-4">
         <div className="mb-10 flex flex-col gap-2 text-center">
           <h2 className="text-2xl font-bold md:text-3xl">
-            Why developers pick Algowars
+            Why developers pick {tenant.name}
           </h2>
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">

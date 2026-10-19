@@ -58,7 +58,7 @@ function buildPost(overrides: Partial<BlogPost> = {}): BlogPost {
     title: "Writing Code In The Age Of AI",
     excerpt: "excerpt",
     body: "body",
-    author: "Algowars",
+    author: "StackDuel",
     tags: [],
     publishedAt: "2026-01-01",
     published: true,

@@ -4,20 +4,10 @@ import { useGameCountdown } from "./use-game-countdown";
 import { GameModeKey } from "../models/game-mode";
 import { GameStatus } from "../models/game";
 import type { Game } from "../models/game";
+import { buildGame as baseBuildGame } from "@/test/factories/game";
 
 function buildGame(overrides: Partial<Game> = {}): Game {
-  return {
-    gameId: "game-1",
-    gameModeId: "mode-1",
-    gameModeKey: GameModeKey.Duel,
-    status: GameStatus.Running,
-    timeLimitInSeconds: 600,
-    createdAt: new Date(),
-    participants: [],
-    techStacks: [],
-    joinCode: "ABC1234",
-    ...overrides,
-  };
+  return baseBuildGame({ gameModeKey: GameModeKey.Duel, ...overrides });
 }
 
 describe("useGameCountdown", () => {

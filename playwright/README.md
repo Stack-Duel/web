@@ -1,7 +1,7 @@
 # E2E tests (Playwright)
 
 These tests exercise the real, integrated app: a running Next.js server talking to a
-real `Algowars.Api` instance (Postgres + RabbitMQ + Judge0), authenticating through the
+real `StackDuel.Api` instance (Postgres + RabbitMQ + Judge0), authenticating through the
 real Auth0 Universal Login flow. There is no mocked backend here — that's intentionally
 left for a separate, frontend-only "integration test" suite.
 
@@ -10,9 +10,9 @@ left for a separate, frontend-only "integration test" suite.
 1. The API stack is running locally (from `../server`):
    ```bash
    docker compose up -d          # Postgres + RabbitMQ
-   dotnet ef database update --project Algowars.Infrastructure --startup-project Algowars.Api
-   dotnet run --project Algowars.Seeder -- --static
-   dotnet run --project Algowars.Api
+   dotnet ef database update --project StackDuel.Infrastructure --startup-project StackDuel.Api
+   dotnet run --project StackDuel.Seeder -- --static
+   dotnet run --project StackDuel.Api
    ```
 2. `web/.env` is filled in (`cp .env.example .env` if you haven't already), including:
    - The usual `AUTH0_*` / `NEXT_PUBLIC_API_SERVER_URL` values, pointed at a **test**
@@ -26,7 +26,7 @@ left for a separate, frontend-only "integration test" suite.
      and sets its username to `test-admin` automatically; grant it admin access
      (once) with:
      ```bash
-     dotnet run --project Algowars.Seeder -- --grant-admin test-admin
+     dotnet run --project StackDuel.Seeder -- --grant-admin test-admin
      ```
 3. Browsers are installed: `pnpm exec playwright install chromium`.
 
@@ -74,8 +74,8 @@ playwright/
 ## CI
 
 `.github/workflows/e2e.yml` runs this suite daily against a full stack it boots itself
-(checks out `algowars/server`, starts Postgres/RabbitMQ/the API, then the Next.js app).
+(checks out `StackDuel/server`, starts Postgres/RabbitMQ/the API, then the Next.js app).
 See that file for the exact steps, and the top of it for the list of GitHub secrets it
 needs — they need to be added by someone with access to the test Auth0 tenant, a
-Judge0 (RapidAPI) key, and (if `algowars/server` is private) a PAT that can check it
+Judge0 (RapidAPI) key, and (if `StackDuel/server` is private) a PAT that can check it
 out.

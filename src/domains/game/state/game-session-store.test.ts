@@ -9,22 +9,23 @@ describe("useGameSessionStore", () => {
   it("starts with no pending next problem and no problem being viewed", () => {
     const state = useGameSessionStore.getState();
 
-    expect(state.pendingNextProblemId).toBeUndefined();
+    expect(state.hasSolvedCurrentProblem).toBe(false);
+    expect(state.nextProblemId).toBeNull();
     expect(state.viewingProblemId).toBeNull();
   });
 
   it("records the next problem id when a problem is solved", () => {
     useGameSessionStore.getState().problemSolved("problem-2");
 
-    expect(useGameSessionStore.getState().pendingNextProblemId).toBe(
-      "problem-2"
-    );
+    expect(useGameSessionStore.getState().hasSolvedCurrentProblem).toBe(true);
+    expect(useGameSessionStore.getState().nextProblemId).toBe("problem-2");
   });
 
   it("records null when the last problem is solved", () => {
     useGameSessionStore.getState().problemSolved(null);
 
-    expect(useGameSessionStore.getState().pendingNextProblemId).toBeNull();
+    expect(useGameSessionStore.getState().hasSolvedCurrentProblem).toBe(true);
+    expect(useGameSessionStore.getState().nextProblemId).toBeNull();
   });
 
   it("clears the pending id and viewed problem once the next problem starts loading", () => {
@@ -33,7 +34,8 @@ describe("useGameSessionStore", () => {
 
     useGameSessionStore.getState().nextProblemLoading();
 
-    expect(useGameSessionStore.getState().pendingNextProblemId).toBeUndefined();
+    expect(useGameSessionStore.getState().hasSolvedCurrentProblem).toBe(false);
+    expect(useGameSessionStore.getState().nextProblemId).toBeNull();
     expect(useGameSessionStore.getState().viewingProblemId).toBeNull();
   });
 
@@ -51,7 +53,8 @@ describe("useGameSessionStore", () => {
 
     useGameSessionStore.getState().reset();
 
-    expect(useGameSessionStore.getState().pendingNextProblemId).toBeUndefined();
+    expect(useGameSessionStore.getState().hasSolvedCurrentProblem).toBe(false);
+    expect(useGameSessionStore.getState().nextProblemId).toBeNull();
     expect(useGameSessionStore.getState().viewingProblemId).toBeNull();
   });
 
@@ -111,6 +114,28 @@ describe("useGameSessionStore", () => {
 
     expect(useGameSessionStore.getState().feed).toHaveLength(50);
     expect(useGameSessionStore.getState().feed[0].userId).toBe("user-54");
+  });
+
+  it("records the problem id out for grading when grading starts", () => {
+    useGameSessionStore.getState().gradingStarted("problem-1");
+
+    expect(useGameSessionStore.getState().gradingProblemId).toBe("problem-1");
+  });
+
+  it("clears the grading problem id once grading settles", () => {
+    useGameSessionStore.getState().gradingStarted("problem-1");
+
+    useGameSessionStore.getState().gradingSettled();
+
+    expect(useGameSessionStore.getState().gradingProblemId).toBeNull();
+  });
+
+  it("clears the grading problem id on reset", () => {
+    useGameSessionStore.getState().gradingStarted("problem-1");
+
+    useGameSessionStore.getState().reset();
+
+    expect(useGameSessionStore.getState().gradingProblemId).toBeNull();
   });
 
   it("clears the feed on reset", () => {

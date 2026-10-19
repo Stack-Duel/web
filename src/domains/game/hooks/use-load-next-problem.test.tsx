@@ -45,7 +45,6 @@ describe("useLoadNextProblem", () => {
     });
 
     await result.current(null);
-    await result.current(undefined);
 
     expect(initializeProblem).not.toHaveBeenCalled();
   });
@@ -59,7 +58,7 @@ describe("useLoadNextProblem", () => {
 
     const loadPromise = result.current("problem-2");
 
-    expect(useGameSessionStore.getState().pendingNextProblemId).toBeUndefined();
+    expect(useGameSessionStore.getState().hasSolvedCurrentProblem).toBe(false);
 
     await loadPromise;
 

@@ -95,6 +95,6 @@ describe("Navbar", () => {
       screen.getByRole("button", { name: "Open navigation menu" })
     );
 
-    expect(screen.getByText("Join the algowars community")).toBeVisible();
+    expect(screen.getByText("Join the Stack Duel community")).toBeVisible();
   });
 });

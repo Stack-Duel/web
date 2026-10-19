@@ -5,7 +5,7 @@ import { FirstGameFeedbackPrompt } from "./first-game-feedback-prompt";
 
 vi.mock("@/env", () => import("@/test/mocks/env"));
 
-const STORAGE_KEY = "algowars:has-seen-first-game-feedback-prompt";
+const STORAGE_KEY = "stackduel:has-seen-first-game-feedback-prompt";
 
 function renderPrompt(gameId = "game_1") {
   const queryClient = new QueryClient({
