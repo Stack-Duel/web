@@ -5,6 +5,7 @@ import { routerConfig } from "@/shared/router-config";
 import type { PageResult } from "@/shared/pagination/page-result";
 import type { ProblemSummary } from "@/domains/problem/models/problem-summary";
 import { getPublishedPosts } from "@/domains/blog/lib/get-posts";
+import { docsSource } from "@/shared/lib/docs-source";
 
 export const revalidate = 3600;
 
@@ -37,6 +38,14 @@ async function getProblemSitemapEntries(
   }
 }
 
+function getDocsSitemapEntries(siteUrl: string): MetadataRoute.Sitemap {
+  return docsSource.getPages().map((page) => ({
+    url: `${siteUrl}${page.url}`,
+    changeFrequency: "monthly",
+    priority: 0.5,
+  }));
+}
+
 function getBlogSitemapEntries(siteUrl: string): MetadataRoute.Sitemap {
   const posts = getPublishedPosts();
 
@@ -54,6 +63,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const problemEntries = await getProblemSitemapEntries(siteUrl);
   const blogEntries = getBlogSitemapEntries(siteUrl);
+  const docsEntries = getDocsSitemapEntries(siteUrl);
 
   return [
     {
@@ -83,5 +93,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     ...problemEntries,
     ...blogEntries,
+    ...docsEntries,
   ];
 }

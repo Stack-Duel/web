@@ -14,6 +14,7 @@ const companyLinks = [
   { name: "About", href: routerConfig.about.path },
   { name: "Blog", href: routerConfig.blog.path },
   { name: "Community", href: routerConfig.community.path },
+  { name: "Docs", href: routerConfig.docs.path },
 ];
 
 const accountLinks = [
