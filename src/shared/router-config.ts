@@ -139,5 +139,16 @@ export const routerConfig = {
   settingsAccount: { path: "/settings/account" },
   settingsPreferences: { path: "/settings/preferences" },
   settingsProfile: { path: "/settings/profile" },
+  studioProblems: {
+    path: "/studio/problems",
+  },
+  studioProblemNew: {
+    path: "/studio/problems/new",
+  },
+  studioProblemDetail: {
+    path: "/studio/problems/:id",
+    execute: ({ id }: { id: string }) =>
+      `/studio/problems/${encodeURIComponent(id)}`,
+  },
   userSetup: { path: "/user/setup" },
 } as const;
