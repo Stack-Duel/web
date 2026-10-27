@@ -71,7 +71,9 @@ test(
 
     await studio.goto();
 
-    await expect(page.getByText("2/10 open")).toBeVisible();
+    await expect(
+      page.getByText("2/10 open").filter({ visible: true })
+    ).toBeVisible();
   }
 );
 

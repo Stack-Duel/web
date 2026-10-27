@@ -17,7 +17,7 @@ export class StudioProblemsPage {
   }
 
   get openLimitBadge() {
-    return this.page.getByText(/^\d+\/10 open$/);
+    return this.page.getByText(/^\d+\/10 open$/).filter({ visible: true });
   }
 
   statusPill(name: string) {

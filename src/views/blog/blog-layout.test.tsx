@@ -11,6 +11,7 @@ vi.mock(
   "@/domains/tenant/lib/get-current-tenant",
   () => import("@/test/mocks/tenant")
 );
+vi.mock("@/shared/layouts/layout/footer", () => import("@/test/mocks/footer"));
 
 const post: BlogPost = {
   slug: "hello-world",
