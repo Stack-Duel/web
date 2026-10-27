@@ -9,6 +9,8 @@ import type { ProblemSetup } from "@/domains/problem/models/problem-setup";
 import type { ProblemSummary } from "@/domains/problem/models/problem-summary";
 import type { Problem, PublicTestCase } from "@/domains/problem/models/problem";
 import type { ProblemSubmission } from "@/domains/problem/problem-submissions/models/problem-submission";
+import type { MyProblemListItem } from "@/domains/problem/models/my-problem";
+import type { MyProblemsMetadata } from "@/domains/problem/models/my-problems-metadata";
 
 export function buildAdminProblemListItem(
   overrides: Partial<AdminProblemListItem> = {}
@@ -27,6 +29,39 @@ export function buildAdminProblemListItem(
     setupCount: 1,
     createdAt: "2026-01-01T00:00:00.000Z",
     createdByUsername: "admin",
+    ...overrides,
+  };
+}
+
+export function buildMyProblemListItem(
+  overrides: Partial<MyProblemListItem> = {}
+): MyProblemListItem {
+  return {
+    id: "problem_1",
+    slug: "two-sum",
+    title: "Two Sum",
+    difficultyValue: 1,
+    difficultyTier: "easy",
+    status: "Draft" as ProblemStatus,
+    timeLimitMs: 2000,
+    memoryLimitMb: 256,
+    tags: ["arrays"],
+    languages: ["JavaScript"],
+    setupCount: 1,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    ...overrides,
+  };
+}
+
+export function buildMyProblemsMetadata(
+  overrides: Partial<MyProblemsMetadata> = {}
+): MyProblemsMetadata {
+  return {
+    totalSubmissions: 0,
+    totalReactions: 0,
+    reactionBreakdown: [],
+    statusBreakdown: [],
+    averageCompletionRate: 0,
     ...overrides,
   };
 }

@@ -11,6 +11,7 @@ vi.mock(
   "@/domains/tenant/lib/get-current-tenant",
   () => import("@/test/mocks/tenant")
 );
+vi.mock("./footer", () => import("@/test/mocks/footer"));
 
 const mockUseUser = vi.mocked(useUser);
 

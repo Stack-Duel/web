@@ -13,6 +13,7 @@ import { routerConfig } from "@/shared/router-config";
 import {
   HomeIcon,
   MessageCircle,
+  PencilRuler,
   Puzzle,
   ShieldCheck,
   Swords,
@@ -116,6 +117,20 @@ export default function AppSidebar(
           external: true,
         })),
       },
+      ...(canReadAdminProblems
+        ? [
+            {
+              title: "Studio",
+              icon: PencilRuler,
+              items: [
+                {
+                  title: "Problems",
+                  url: routerConfig.studioProblems.path,
+                },
+              ],
+            },
+          ]
+        : []),
       ...(canReadAdminDashboard ||
       canReadAdminUsers ||
       canReadAdminSubmissions ||
