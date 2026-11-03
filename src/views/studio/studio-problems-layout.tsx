@@ -2,10 +2,6 @@
 
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import MyProblemsTable from "@/domains/problem/tables/my-problems-table";
-import MyProblemSearchInput from "@/domains/problem/components/my-problem-search-input";
-import MyProblemStatusTabs from "@/domains/problem/components/my-problem-status-tabs";
-import MyProblemsStatCards from "@/domains/problem/components/my-problems-stat-cards";
 import { useMyProblemsMetadata } from "@/domains/problem/api/get-my-problems-metadata";
 import {
   getOpenProblemCount,
@@ -38,7 +34,12 @@ export default function StudioProblemsLayout() {
                 label="open"
                 className="hidden @md:inline-flex"
               />
-              <Button size="sm" className="gap-1.5" asChild>
+              <Button
+                size="sm"
+                className="gap-1.5"
+                asChild
+                disabled={openCount >= MAX_OPEN_PROBLEMS_PER_CREATOR}
+              >
                 <Link href={routerConfig.studioProblemNew.path}>
                   <Plus size={14} /> New Problem
                 </Link>
@@ -54,16 +55,9 @@ export default function StudioProblemsLayout() {
         </CardHeader>
       </Card>
 
-      <MyProblemsStatCards />
-
       <Card className="col-span-12">
-        <CardHeader className="flex flex-col items-stretch gap-3 @md:flex-row @md:items-center @md:justify-between">
-          <MyProblemStatusTabs />
-          <MyProblemSearchInput />
-        </CardHeader>
-        <CardContent>
-          <MyProblemsTable />
-        </CardContent>
+        <CardHeader className="flex flex-col items-stretch gap-3 @md:flex-row @md:items-center @md:justify-between"></CardHeader>
+        <CardContent></CardContent>
       </Card>
     </div>
   );

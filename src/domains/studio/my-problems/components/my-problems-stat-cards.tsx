@@ -1,26 +1,26 @@
-"use client";
-
+import { useMyProblemsMetadata } from "@/domains/problem/api/get-my-problems-metadata";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-import { useMyProblemsMetadata } from "../api/get-my-problems-metadata";
 
-function formatPercent(value: number) {
-  return `${Math.round(value * 100)}%`;
-}
-
-export default function MyProblemsStatCards() {
-  const { data, isLoading } = useMyProblemsMetadata();
+export default function MyProblemStatsCard() {
+  const { data: metadata, isLoading } = useMyProblemsMetadata();
 
   const stats = [
-    { label: "Total Submissions", value: data?.totalSubmissions ?? 0 },
-    { label: "Total Reactions", value: data?.totalReactions ?? 0 },
+    {
+      label: "Total Submissions",
+      value: metadata?.totalSubmissions ?? 0,
+    },
+    {
+      label: "Total Reactions",
+      value: metadata?.totalReactions ?? 0,
+    },
     {
       label: "Avg. Completion Rate",
-      value: formatPercent(data?.averageCompletionRate ?? 0),
+      value: Math.round((metadata?.averageCompletionRate ?? 0) * 100),
     },
   ];
 
