@@ -12,17 +12,17 @@ import {
 import { mockJson } from "../../support/route-mock";
 
 export function buildStudioAccount(overrides: Partial<User> = {}): User {
-  return buildUser({ permissions: [Permissions.ADMIN_PROBLEMS_READ], ...overrides });
+  return buildUser({
+    permissions: [Permissions.ADMIN_PROBLEMS_READ],
+    ...overrides,
+  });
 }
 
 export async function mockAccount(page: Page, account: User) {
   await mockJson(page, /\/api\/v1\/user(?:\?.*)?$/, account);
 }
 
-export async function mockMyProblems(
-  page: Page,
-  results: MyProblemListItem[]
-) {
+export async function mockMyProblems(page: Page, results: MyProblemListItem[]) {
   const body: PageResult<MyProblemListItem> = {
     results,
     total: results.length,
@@ -54,5 +54,8 @@ type StudioScenario = {
 export async function mockStudio(page: Page, scenario: StudioScenario = {}) {
   await mockAccount(page, buildStudioAccount(scenario.account));
   await mockMyProblems(page, scenario.problems ?? [buildMyProblemListItem()]);
-  await mockMyProblemsMetadata(page, buildMyProblemsMetadata(scenario.metadata));
+  await mockMyProblemsMetadata(
+    page,
+    buildMyProblemsMetadata(scenario.metadata)
+  );
 }

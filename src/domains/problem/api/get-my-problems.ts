@@ -27,7 +27,10 @@ export const getMyProblems = ({
     paramsSerializer: { indexes: null },
   });
 
-const myProblemsQuery = defineQuery<PageResult<MyProblemListItem>, GetMyProblemsParams>({
+const myProblemsQuery = defineQuery<
+  PageResult<MyProblemListItem>,
+  GetMyProblemsParams
+>({
   queryKey: ({ page, size, timestamp, search, statuses }) => [
     "my-problems",
     page,

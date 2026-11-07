@@ -21,8 +21,7 @@ export default function LimitBadge({
     <Badge
       variant={isAtLimit ? "destructive" : "outline"}
       className={cn(
-        isNearLimit &&
-          "border-yellow-500 text-yellow-700 dark:text-yellow-400",
+        isNearLimit && "border-yellow-500 text-yellow-700 dark:text-yellow-400",
         className
       )}
     >

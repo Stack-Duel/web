@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -18,26 +18,13 @@ import {
   SidebarMenuSubItem,
 } from "@/shared/components/ui/sidebar";
 import Link from "next/link";
-import type { ComponentType } from "react";
-
-type SubItemIcon = ComponentType<{ className?: string; size?: number }>;
+import type { NavLink } from "./nav-link";
 
 export function SidebarMainNav({
   items,
   title = "Platform",
 }: {
-  items: {
-    title: string;
-    url?: string;
-    icon: LucideIcon;
-    isActive?: boolean;
-    items?: {
-      title: string;
-      url: string;
-      icon?: SubItemIcon;
-      external?: boolean;
-    }[];
-  }[];
+  items: NavLink[];
   title?: string;
 }) {
   return (
@@ -50,14 +37,14 @@ export function SidebarMainNav({
               {item.url ? (
                 <SidebarMenuButton asChild tooltip={item.title}>
                   <Link href={item.url}>
-                    <item.icon />
+                    {item.icon ? <item.icon /> : null}
                     <span>{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
               ) : (
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton tooltip={item.title}>
-                    <item.icon />
+                    {item.icon ? <item.icon /> : null}
                     <span>{item.title}</span>
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
@@ -77,7 +64,7 @@ export function SidebarMainNav({
                           <SidebarMenuSubButton asChild>
                             {subItem.external ? (
                               <a
-                                href={subItem.url}
+                                href={subItem.url ?? ""}
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
@@ -87,7 +74,7 @@ export function SidebarMainNav({
                                 <span>{subItem.title}</span>
                               </a>
                             ) : (
-                              <Link href={subItem.url}>
+                              <Link href={subItem.url ?? ""}>
                                 {subItem.icon ? (
                                   <subItem.icon size={16} />
                                 ) : null}
