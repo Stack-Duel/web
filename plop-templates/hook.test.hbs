@@ -1,0 +1,11 @@
+import { describe, expect, it } from "vitest";
+import { renderHook } from "@testing-library/react";
+import { use{{pascalCase name}} } from "./use-{{kebabCase name}}";
+
+describe("use{{pascalCase name}}", () => {
+  it("returns a value", () => {
+    const { result } = renderHook(() => use{{pascalCase name}}());
+
+    expect(result.current).toBeNull();
+  });
+});

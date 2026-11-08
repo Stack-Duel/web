@@ -1,0 +1,26 @@
+import { defineMutation } from "@/shared/api/define-mutation";
+import { http } from "@/shared/lib/http";
+import { toAxiosConfig } from "@/shared/lib/request-config";
+import type { RequestConfig } from "@/shared/lib/request-config";
+
+type {{pascalCase name}}Variables = { {{camelCase paramName}}: string };
+
+export const {{camelCase name}} = ({
+  {{camelCase paramName}},
+  signal,
+}: {{pascalCase name}}Variables & RequestConfig) =>
+  {{#ifEquals method "delete"}}
+  http.delete<void>(`{{endpoint}}`, toAxiosConfig({ signal }));
+  {{else}}
+  http.{{method}}<void>(`{{endpoint}}`, undefined, toAxiosConfig({ signal }));
+  {{/ifEquals}}
+
+const {{camelCase name}}Mutation = defineMutation<
+  void,
+  {{pascalCase name}}Variables
+>({
+  mutationFn: {{camelCase name}},
+  invalidateQueries: () => [],
+});
+
+export const use{{pascalCase name}} = {{camelCase name}}Mutation.useMutation;

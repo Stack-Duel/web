@@ -45,7 +45,7 @@ const markdownSanitizeSchema = {
 
 export function Markdown({ content }: Props) {
   return (
-    <article className="prose prose-neutral max-w-none dark:prose-invert">
+    <article className="prose prose-neutral max-w-none break-words dark:prose-invert">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeSlug, [rehypeSanitize, markdownSanitizeSchema]]}

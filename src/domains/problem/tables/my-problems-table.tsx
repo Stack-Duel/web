@@ -11,11 +11,14 @@ import {
 import { DataTable } from "@/shared/components/ui/data-table";
 import { Badge } from "@/shared/components/ui/badge";
 import { routerConfig } from "@/shared/router-config";
+import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import DifficultyBadge from "../components/difficulty-badge";
 import AdminProblemStatusBadge from "../components/admin-problem-status-badge";
 import { useMyProblemListStore } from "../state/my-problem-list-store";
 import { useMyProblems } from "../api/get-my-problems";
 import type { MyProblemListItem } from "../models/my-problem";
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 const columns: ColumnDef<MyProblemListItem>[] = [
   {
@@ -104,7 +107,8 @@ export default function MyProblemsTable() {
     resetSession();
   }, [resetSession]);
 
-  const trimmedSearch = search.trim();
+  const debouncedSearch = useDebouncedValue(search, SEARCH_DEBOUNCE_MS);
+  const trimmedSearch = debouncedSearch.trim();
 
   const { data, isLoading } = useMyProblems({
     page: pageIndex + 1,

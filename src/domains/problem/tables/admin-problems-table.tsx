@@ -11,11 +11,14 @@ import {
 import { DataTable } from "@/shared/components/ui/data-table";
 import { Badge } from "@/shared/components/ui/badge";
 import { routerConfig } from "@/shared/router-config";
+import { useDebouncedValue } from "@/shared/hooks/use-debounced-value";
 import DifficultyBadge from "../components/difficulty-badge";
 import AdminProblemStatusBadge from "../components/admin-problem-status-badge";
 import { useAdminProblemListStore } from "../state/admin-problem-list-store";
 import { useAdminProblems } from "../api/get-admin-problems";
 import type { AdminProblemListItem } from "../models/admin-problem";
+
+const SEARCH_DEBOUNCE_MS = 300;
 
 const columns: ColumnDef<AdminProblemListItem>[] = [
   {
@@ -93,7 +96,8 @@ export default function AdminProblemsTable() {
     resetSession();
   }, [resetSession]);
 
-  const trimmedSearch = search.trim();
+  const debouncedSearch = useDebouncedValue(search, SEARCH_DEBOUNCE_MS);
+  const trimmedSearch = debouncedSearch.trim();
 
   const { data, isLoading } = useAdminProblems({
     page: pageIndex + 1,

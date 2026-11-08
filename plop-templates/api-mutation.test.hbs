@@ -1,0 +1,25 @@
+import { describe, expect, it, vi } from "vitest";
+import { {{camelCase name}} } from "./{{kebabCase name}}";
+import { http } from "@/shared/lib/http";
+
+vi.mock("@/shared/lib/http", () => ({
+  http: {
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
+  },
+}));
+
+const mockedHttp = vi.mocked(http, { deep: true });
+
+describe("{{camelCase name}}", () => {
+  it("sends the request", async () => {
+    mockedHttp.{{method}}.mockResolvedValue(undefined);
+
+    await {{camelCase name}}({ {{camelCase paramName}}: "test-id" });
+
+    expect(mockedHttp.{{method}}).toHaveBeenCalledTimes(1);
+  });
+});

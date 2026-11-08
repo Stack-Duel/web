@@ -1,0 +1,19 @@
+"use client";
+
+import SidebarLayout from "@/shared/layouts/sidebar-layout/sidebar-layout";
+
+type {{pascalCase name}}LayoutProps = {
+  id: string;
+};
+
+export default function {{pascalCase name}}Layout({
+  id,
+}: Readonly<{{pascalCase name}}LayoutProps>) {
+  return (
+    <SidebarLayout
+      breadcrumbs={[{ name: "{{titleCase name}}", url: "{{path}}" }]}
+    >
+      <div></div>
+    </SidebarLayout>
+  );
+}
