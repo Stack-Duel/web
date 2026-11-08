@@ -3,6 +3,7 @@ import type { User } from "@/domains/user/models/user";
 import type { MyProblemListItem } from "@/domains/problem/models/my-problem";
 import type { MyProblemsMetadata } from "@/domains/problem/models/my-problems-metadata";
 import type { StudioProblemDetails } from "@/domains/studio/models/studio-problem-details";
+import type { StudioProblemSetup } from "@/domains/studio/models/studio-problem-setup";
 import type { PageResult } from "@/shared/pagination/page-result";
 import { Permissions } from "@/shared/lib/permissions";
 import { buildUser } from "@/test/factories/user";
@@ -56,6 +57,18 @@ export async function mockStudioProblemDetail(
     page,
     new RegExp(`/api/v1/studio/problems/${problemId}(?:\\?.*)?$`),
     buildStudioProblemDetails({ problemId, ...details })
+  );
+}
+
+export async function mockStudioProblemSetups(
+  page: Page,
+  problemId: string,
+  setups: StudioProblemSetup[] = []
+) {
+  await mockJson(
+    page,
+    new RegExp(`/api/v1/studio/problems/${problemId}/setups(?:\\?.*)?$`),
+    setups
   );
 }
 

@@ -1,6 +1,11 @@
 import { test, expect } from "@playwright/test";
 import { StudioProblemDetailPage } from "../../pages/studio-problem-detail-page";
-import { mockAccount, buildStudioAccount, mockStudioProblemDetail } from "./mocks";
+import {
+  mockAccount,
+  buildStudioAccount,
+  mockStudioProblemDetail,
+  mockStudioProblemSetups,
+} from "./mocks";
 
 test(
   "a creator can view their studio problem's details and question",
@@ -39,11 +44,14 @@ test(
     const studioProblem = new StudioProblemDetailPage(page);
     await mockAccount(page, buildStudioAccount());
     await mockStudioProblemDetail(page, "problem_1");
+    await mockStudioProblemSetups(page, "problem_1");
 
     await studioProblem.goto("problem_1");
     await studioProblem.setupsTab.click();
 
-    await expect(page.getByRole("heading", { name: "SETUPS" })).toBeVisible();
+    await expect(
+      page.getByText("No language setups configured for this problem.")
+    ).toBeVisible();
   }
 );
 
