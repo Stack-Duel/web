@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test";
 import type { User } from "@/domains/user/models/user";
 import type { MyProblemListItem } from "@/domains/problem/models/my-problem";
 import type { MyProblemsMetadata } from "@/domains/problem/models/my-problems-metadata";
+import type { StudioProblemDetails } from "@/domains/studio/models/studio-problem-details";
 import type { PageResult } from "@/shared/pagination/page-result";
 import { Permissions } from "@/shared/lib/permissions";
 import { buildUser } from "@/test/factories/user";
@@ -9,6 +10,7 @@ import {
   buildMyProblemListItem,
   buildMyProblemsMetadata,
 } from "@/test/factories/problem";
+import { buildStudioProblemDetails } from "@/test/factories/studio-problem";
 import { mockJson } from "../../support/route-mock";
 
 export function buildStudioAccount(overrides: Partial<User> = {}): User {
@@ -42,6 +44,18 @@ export async function mockMyProblemsMetadata(
     page,
     /\/api\/v1\/problem\/mine\/metadata(?:\?.*)?$/,
     metadata
+  );
+}
+
+export async function mockStudioProblemDetail(
+  page: Page,
+  problemId: string,
+  details: Partial<StudioProblemDetails> = {}
+) {
+  await mockJson(
+    page,
+    new RegExp(`/api/v1/studio/problems/${problemId}(?:\\?.*)?$`),
+    buildStudioProblemDetails({ problemId, ...details })
   );
 }
 

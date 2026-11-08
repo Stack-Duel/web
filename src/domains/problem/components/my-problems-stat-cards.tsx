@@ -35,7 +35,7 @@ export default function MyProblemsStatCards() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-semibold">
-              {isLoading ? "—" : stat.value}
+              {isLoading ? "-" : stat.value}
             </div>
           </CardContent>
         </Card>

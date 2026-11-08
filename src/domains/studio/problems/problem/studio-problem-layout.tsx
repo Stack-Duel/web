@@ -19,10 +19,11 @@ import {
   TabsTrigger,
 } from "@/shared/components/ui/tabs";
 import StudioProblemQuestion from "./studio-problem-question";
+import StudioProblemSetups from "./studio-problem-setups/studio-problem-setups";
 
 function StudioProblemSkeleton() {
   return (
-    <div className="space-y-4" aria-label="Loading problem">
+    <div className="@container space-y-4" aria-label="Loading problem">
       <Card>
         <CardContent className="space-y-3 py-6">
           <Skeleton className="h-4 w-32" />
@@ -30,10 +31,10 @@ function StudioProblemSkeleton() {
           <Skeleton className="h-4 w-80" />
         </CardContent>
       </Card>
-      <div className="grid grid-cols-3 gap-4">
-        <Skeleton className="h-20 w-full" />
-        <Skeleton className="h-20 w-full" />
-        <Skeleton className="h-20 w-full" />
+      <div className="flex flex-col gap-4 @md:flex-row">
+        <Skeleton className="h-20 flex-1" />
+        <Skeleton className="h-20 flex-1" />
+        <Skeleton className="h-20 flex-1" />
       </div>
     </div>
   );
@@ -99,7 +100,7 @@ export default function StudioProblemLayout({
                           <StudioProblemQuestion problemId={id} />
                         </TabsContent>
                         <TabsContent value="setups">
-                          <h1>SETUPS</h1>
+                          <StudioProblemSetups problemId={id} />
                         </TabsContent>
                       </Tabs>
                     </CardContent>
