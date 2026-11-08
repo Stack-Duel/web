@@ -1,90 +1,65 @@
-# StackDuel Web
+# Code generation
 
-[![Quality gate status](https://sonarcloud.io/api/project_badges/measure?project=Stack-Duel_web&metric=alert_status&token=9d5894ad491b96582f34ed66f309d2f2169120a2)](https://sonarcloud.io/summary/new_code?id=Stack-Duel_web) [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Stack-Duel_web&metric=coverage&token=9d5894ad491b96582f34ed66f309d2f2169120a2)](https://sonarcloud.io/summary/new_code?id=Stack-Duel_web) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Stack-Duel_web&metric=sqale_rating&token=9d5894ad491b96582f34ed66f309d2f2169120a2)](https://sonarcloud.io/summary/new_code?id=Stack-Duel_web) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Stack-Duel_web&metric=security_rating&token=9d5894ad491b96582f34ed66f309d2f2169120a2)](https://sonarcloud.io/summary/new_code?id=Stack-Duel_web) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Stack-Duel_web&metric=reliability_rating&token=9d5894ad491b96582f34ed66f309d2f2169120a2)](https://sonarcloud.io/summary/new_code?id=Stack-Duel_web) [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Stack-Duel_web&metric=duplicated_lines_density&token=9d5894ad491b96582f34ed66f309d2f2169120a2)](https://sonarcloud.io/summary/new_code?id=Stack-Duel_web) [![Security issues](https://sonarcloud.io/api/project_badges/measure?project=Stack-Duel_web&metric=software_quality_security_issues&token=9d5894ad491b96582f34ed66f309d2f2169120a2)](https://sonarcloud.io/summary/new_code?id=Stack-Duel_web) [![Maintainability issues](https://sonarcloud.io/api/project_badges/measure?project=Stack-Duel_web&metric=software_quality_maintainability_issues&token=9d5894ad491b96582f34ed66f309d2f2169120a2)](https://sonarcloud.io/summary/new_code?id=Stack-Duel_web) [![Reliability issues](https://sonarcloud.io/api/project_badges/measure?project=Stack-Duel_web&metric=software_quality_reliability_issues&token=9d5894ad491b96582f34ed66f309d2f2169120a2)](https://sonarcloud.io/summary/new_code?id=Stack-Duel_web) [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=Stack-Duel_web&metric=ncloc&token=9d5894ad491b96582f34ed66f309d2f2169120a2)](https://sonarcloud.io/summary/new_code?id=Stack-Duel_web)
+This project uses [Plop](https://plopjs.com/) to scaffold new files that follow
+the existing conventions (domain folders, `defineQuery`/`defineMutation`,
+client vs. server components).
 
-Web application built for Stack Duel. This project uses Nextjs, tailwindcss, shadcn, vitest, and playwright.
+Run it from `web/`:
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js 24.5 (matches CI).
-- pnpm 11.10.0 - pinned via `packageManager` in `package.json`; `corepack enable` will pick it up automatically.
-- A running [`stack-duel/server`](https://github.com/Stack-Duel/server) API, unless you're pointing `NEXT_PUBLIC_API_SERVER_URL` at a shared dev environment instead. See [`playwright/README.md`](./playwright/README.md#prerequisites) for the local Postgres/RabbitMQ/API bootstrap steps.
-
-### Installation
-
-This project uses `pnpm`. To install packages, run this command:
-
-```bash
-pnpm i
+```
+pnpm generate
 ```
 
-### Environment Variables
+This opens an interactive menu. You can also jump straight to a generator:
 
-To get started you first need create environment variables by running:
-
-```bash
-cp .env.example .env
+```
+pnpm generate component
+pnpm generate api-query
+pnpm generate api-mutation
+pnpm generate model
+pnpm generate hook
+pnpm generate view
+pnpm generate page
 ```
 
-And this will make a copy of the empty .env file. Then fill in:
+### `component`: Angular-CLI-style path
 
-- `AUTH0_*` - go into Auth0 and create a Next.js web application and an API, then fill in the resulting values. `AUTH0_SECRET` can be generated with `openssl rand -hex 32`.
-- `NEXT_PUBLIC_API_SERVER_URL` - where the `stack Duel/server` API is reachable (`http://localhost:5041` for a locally-running instance).
-- `NEXT_PUBLIC_CODEPREVIEW_ORIGIN` - the origin serving the React-component-preview iframe runtime (see `codepreview/`). This is **required**: the app throws on startup if it's unset. Unless you're specifically working on that feature, point it at the shared dev deployment - ask a teammate for the current URL, or check the `Preview` GitHub Environment's variables.
-- `NEXT_PUBLIC_APPLICATIONINSIGHTS_CONNECTION_STRING` is optional - telemetry is skipped when it's unset.
+`component` takes a single path argument instead of separate prompts, the
+last segment is the file name, everything before it is the literal folder
+under `domains/`. There's no implicit `components/` folder, the path is used
+exactly as given, matching `ng generate component`:
 
-### Running the app
-
-```bash
-pnpm dev
+```sh
+pnpm generate component studio/problems/problem/studio-problem-question
+pnpm generate component problem/my-search-input
 ```
 
-Serves the app at `http://localhost:3000`.
+The first lands at `domains/studio/problems/problem/studio-problem-question.tsx`,
+the second at `domains/problem/my-search-input.tsx`. To put something under a
+`components/` folder, type that segment yourself:
+`problem/components/my-search-input`.
 
-### Linting and formatting
+## Generators
 
-```bash
-pnpm lint           # ESLint
-pnpm format         # Prettier, writes changes
-pnpm format:check   # Prettier, check only
-```
+| Generator | Produces | Client/server |
+| --- | --- | --- |
+| `component` | `domains/<path>.tsx` + test, path given as one argument | Asks if it needs hooks/state; adds `"use client"` only if so |
+| `api-query` | `domains/<domain>/api/get-<name>.ts` + test | Client (`defineQuery` / `useQuery`) |
+| `api-mutation` | `domains/<domain>/api/<name>.ts` + test | Client (`defineMutation` / `useMutation`) |
+| `model` | `domains/<domain>/models/<name>.ts` | Type only |
+| `hook` | `domains/<domain>/hooks/use-<name>.ts` + test | Client |
+| `view` | `domains/<domain>/<path>/<name>-layout.tsx` + test | Client — the top-level content for one route: fetches its own data, composes components, owns `SidebarLayout` + breadcrumbs |
+| `page` | `app/<route>/page.tsx` | Server — the thin route entry that renders a `view`; `async` and awaits `params` only when the route has a dynamic segment |
 
-### Building for production
+`view` vs. `component`: a `component` is a reusable building block with no
+routing concept (a badge, an input, a table). A `view` is tied to exactly one
+route, owns its own data fetching, and is what a `page` renders.
 
-```bash
-pnpm build
-pnpm start
-```
+All generated files live under `domains/<domain>/...` — there is no separate
+`views/` folder.
 
-## Testing
-
-To test this project run these commands:
-
-### Standard run
-
-```bash
-pnpm test
-```
-
-### Test with watch enabled
-
-```bash
-pnpm test --watch
-```
-
-### Test with code coverage
-
-```bash
-pnpm test:coverage
-```
-
-CLI tool for more information: https://vitest.dev/guide/cli
-
-## E2E tests
-
-End-to-end tests run against the real, integrated app (a running API, database, and
-Auth0 tenant) using Playwright. See [`playwright/README.md`](./playwright/README.md)
-for prerequisites, how to run them locally, and the tagging system (`@smoke`,
-`@regression`, `@critical`).
+Templates live in `web/plop-templates/*.hbs`; generator definitions are in
+`web/plopfile.mjs`. Not yet covered: the Next.js route-segment `layout.tsx`
+(the `AuthGuard` + `SidebarLayout` wrapper for a whole route subtree) and
+`error.tsx`/`not-found.tsx` boundaries — add generators for those if they
+become repetitive to write by hand.

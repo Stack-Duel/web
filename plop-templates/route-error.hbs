@@ -1,0 +1,26 @@
+"use client";
+
+import { useEffect } from "react";
+import ErrorCard from "@/shared/components/error-card/error-card";
+
+type {{pascalCase name}}ErrorProps = {
+  error: Error & { digest?: string };
+  reset: () => void;
+};
+
+export default function {{pascalCase name}}Error({
+  error,
+  reset,
+}: Readonly<{{pascalCase name}}ErrorProps>) {
+  useEffect(() => {
+    console.error(error);
+  }, [error]);
+
+  return (
+    <ErrorCard
+      onRetry={reset}
+      homeHref="{{homeHref}}"
+      homeLabel="{{homeLabel}}"
+    />
+  );
+}

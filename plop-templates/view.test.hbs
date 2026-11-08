@@ -1,0 +1,11 @@
+import { describe, expect, it } from "vitest";
+import { render, screen } from "@testing-library/react";
+import {{pascalCase name}}Layout from "./{{kebabCase name}}-layout";
+
+describe("{{pascalCase name}}Layout", () => {
+  it("renders", () => {
+    render(<{{pascalCase name}}Layout id="test-id" />);
+
+    expect(screen.getByRole("navigation")).toBeInTheDocument();
+  });
+});

@@ -1,4 +1,4 @@
-import StudioProblemsLayout from "@/views/studio/studio-problems-layout";
+import StudioProblemsLayout from "@/domains/studio/problems/studio-problems-layout";
 
 export default function StudioProblemsPage() {
   return <StudioProblemsLayout />;

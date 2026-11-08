@@ -1,0 +1,17 @@
+import {{pascalCase name}}Layout from "{{layoutImport}}";
+
+{{#if hasParam}}
+export default async function {{pascalCase name}}Page({
+  params,
+}: Readonly<{
+  params: Promise<{ {{camelCase paramName}}: string }>;
+}>) {
+  const {{camelCase paramName}} = (await params).{{camelCase paramName}};
+
+  return <{{pascalCase name}}Layout {{camelCase paramName}}={{jsxBrace (camelCase paramName)}} />;
+}
+{{else}}
+export default function {{pascalCase name}}Page() {
+  return <{{pascalCase name}}Layout />;
+}
+{{/if}}
