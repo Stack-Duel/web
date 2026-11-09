@@ -1,5 +1,9 @@
 import type { ReactNode } from "react";
 
-export default function SidebarLayout({ children }: { children?: ReactNode }) {
+export default function SidebarLayoutTest({
+  children,
+}: {
+  children?: ReactNode;
+}) {
   return <>{children}</>;
 }
