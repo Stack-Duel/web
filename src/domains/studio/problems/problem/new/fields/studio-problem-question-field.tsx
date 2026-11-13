@@ -2,10 +2,13 @@
 
 import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
-import { useNewStudioProblemStore } from "../new-studio-problem-store";
+import {
+  selectQuestion,
+  useNewStudioProblemStore,
+} from "../new-studio-problem-store";
 
 export default function StudioProblemQuestionField() {
-  const question = useNewStudioProblemStore((state) => state.question);
+  const question = useNewStudioProblemStore(selectQuestion);
   const changeQuestion = useNewStudioProblemStore(
     (state) => state.changeQuestion
   );

@@ -11,6 +11,7 @@ import StudioProblemQuestionField from "./fields/studio-problem-question-field";
 import StudioProblemDifficultyField from "./fields/studio-problem-difficulty-field";
 import StudioProblemTimeLimitField from "./fields/studio-problem-time-limit-field";
 import StudioProblemMemoryLimitField from "./fields/studio-problem-memory-limit-field";
+import StudioProblemTagsField from "./fields/studio-problem-tags-field";
 
 export default function StudioProblemNewMetadata() {
   return (
@@ -30,6 +31,7 @@ export default function StudioProblemNewMetadata() {
           <StudioProblemTimeLimitField />
           <StudioProblemMemoryLimitField />
         </div>
+        <StudioProblemTagsField />
       </CardContent>
     </Card>
   );

@@ -42,31 +42,54 @@ export const useNewStudioProblemStore = create<NewStudioProblemState>()(
       (set) => ({
         ...initialState,
         changeTitle: (title) => set({ title }, false, "changeTitle"),
+
         changeQuestion: (question) =>
           set({ question }, false, "changeQuestion"),
+
         changeEstimatedDifficulty: (estimatedDifficulty) =>
           set({ estimatedDifficulty }, false, "changeEstimatedDifficulty"),
+
         changeTimeLimitMs: (timeLimitMs) =>
           set({ timeLimitMs }, false, "changeTimeLimitMs"),
+
         changeMemoryLimitMB: (memoryLimitMB) =>
           set({ memoryLimitMB }, false, "changeMemoryLimitMB"),
+
         setTrackId: (trackId) => set({ trackId }, false, "setTrackId"),
+
         addTag: (tag) =>
-          set(
-            (state) => ({ tags: [...state.tags, tag] }),
-            false,
-            "addTag"
-          ),
+          set((state) => ({ tags: [...state.tags, tag] }), false, "addTag"),
+
         removeTag: (tag) =>
           set(
             (state) => ({ tags: state.tags.filter((t) => t !== tag) }),
             false,
             "removeTag"
           ),
+
         clearTags: () => set({ tags: [] }, false, "clearTags"),
+
         reset: () => set(initialState, false, "reset"),
       }),
+
       { name: "studio-new-problem-draft" }
     )
   )
 );
+
+export const selectTitle = (state: NewStudioProblemState) => state.title;
+
+export const selectQuestion = (state: NewStudioProblemState) => state.question;
+
+export const selectEstimatedDifficulty = (state: NewStudioProblemState) =>
+  state.estimatedDifficulty;
+
+export const selectTimeLimitMs = (state: NewStudioProblemState) =>
+  state.timeLimitMs;
+
+export const selectMemoryLimitMb = (state: NewStudioProblemState) =>
+  state.memoryLimitMB;
+
+export const selectTrackId = (state: NewStudioProblemState) => state.trackId;
+
+export const selectTags = (state: NewStudioProblemState) => state.tags;

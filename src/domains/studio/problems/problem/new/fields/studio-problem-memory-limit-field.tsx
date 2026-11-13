@@ -2,12 +2,13 @@
 
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { useNewStudioProblemStore } from "../new-studio-problem-store";
+import {
+  selectMemoryLimitMb,
+  useNewStudioProblemStore,
+} from "../new-studio-problem-store";
 
 export default function StudioProblemMemoryLimitField() {
-  const memoryLimitMB = useNewStudioProblemStore(
-    (state) => state.memoryLimitMB
-  );
+  const memoryLimitMB = useNewStudioProblemStore(selectMemoryLimitMb);
   const changeMemoryLimitMB = useNewStudioProblemStore(
     (state) => state.changeMemoryLimitMB
   );

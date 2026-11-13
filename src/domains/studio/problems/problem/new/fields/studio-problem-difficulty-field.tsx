@@ -2,11 +2,14 @@
 
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { useNewStudioProblemStore } from "../new-studio-problem-store";
+import {
+  selectEstimatedDifficulty,
+  useNewStudioProblemStore,
+} from "../new-studio-problem-store";
 
 export default function StudioProblemDifficultyField() {
   const estimatedDifficulty = useNewStudioProblemStore(
-    (state) => state.estimatedDifficulty
+    selectEstimatedDifficulty
   );
   const changeEstimatedDifficulty = useNewStudioProblemStore(
     (state) => state.changeEstimatedDifficulty
