@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
+import type { DataTableFeatures } from "@/shared/components/ui/data-table-features";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
@@ -61,7 +62,7 @@ export default function AdminPoolAddTable({
   const total = data?.total ?? 0;
   const hasMoreThanPage = total > addableResults.length;
 
-  const columns: ColumnDef<AdminProblemListItem>[] = [
+  const columns: ColumnDef<DataTableFeatures, AdminProblemListItem>[] = [
     {
       id: "select",
       header: () => (
@@ -85,12 +86,15 @@ export default function AdminPoolAddTable({
       cell: ({ row }) => (
         <Checkbox
           checked={!!rowSelection(pageIds)[row.original.id]}
-          onCheckedChange={(checked) =>
-            onRowSelectionChange(pageIds, {
-              ...rowSelection(pageIds),
-              [row.original.id]: !!checked,
-            })
-          }
+          onCheckedChange={(checked) => {
+            const next = { ...rowSelection(pageIds) };
+            if (checked) {
+              next[row.original.id] = true;
+            } else {
+              delete next[row.original.id];
+            }
+            onRowSelectionChange(pageIds, next);
+          }}
           aria-label={`Select ${row.original.title}`}
         />
       ),

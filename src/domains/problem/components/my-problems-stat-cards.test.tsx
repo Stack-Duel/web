@@ -30,7 +30,7 @@ describe("MyProblemsStatCards", () => {
 
     render(<MyProblemsStatCards />);
 
-    expect(screen.getAllByText("—")).toHaveLength(3);
+    expect(screen.getAllByText("-")).toHaveLength(3);
   });
 
   it("renders the submissions, reactions, and completion rate", () => {

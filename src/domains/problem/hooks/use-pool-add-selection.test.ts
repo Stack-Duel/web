@@ -67,14 +67,11 @@ describe("usePoolAddSelection", () => {
     const { result } = renderHook(() => usePoolAddSelection());
 
     act(() => result.current.selectAllMatching());
-    act(() =>
-      result.current.onRowSelectionChange(["a", "b"], { a: true, b: false })
-    );
+    act(() => result.current.onRowSelectionChange(["a", "b"], { a: true }));
 
     expect(result.current.selectedCount(50)).toBe(49);
     expect(result.current.rowSelection(["a", "b"])).toEqual({
       a: true,
-      b: false,
     });
     expect(result.current.selection).toEqual({
       mode: "all-matching",
@@ -86,7 +83,7 @@ describe("usePoolAddSelection", () => {
     const { result } = renderHook(() => usePoolAddSelection());
 
     act(() => result.current.selectAllMatching());
-    act(() => result.current.onRowSelectionChange(["a"], { a: false }));
+    act(() => result.current.onRowSelectionChange(["a"], {}));
     act(() => result.current.onRowSelectionChange(["a"], { a: true }));
 
     expect(result.current.selection).toEqual({

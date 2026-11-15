@@ -1,6 +1,7 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
+import type { DataTableFeatures } from "@/shared/components/ui/data-table-features";
 import { toast } from "sonner";
 import { Button } from "@/shared/components/ui/button";
 import { DataTable } from "@/shared/components/ui/data-table";
@@ -34,7 +35,7 @@ function RemoveCell({
   );
 }
 
-const columns: ColumnDef<RequiredProblemLanguage>[] = [
+const columns: ColumnDef<DataTableFeatures, RequiredProblemLanguage>[] = [
   {
     accessorKey: "languageName",
     header: "Language",

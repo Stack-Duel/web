@@ -1,4 +1,5 @@
-import { type Table } from "@tanstack/react-table";
+import type { ReactTable, RowData } from "@tanstack/react-table";
+import type { DataTableFeatures } from "./data-table-features";
 import {
   ChevronLeft,
   ChevronRight,
@@ -14,13 +15,13 @@ import {
 } from "./select";
 import { Button } from "./button";
 
-export interface DataTablePaginationProps<TData> {
-  table: Table<TData>;
+export interface DataTablePaginationProps<TData extends RowData> {
+  table: ReactTable<DataTableFeatures, TData>;
   sizes?: number[];
   showSelectionSummary?: boolean;
 }
 
-export function DataTablePagination<TData>({
+export function DataTablePagination<TData extends RowData>({
   table,
   sizes = [10, 20, 25, 30, 40, 50],
   showSelectionSummary = true,
@@ -29,7 +30,7 @@ export function DataTablePagination<TData>({
     <div className="flex items-center gap-2">
       <p className="hidden text-sm font-medium sm:block">Rows per page</p>
       <Select
-        value={`${table.getState().pagination.pageSize}`}
+        value={`${table.state.pagination.pageSize}`}
         onValueChange={(value) => {
           table.setPageSize(Number(value));
         }}
@@ -38,7 +39,7 @@ export function DataTablePagination<TData>({
           className="h-8 w-16 sm:w-17.5"
           aria-label="Rows per page"
         >
-          <SelectValue placeholder={table.getState().pagination.pageSize} />
+          <SelectValue placeholder={table.state.pagination.pageSize} />
         </SelectTrigger>
         <SelectContent side="top">
           {sizes.map((pageSize) => (
@@ -66,7 +67,7 @@ export function DataTablePagination<TData>({
       <div className="order-1 flex items-center justify-between gap-3 sm:order-2 sm:justify-end sm:gap-6 lg:gap-8">
         {showSelectionSummary ? rowsPerPage : null}
         <div className="flex items-center justify-center text-sm font-medium">
-          Page {table.getState().pagination.pageIndex + 1}
+          Page {table.state.pagination.pageIndex + 1}
           {table.getPageCount() >= 0 ? (
             <>
               <span className="mx-1 sm:hidden">/</span>

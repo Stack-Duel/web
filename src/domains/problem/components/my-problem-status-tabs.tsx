@@ -16,9 +16,7 @@ const STATUS_ORDER: ProblemStatus[] = [
 export default function MyProblemStatusTabs() {
   const statusFilter = useMyProblemListStore((s) => s.statusFilter);
   const setStatusFilter = useMyProblemListStore((s) => s.setStatusFilter);
-  const toggleStatusFilter = useMyProblemListStore(
-    (s) => s.toggleStatusFilter
-  );
+  const toggleStatusFilter = useMyProblemListStore((s) => s.toggleStatusFilter);
   const { data } = useMyProblemsMetadata();
 
   const countByStatus = new Map(

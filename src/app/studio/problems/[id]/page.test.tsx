@@ -3,9 +3,7 @@ import { render, screen } from "@testing-library/react";
 import StudioProblem from "./page";
 
 vi.mock("@/domains/studio/problems/problem/studio-problem-layout", () => ({
-  default: ({ id }: { id: string }) => (
-    <div>Studio Problem Layout: {id}</div>
-  ),
+  default: ({ id }: { id: string }) => <div>Studio Problem Layout: {id}</div>,
 }));
 
 describe("StudioProblem", () => {
@@ -14,8 +12,6 @@ describe("StudioProblem", () => {
       await StudioProblem({ params: Promise.resolve({ id: "problem-1" }) })
     );
 
-    expect(
-      screen.getByText("Studio Problem Layout: problem-1")
-    ).toBeVisible();
+    expect(screen.getByText("Studio Problem Layout: problem-1")).toBeVisible();
   });
 });

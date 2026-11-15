@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import type { ColumnDef } from "@tanstack/react-table";
+import type { DataTableFeatures } from "@/shared/components/ui/data-table-features";
 import { DataTable } from "@/shared/components/ui/data-table";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
@@ -40,7 +41,7 @@ function ActionCell({ game }: Readonly<{ game: MyActiveGame }>) {
   );
 }
 
-const columns: ColumnDef<MyActiveGame>[] = [
+const columns: ColumnDef<DataTableFeatures, MyActiveGame>[] = [
   {
     accessorKey: "gameModeName",
     header: "Mode",

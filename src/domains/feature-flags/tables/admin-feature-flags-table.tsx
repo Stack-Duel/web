@@ -1,6 +1,7 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
+import type { DataTableFeatures } from "@/shared/components/ui/data-table-features";
 import { toast } from "sonner";
 import { Badge } from "@/shared/components/ui/badge";
 import { Checkbox } from "@/shared/components/ui/checkbox";
@@ -36,7 +37,7 @@ function DefaultEnabledCell({ flag }: Readonly<{ flag: FeatureFlagAdmin }>) {
   );
 }
 
-const columns: ColumnDef<FeatureFlagAdmin>[] = [
+const columns: ColumnDef<DataTableFeatures, FeatureFlagAdmin>[] = [
   {
     accessorKey: "key",
     header: "Key",

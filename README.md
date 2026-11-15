@@ -41,15 +41,15 @@ the second at `domains/problem/my-search-input.tsx`. To put something under a
 
 ## Generators
 
-| Generator | Produces | Client/server |
-| --- | --- | --- |
-| `component` | `domains/<path>.tsx` + test, path given as one argument | Asks if it needs hooks/state; adds `"use client"` only if so |
-| `api-query` | `domains/<domain>/api/get-<name>.ts` + test | Client (`defineQuery` / `useQuery`) |
-| `api-mutation` | `domains/<domain>/api/<name>.ts` + test | Client (`defineMutation` / `useMutation`) |
-| `model` | `domains/<domain>/models/<name>.ts` | Type only |
-| `hook` | `domains/<domain>/hooks/use-<name>.ts` + test | Client |
-| `view` | `domains/<domain>/<path>/<name>-layout.tsx` + test | Client — the top-level content for one route: fetches its own data, composes components, owns `SidebarLayout` + breadcrumbs |
-| `page` | `app/<route>/page.tsx` | Server — the thin route entry that renders a `view`; `async` and awaits `params` only when the route has a dynamic segment |
+| Generator      | Produces                                                | Client/server                                                                                                               |
+| -------------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `component`    | `domains/<path>.tsx` + test, path given as one argument | Asks if it needs hooks/state; adds `"use client"` only if so                                                                |
+| `api-query`    | `domains/<domain>/api/get-<name>.ts` + test             | Client (`defineQuery` / `useQuery`)                                                                                         |
+| `api-mutation` | `domains/<domain>/api/<name>.ts` + test                 | Client (`defineMutation` / `useMutation`)                                                                                   |
+| `model`        | `domains/<domain>/models/<name>.ts`                     | Type only                                                                                                                   |
+| `hook`         | `domains/<domain>/hooks/use-<name>.ts` + test           | Client                                                                                                                      |
+| `view`         | `domains/<domain>/<path>/<name>-layout.tsx` + test      | Client — the top-level content for one route: fetches its own data, composes components, owns `SidebarLayout` + breadcrumbs |
+| `page`         | `app/<route>/page.tsx`                                  | Server — the thin route entry that renders a `view`; `async` and awaits `params` only when the route has a dynamic segment  |
 
 `view` vs. `component`: a `component` is a reusable building block with no
 routing concept (a badge, an input, a table). A `view` is tied to exactly one
