@@ -10,6 +10,23 @@ import { Button } from "@/shared/components/ui/button";
 import { Copy } from "lucide-react";
 import type { Track } from "@/domains/game/models/track";
 
+import {
+  TITLE_MIN_LENGTH,
+  TITLE_MAX_LENGTH,
+  QUESTION_MIN_LENGTH,
+  QUESTION_MAX_LENGTH,
+  DIFFICULTY_MIN,
+  DIFFICULTY_MAX,
+  TIME_LIMIT_MIN_MS,
+  TIME_LIMIT_MAX_MS,
+  MEMORY_LIMIT_MIN_MB,
+  MEMORY_LIMIT_MAX_MB,
+  MIN_TAG_COUNT,
+  MAX_TAG_COUNT,
+  TAG_MIN_LENGTH,
+  TAG_MAX_LENGTH,
+} from "./new-studio-problem-schema";
+
 const jsonEditorExtensions = [json(), EditorView.lineWrapping];
 
 async function copyToClipboard(value: string, successMessage: string) {
@@ -106,6 +123,30 @@ export default function NewStudioProblemUploadJsonContent({
       </div>
       <div className="min-w-0 space-y-1.5">
         <p className="text-sm font-medium">Paste problem JSON</p>
+        <ul className="list-inside list-disc text-xs text-muted-foreground">
+          <li>
+            Title: {TITLE_MIN_LENGTH}–{TITLE_MAX_LENGTH} characters.
+          </li>
+          <li>
+            Question: {QUESTION_MIN_LENGTH}–{QUESTION_MAX_LENGTH} characters;
+            Markdown supported.
+          </li>
+          <li>
+            Difficulty: {DIFFICULTY_MIN}–{DIFFICULTY_MAX}.
+          </li>
+          <li>
+            Time limit: {TIME_LIMIT_MIN_MS}–{TIME_LIMIT_MAX_MS} ms.
+          </li>
+          <li>
+            Memory limit: {MEMORY_LIMIT_MIN_MB}–{MEMORY_LIMIT_MAX_MB} MB.
+          </li>
+          <li>Track ID must match an available track listed above.</li>
+          <li>
+            {MIN_TAG_COUNT}–{MAX_TAG_COUNT} tags, each {TAG_MIN_LENGTH}–
+            {TAG_MAX_LENGTH} lowercase letters, numbers, or hyphens; no leading,
+            trailing, or consecutive hyphens.
+          </li>
+        </ul>
         <div className="min-w-0 overflow-hidden rounded-lg border text-xs">
           <CodeMirror
             value={text}
