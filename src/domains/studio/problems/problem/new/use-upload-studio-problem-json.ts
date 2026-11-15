@@ -4,21 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import type { AnyFormApi } from "@tanstack/react-form";
 import type { Track } from "@/domains/game/models/track";
-import {
-  newStudioProblemSchema,
-  TITLE_MIN_LENGTH,
-  TITLE_MAX_LENGTH,
-  QUESTION_MIN_LENGTH,
-  QUESTION_MAX_LENGTH,
-  DIFFICULTY_MIN,
-  DIFFICULTY_MAX,
-  TIME_LIMIT_MIN_MS,
-  TIME_LIMIT_MAX_MS,
-  MEMORY_LIMIT_MIN_MB,
-  MEMORY_LIMIT_MAX_MB,
-  MIN_TAG_COUNT,
-  MAX_TAG_COUNT,
-} from "./new-studio-problem-schema";
+import { newStudioProblemSchema } from "./new-studio-problem-schema";
 import { formatZodError } from "@/domains/problem/schemas/format-zod-error";
 import { normalizeText } from "@/shared/utils/normalize-text";
 import { useNewStudioProblemStore } from "./new-studio-problem-store";
@@ -26,24 +12,19 @@ import { useNewStudioProblemStore } from "./new-studio-problem-store";
 export function buildStudioProblemJsonPromptTemplate(
   availableTracks: Track[]
 ): string {
-  const trackIds = availableTracks.map((track) => track.id).join(" | ");
-
-  return `{
-  // ${TITLE_MIN_LENGTH}-${TITLE_MAX_LENGTH} characters
-  "title": "string",
-  // ${QUESTION_MIN_LENGTH}-${QUESTION_MAX_LENGTH} characters, markdown supported
-  "question": "string",
-  // ${DIFFICULTY_MIN}-${DIFFICULTY_MAX}
-  "estimatedDifficulty": 500,
-  // ${TIME_LIMIT_MIN_MS}-${TIME_LIMIT_MAX_MS}
-  "timeLimitMs": 1000,
-  // ${MEMORY_LIMIT_MIN_MB}-${MEMORY_LIMIT_MAX_MB}
-  "memoryLimitMB": 64,
-  // one of: ${trackIds || "(no tracks available)"}
-  "trackId": "string",
-  // ${MIN_TAG_COUNT}-${MAX_TAG_COUNT} tags, lowercase letters/numbers/hyphens only
-  "tags": ["string"]
-}`;
+  return JSON.stringify(
+    {
+      title: "Problem title",
+      question: "Describe the problem, its inputs, outputs, and examples here.",
+      estimatedDifficulty: 500,
+      timeLimitMs: 1000,
+      memoryLimitMB: 64,
+      trackId: availableTracks[0]?.id ?? "string",
+      tags: ["string"],
+    },
+    null,
+    2
+  );
 }
 
 type UseUploadStudioProblemJsonArgs = {

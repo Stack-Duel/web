@@ -99,7 +99,7 @@ export default function NewStudioProblemUploadJSON({
             <DrawerTitle>{title}</DrawerTitle>
             <DrawerDescription>{description}</DrawerDescription>
           </DrawerHeader>
-          <div className="px-4">
+          <div className="min-h-0 flex-1 overflow-y-auto px-4">
             <NewStudioProblemUploadJsonContent
               text={text}
               onTextChange={setText}
@@ -107,7 +107,7 @@ export default function NewStudioProblemUploadJSON({
               promptTemplate={promptTemplate}
             />
           </div>
-          <DrawerFooter>
+          <DrawerFooter className="shrink-0">
             <Button
               type="button"
               onClick={handleUpload}

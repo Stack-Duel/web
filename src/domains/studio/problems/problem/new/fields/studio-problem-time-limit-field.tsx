@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { AnyFieldApi } from "@tanstack/react-form";
 import { Field, FieldError, FieldLabel } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
@@ -16,7 +17,20 @@ export default function StudioProblemTimeLimitField({
   const changeTimeLimitMs = useNewStudioProblemStore(
     (state) => state.changeTimeLimitMs
   );
+  const [draft, setDraft] = useState<string | null>(null);
   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
+  const commitDraft = () => {
+    const parsed = Number(draft ?? field.state.value);
+    const value = clampNumber(
+      Number.isFinite(parsed) ? parsed : TIME_LIMIT_MIN_MS,
+      TIME_LIMIT_MIN_MS,
+      TIME_LIMIT_MAX_MS
+    );
+    field.handleChange(value);
+    changeTimeLimitMs(value);
+    setDraft(null);
+  };
 
   return (
     <Field data-invalid={isInvalid}>
@@ -27,15 +41,14 @@ export default function StudioProblemTimeLimitField({
         type="number"
         min={TIME_LIMIT_MIN_MS}
         max={TIME_LIMIT_MAX_MS}
-        value={field.state.value}
-        onBlur={field.handleBlur}
-        onChange={(e) => {
-          const parsed = Number(e.target.value);
-          const value = Number.isNaN(parsed)
-            ? field.state.value
-            : clampNumber(parsed, TIME_LIMIT_MIN_MS, TIME_LIMIT_MAX_MS);
-          field.handleChange(value);
-          changeTimeLimitMs(value);
+        value={draft ?? field.state.value}
+        onBlur={() => {
+          commitDraft();
+          field.handleBlur();
+        }}
+        onChange={(e) => setDraft(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") commitDraft();
         }}
         aria-invalid={isInvalid}
       />

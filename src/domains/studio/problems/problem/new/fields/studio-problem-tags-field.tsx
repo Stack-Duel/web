@@ -68,15 +68,17 @@ export default function StudioProblemTagsField({
   return (
     <Field data-invalid={isInvalid}>
       <FieldLabel htmlFor="tags">Tags</FieldLabel>
-      <ul className="flex items-center gap-2">
+      <ul className="flex min-w-0 flex-wrap items-center gap-2">
         {tags.map((tag) => (
-          <li key={tag}>
-            <Badge variant="secondary" className="gap-1 pr-1">
-              {tag}{" "}
+          <li key={tag} className="min-w-0 max-w-full">
+            <Badge variant="secondary" className="max-w-full gap-1 pr-1">
+              <span className="min-w-0 truncate" title={tag}>
+                {tag}
+              </span>
               <button
                 type="button"
                 onClick={() => handleRemoveTag(tag)}
-                className="rounded-full p-0.5 hover:bg-muted-foreground/20"
+                className="shrink-0 rounded-full p-0.5 hover:bg-muted-foreground/20"
                 aria-label={`Remove ${tag}`}
               >
                 <X size={12} />
