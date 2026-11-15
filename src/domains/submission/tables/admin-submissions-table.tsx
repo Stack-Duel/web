@@ -2,11 +2,9 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import {
-  ColumnDef,
-  type OnChangeFn,
-  type PaginationState,
-} from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
+import type { DataTableFeatures } from "@/shared/components/ui/data-table-features";
+import { type OnChangeFn, type PaginationState } from "@tanstack/react-table";
 
 import { DataTable } from "@/shared/components/ui/data-table";
 import { Badge } from "@/shared/components/ui/badge";
@@ -28,7 +26,7 @@ function getStatusClassName(status: AdminSubmissionListItem["status"]) {
     : undefined;
 }
 
-const columns: ColumnDef<AdminSubmissionListItem>[] = [
+const columns: ColumnDef<DataTableFeatures, AdminSubmissionListItem>[] = [
   {
     accessorKey: "id",
     header: "ID",

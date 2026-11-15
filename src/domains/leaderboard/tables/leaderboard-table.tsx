@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import type {
-  ColumnDef,
-  OnChangeFn,
-  PaginationState,
-} from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
+import type { DataTableFeatures } from "@/shared/components/ui/data-table-features";
+import type { OnChangeFn, PaginationState } from "@tanstack/react-table";
 import { DataTable } from "@/shared/components/ui/data-table";
 import {
   Avatar,
@@ -17,7 +15,7 @@ import { useLeaderboard } from "../api/get-leaderboard";
 import type { LeaderboardEntry } from "../models/leaderboard-entry";
 import type { GameModeKey } from "@/domains/game/models/game-mode";
 
-const columns: ColumnDef<LeaderboardEntry>[] = [
+const columns: ColumnDef<DataTableFeatures, LeaderboardEntry>[] = [
   {
     accessorKey: "rank",
     header: "Rank",

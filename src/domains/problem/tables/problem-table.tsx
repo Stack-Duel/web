@@ -2,11 +2,9 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import {
-  ColumnDef,
-  type OnChangeFn,
-  type PaginationState,
-} from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
+import type { DataTableFeatures } from "@/shared/components/ui/data-table-features";
+import { type OnChangeFn, type PaginationState } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 
 import DifficultyBadge from "../components/difficulty-badge";
@@ -22,7 +20,7 @@ import type { PageResult } from "@/shared/pagination/page-result";
 const SEARCH_DEBOUNCE_MS = 300;
 const VISIBLE_LANGUAGE_COUNT = 2;
 
-const columns: ColumnDef<ProblemSummary>[] = [
+const columns: ColumnDef<DataTableFeatures, ProblemSummary>[] = [
   {
     accessorKey: "title",
     header: "Title",

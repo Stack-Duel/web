@@ -20,7 +20,9 @@ function rowSelectionForPage(
   }
 
   return Object.fromEntries(
-    pageIds.map((id) => [id, !selection.excludedIds.has(id)])
+    pageIds
+      .filter((id) => !selection.excludedIds.has(id))
+      .map((id) => [id, true as const])
   );
 }
 

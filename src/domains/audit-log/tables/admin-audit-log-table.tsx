@@ -1,6 +1,7 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
+import type { DataTableFeatures } from "@/shared/components/ui/data-table-features";
 
 import { DataTable } from "@/shared/components/ui/data-table";
 import { useAdminListPagination } from "@/shared/hooks/use-admin-list-pagination";
@@ -8,7 +9,7 @@ import { useAdminAuditLogStore } from "../state/admin-audit-log-store";
 import { useAdminAuditLog } from "../api/get-admin-audit-log";
 import type { AuditLogEntry } from "../models/audit-log-entry";
 
-const columns: ColumnDef<AuditLogEntry>[] = [
+const columns: ColumnDef<DataTableFeatures, AuditLogEntry>[] = [
   {
     id: "createdAt",
     header: "Time",

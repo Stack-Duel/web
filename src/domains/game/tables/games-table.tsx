@@ -3,11 +3,9 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import type {
-  ColumnDef,
-  OnChangeFn,
-  PaginationState,
-} from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
+import type { DataTableFeatures } from "@/shared/components/ui/data-table-features";
+import type { OnChangeFn, PaginationState } from "@tanstack/react-table";
 import { DataTable } from "@/shared/components/ui/data-table";
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
@@ -79,7 +77,7 @@ function LobbyActionCell({ lobby }: Readonly<{ lobby: GameLobbySummary }>) {
   );
 }
 
-const columns: ColumnDef<GameLobbySummary>[] = [
+const columns: ColumnDef<DataTableFeatures, GameLobbySummary>[] = [
   {
     accessorKey: "gameModeName",
     header: "Mode",

@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { X } from "lucide-react";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
+import type { DataTableFeatures } from "@/shared/components/ui/data-table-features";
 import { Button } from "@/shared/components/ui/button";
 import { DataTable } from "@/shared/components/ui/data-table";
 import DifficultyBadge from "./difficulty-badge";
@@ -44,7 +45,7 @@ export default function AdminPoolMembersTable({
     );
   };
 
-  const columns: ColumnDef<AdminProblemListItem>[] = [
+  const columns: ColumnDef<DataTableFeatures, AdminProblemListItem>[] = [
     { accessorKey: "title", header: "Title" },
     {
       accessorKey: "difficultyTier",

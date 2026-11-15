@@ -1,15 +1,18 @@
 "use client";
 
 import {
-  ColumnDef,
   flexRender,
-  getCoreRowModel,
-  getPaginationRowModel,
-  useReactTable,
+  useTable,
+  type ColumnDef,
   type OnChangeFn,
   type PaginationState,
+  type RowData,
   type RowSelectionState,
 } from "@tanstack/react-table";
+import {
+  dataTableFeatures,
+  type DataTableFeatures,
+} from "./data-table-features";
 
 import {
   Table,
@@ -34,8 +37,8 @@ export interface ManualPaginationProps {
   pageCount: number;
 }
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
+interface DataTableProps<TData extends RowData> {
+  columns: ColumnDef<DataTableFeatures, TData>[];
   data: TData[];
   isLoading: boolean;
   skeletonRows: number;
@@ -55,7 +58,7 @@ interface DataTableProps<TData, TValue> {
   getRowId?: (row: TData) => string;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends RowData>({
   columns,
   data,
   isLoading,
@@ -67,12 +70,11 @@ export function DataTable<TData, TValue>({
   rowSelection = {},
   onRowSelectionChange,
   getRowId,
-}: Readonly<DataTableProps<TData, TValue>>) {
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const table = useReactTable({
+}: Readonly<DataTableProps<TData>>) {
+  const table = useTable<DataTableFeatures, TData>({
+    features: dataTableFeatures,
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
     enableRowSelection,
     onRowSelectionChange,
     getRowId,
@@ -84,7 +86,6 @@ export function DataTable<TData, TValue>({
           onPaginationChange: manualPagination.onPaginationChange,
         }
       : {
-          getPaginationRowModel: getPaginationRowModel(),
           state: { rowSelection },
         }),
   });
@@ -117,7 +118,7 @@ export function DataTable<TData, TValue>({
             : undefined
         }
       >
-        {row.getVisibleCells().map((cell) => (
+        {row.getAllCells().map((cell) => (
           <TableCell key={cell.id}>
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
           </TableCell>
