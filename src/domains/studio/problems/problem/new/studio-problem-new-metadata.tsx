@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   Card,
@@ -24,6 +25,8 @@ import {
 } from "./new-studio-problem-store";
 import { InitialStudioProblemSetup } from "@/domains/studio/models/initial-studio-problem-setup";
 import NewStudioProblemUploadJSON from "./new-studio-problem-upload-json";
+import { useCreateStudioProblem } from "@/domains/studio/api/create-studio-problem";
+import { routerConfig } from "@/shared/router-config";
 
 type StudioProblemNewMetadataProps = {
   initialStudioProblemSetup: InitialStudioProblemSetup;
@@ -33,6 +36,21 @@ export default function StudioProblemNewMetadata({
   initialStudioProblemSetup,
 }: Readonly<StudioProblemNewMetadataProps>) {
   const { availableTracks } = initialStudioProblemSetup;
+  const router = useRouter();
+  const resetDraft = useNewStudioProblemStore((state) => state.reset);
+
+  const mutation = useCreateStudioProblem({
+    mutationConfig: {
+      onSuccess: (id) => {
+        toast.success("Problem created");
+        resetDraft();
+        router.push(routerConfig.studioProblemDetail.execute({ id }));
+      },
+      onError: (error) => {
+        toast.error(error.message || "Failed to create problem");
+      },
+    },
+  });
 
   const form = useForm({
     defaultValues: selectDraft(useNewStudioProblemStore.getState()),
@@ -40,8 +58,16 @@ export default function StudioProblemNewMetadata({
       onBlur: newStudioProblemSchema,
       onSubmit: newStudioProblemSchema,
     },
-    onSubmit: async () => {
-      toast.success("Draft saved");
+    onSubmit: async ({ value }) => {
+      mutation.mutate({
+        title: value.title,
+        question: value.question,
+        difficulty: value.estimatedDifficulty,
+        timeLimitMs: value.timeLimitMs,
+        memoryLimitMb: value.memoryLimitMB,
+        tags: value.tags,
+        trackId: value.trackId,
+      });
     },
   });
 
@@ -78,6 +104,9 @@ export default function StudioProblemNewMetadata({
               {(field) => <StudioProblemMemoryLimitField field={field} />}
             </form.Field>
           </div>
+          <form.Field name="tags">
+            {(field) => <StudioProblemTagsField field={field} />}
+          </form.Field>
           <form.Field name="trackId">
             {(field) => (
               <StudioProblemTrackField
@@ -86,18 +115,12 @@ export default function StudioProblemNewMetadata({
               />
             )}
           </form.Field>
-          <form.Field name="tags">
-            {(field) => <StudioProblemTagsField field={field} />}
-          </form.Field>
         </CardContent>
         <CardFooter>
-          <form.Subscribe
-            selector={(state) => [state.isSubmitting, state.canSubmit]}
-          >
-            {([isSubmitting, canSubmit]) => (
+          <form.Subscribe selector={(state) => state.isSubmitting}>
+            {(isSubmitting) => (
               <StudioProblemNewFooter
-                isSubmitting={isSubmitting}
-                canSubmit={canSubmit}
+                isSubmitting={isSubmitting || mutation.isPending}
               />
             )}
           </form.Subscribe>
