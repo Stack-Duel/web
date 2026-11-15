@@ -1,32 +1,59 @@
 "use client";
 
-import { Label } from "@/shared/components/ui/label";
+import type { AnyFieldApi } from "@tanstack/react-form";
 import {
-  selectTags,
-  useNewStudioProblemStore,
-} from "../new-studio-problem-store";
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/shared/components/ui/field";
+import { useNewStudioProblemStore } from "../new-studio-problem-store";
 import { Input } from "@/shared/components/ui/input";
 import { useState, type KeyboardEvent } from "react";
 import { Badge } from "@/shared/components/ui/badge";
 import { normalizeText } from "@/shared/utils/normalize-text";
 import { X } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
+import {
+  MAX_TAG_COUNT,
+  TAG_MAX_LENGTH,
+  TAG_MIN_LENGTH,
+} from "../new-studio-problem-schema";
 
-export default function StudioProblemTagsField() {
-  const tags = useNewStudioProblemStore(selectTags);
-
+export default function StudioProblemTagsField({
+  field,
+}: Readonly<{ field: AnyFieldApi }>) {
   const addTag = useNewStudioProblemStore((store) => store.addTag);
   const removeTag = useNewStudioProblemStore((store) => store.removeTag);
   const clearTags = useNewStudioProblemStore((store) => store.clearTags);
 
   const [draftTag, setDraftTag] = useState("");
 
+  const tags = field.state.value as string[];
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+  const isAtTagLimit = tags.length >= MAX_TAG_COUNT;
+
+  const syncTagsFromStore = () => {
+    field.handleChange(useNewStudioProblemStore.getState().tags);
+  };
+
   const addDraftTag = () => {
     const normalized = normalizeText(draftTag);
-    if (normalized && !tags.includes(normalized)) {
+    if (normalized && !tags.includes(normalized) && !isAtTagLimit) {
       addTag(normalized);
+      syncTagsFromStore();
     }
     setDraftTag("");
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    removeTag(tag);
+    syncTagsFromStore();
+  };
+
+  const handleClearTags = () => {
+    clearTags();
+    syncTagsFromStore();
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -38,13 +65,13 @@ export default function StudioProblemTagsField() {
       draftTag === "" &&
       draftTag.length > 0
     ) {
-      removeTag(tags[tags.length - 1]);
+      handleRemoveTag(tags[tags.length - 1]);
     }
   };
 
   return (
-    <div className="space-y-1.5">
-      <Label htmlFor="tags">Tags</Label>
+    <Field data-invalid={isInvalid}>
+      <FieldLabel htmlFor="tags">Tags</FieldLabel>
       <ul className="flex items-center gap-2">
         {tags.map((tag) => (
           <li key={tag}>
@@ -52,7 +79,7 @@ export default function StudioProblemTagsField() {
               {tag}{" "}
               <button
                 type="button"
-                onClick={() => removeTag(tag)}
+                onClick={() => handleRemoveTag(tag)}
                 className="rounded-full p-0.5 hover:bg-muted-foreground/20"
                 aria-label={`Remove ${tag}`}
               >
@@ -64,16 +91,36 @@ export default function StudioProblemTagsField() {
       </ul>
       <Input
         id="tags"
-        minLength={1}
-        maxLength={50}
+        minLength={TAG_MIN_LENGTH}
+        maxLength={TAG_MAX_LENGTH}
         value={draftTag}
+        disabled={isAtTagLimit}
         onKeyDown={handleKeyDown}
-        onBlur={addDraftTag}
+        onBlur={() => {
+          addDraftTag();
+          field.handleBlur();
+        }}
         onChange={(e) => setDraftTag(e.target.value)}
+        aria-invalid={isInvalid}
       />
-      <Button variant="secondary" size="sm" onClick={clearTags}>
-        Clear Tags
-      </Button>
-    </div>
+      {isInvalid ? (
+        <FieldError errors={field.state.meta.errors} />
+      ) : (
+        <FieldDescription>
+          1 to {MAX_TAG_COUNT} tags. Lowercase letters, numbers, and hyphens
+          only.
+        </FieldDescription>
+      )}
+      <div>
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={handleClearTags}
+        >
+          Clear Tags
+        </Button>
+      </div>
+    </Field>
   );
 }

@@ -1,27 +1,54 @@
 "use client";
 
-import { Label } from "@/shared/components/ui/label";
+import type { AnyFieldApi } from "@tanstack/react-form";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/shared/components/ui/field";
 import { Textarea } from "@/shared/components/ui/textarea";
 import {
-  selectQuestion,
-  useNewStudioProblemStore,
-} from "../new-studio-problem-store";
+  QUESTION_MAX_LENGTH,
+  QUESTION_MIN_LENGTH,
+} from "../new-studio-problem-schema";
+import { useNewStudioProblemStore } from "../new-studio-problem-store";
 
-export default function StudioProblemQuestionField() {
-  const question = useNewStudioProblemStore(selectQuestion);
+export default function StudioProblemQuestionField({
+  field,
+}: Readonly<{ field: AnyFieldApi }>) {
   const changeQuestion = useNewStudioProblemStore(
     (state) => state.changeQuestion
   );
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
   return (
-    <div className="space-y-1.5">
-      <Label htmlFor="new-problem-question">Question</Label>
+    <Field data-invalid={isInvalid}>
+      <FieldLabel htmlFor={field.name}>Question</FieldLabel>
       <Textarea
-        id="new-problem-question"
-        value={question}
-        onChange={(e) => changeQuestion(e.target.value)}
+        id={field.name}
+        name={field.name}
+        minLength={QUESTION_MIN_LENGTH}
+        maxLength={QUESTION_MAX_LENGTH}
+        value={field.state.value}
+        onBlur={field.handleBlur}
+        onChange={(e) => {
+          field.handleChange(e.target.value);
+          changeQuestion(e.target.value);
+        }}
         className="min-h-64 font-mono text-sm"
+        aria-invalid={isInvalid}
       />
-    </div>
+      {isInvalid ? (
+        <FieldError errors={field.state.meta.errors} />
+      ) : (
+        <FieldDescription className="flex items-center gap-3">
+          Between {QUESTION_MIN_LENGTH} and {QUESTION_MAX_LENGTH} characters.
+          <span className="ml-auto">
+            {field.state.value.length} of {QUESTION_MAX_LENGTH}
+          </span>
+        </FieldDescription>
+      )}
+    </Field>
   );
 }

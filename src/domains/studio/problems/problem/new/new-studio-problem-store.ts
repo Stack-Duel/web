@@ -1,13 +1,13 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 
-interface NewStudioProblemDraft {
+export interface NewStudioProblemDraft {
   title: string;
   question: string;
   estimatedDifficulty: number;
   timeLimitMs: number;
   memoryLimitMB: number;
-  trackId: string | null;
+  trackId: string;
   tags: string[];
 }
 
@@ -32,7 +32,7 @@ const initialState: NewStudioProblemDraft = {
   estimatedDifficulty: 500,
   timeLimitMs: 1_000,
   memoryLimitMB: 64,
-  trackId: null,
+  trackId: "",
   tags: [],
 };
 
@@ -93,3 +93,15 @@ export const selectMemoryLimitMb = (state: NewStudioProblemState) =>
 export const selectTrackId = (state: NewStudioProblemState) => state.trackId;
 
 export const selectTags = (state: NewStudioProblemState) => state.tags;
+
+export const selectDraft = (
+  state: NewStudioProblemState
+): NewStudioProblemDraft => ({
+  title: state.title,
+  question: state.question,
+  estimatedDifficulty: state.estimatedDifficulty,
+  timeLimitMs: state.timeLimitMs,
+  memoryLimitMB: state.memoryLimitMB,
+  trackId: state.trackId,
+  tags: state.tags,
+});

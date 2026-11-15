@@ -29,7 +29,10 @@ export default function StudioProblemSetups({
   return (
     <Accordion type="single" collapsible className="w-full">
       {data.map((setup) => (
-        <AccordionItem key={setup.languageVersionId} value={setup.languageVersionId}>
+        <AccordionItem
+          key={setup.languageVersionId}
+          value={setup.languageVersionId}
+        >
           <AccordionTrigger>
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-medium">

@@ -29,7 +29,10 @@ describe("StudioProblemSetups", () => {
   it("lists the language and version for each setup", () => {
     mockUseSuspenseStudioProblemSetups.mockReturnValue({
       data: [
-        buildStudioProblemSetup({ language: "JavaScript", languageVersion: "ES2022" }),
+        buildStudioProblemSetup({
+          language: "JavaScript",
+          languageVersion: "ES2022",
+        }),
         buildStudioProblemSetup({
           languageVersionId: "lang_version_2",
           language: "Python",
@@ -56,7 +59,9 @@ describe("StudioProblemSetups", () => {
 
   it("hides the function name and reference solution badges when absent", () => {
     mockUseSuspenseStudioProblemSetups.mockReturnValue({
-      data: [buildStudioProblemSetup({ functionName: "", referenceSolution: "" })],
+      data: [
+        buildStudioProblemSetup({ functionName: "", referenceSolution: "" }),
+      ],
     } as unknown as ReturnType<typeof useSuspenseStudioProblemSetups>);
 
     const { container } = render(<StudioProblemSetups problemId="problem_1" />);
@@ -66,7 +71,11 @@ describe("StudioProblemSetups", () => {
 
   it("shows a reference solution badge only when one is present", () => {
     mockUseSuspenseStudioProblemSetups.mockReturnValue({
-      data: [buildStudioProblemSetup({ referenceSolution: "function twoSum() { return [0, 1]; }" })],
+      data: [
+        buildStudioProblemSetup({
+          referenceSolution: "function twoSum() { return [0, 1]; }",
+        }),
+      ],
     } as unknown as ReturnType<typeof useSuspenseStudioProblemSetups>);
 
     render(<StudioProblemSetups problemId="problem_1" />);
@@ -92,8 +101,6 @@ describe("StudioProblemSetups", () => {
 
     expect(screen.getByText("2")).toBeVisible();
     expect(screen.getByText("10")).toBeVisible();
-    expect(
-      screen.getByText("function twoSum(nums, target) {}")
-    ).toBeVisible();
+    expect(screen.getByText("function twoSum(nums, target) {}")).toBeVisible();
   });
 });

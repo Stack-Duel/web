@@ -49,7 +49,9 @@ describe("StudioProblemContent", () => {
     expect(screen.getByText(/Memory Limit 128MB/)).toBeVisible();
     expect(screen.getByText("3 setups")).toBeVisible();
     expect(
-      screen.getByText(`Created on ${new Date("2026-02-10T00:00:00.000Z").toLocaleDateString()}`)
+      screen.getByText(
+        `Created on ${new Date("2026-02-10T00:00:00.000Z").toLocaleDateString()}`
+      )
     ).toBeVisible();
   });
 

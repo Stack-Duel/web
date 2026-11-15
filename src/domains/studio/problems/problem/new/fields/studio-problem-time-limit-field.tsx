@@ -1,26 +1,45 @@
 "use client";
 
+import type { AnyFieldApi } from "@tanstack/react-form";
+import { Field, FieldError, FieldLabel } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
+import { clampNumber } from "@/shared/utils/clamp-number";
+import {
+  TIME_LIMIT_MAX_MS,
+  TIME_LIMIT_MIN_MS,
+} from "../new-studio-problem-schema";
 import { useNewStudioProblemStore } from "../new-studio-problem-store";
 
-export default function StudioProblemTimeLimitField() {
-  const timeLimitMs = useNewStudioProblemStore((state) => state.timeLimitMs);
+export default function StudioProblemTimeLimitField({
+  field,
+}: Readonly<{ field: AnyFieldApi }>) {
   const changeTimeLimitMs = useNewStudioProblemStore(
     (state) => state.changeTimeLimitMs
   );
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
   return (
-    <div className="space-y-1.5">
-      <Label htmlFor="new-problem-time-limit">Time limit (ms)</Label>
+    <Field data-invalid={isInvalid}>
+      <FieldLabel htmlFor={field.name}>Time limit (ms)</FieldLabel>
       <Input
-        id="new-problem-time-limit"
+        id={field.name}
+        name={field.name}
         type="number"
-        min={100}
-        max={10000}
-        value={timeLimitMs}
-        onChange={(e) => changeTimeLimitMs(Number(e.target.value))}
+        min={TIME_LIMIT_MIN_MS}
+        max={TIME_LIMIT_MAX_MS}
+        value={field.state.value}
+        onBlur={field.handleBlur}
+        onChange={(e) => {
+          const parsed = Number(e.target.value);
+          const value = Number.isNaN(parsed)
+            ? field.state.value
+            : clampNumber(parsed, TIME_LIMIT_MIN_MS, TIME_LIMIT_MAX_MS);
+          field.handleChange(value);
+          changeTimeLimitMs(value);
+        }}
+        aria-invalid={isInvalid}
       />
-    </div>
+      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+    </Field>
   );
 }

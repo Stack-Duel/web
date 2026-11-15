@@ -30,6 +30,7 @@
     "@codemirror/lang-cpp": "^6.0.3",
     "@codemirror/lang-java": "^6.0.2",
     "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/lang-json": "^6.0.2",
     "@codemirror/lang-python": "^6.2.1",
     "@codemirror/language": "^6.12.4",
     "@codemirror/lint": "^6.9.7",
@@ -84,6 +85,7 @@
     "remark-gfm": "^4.0.1",
     "sonner": "^2.0.8",
     "tailwind-merge": "^3.7.0",
+    "vaul": "^1.1.2",
     "zod": "^4.6.5",
     "zustand": "^5.0.15"
   },

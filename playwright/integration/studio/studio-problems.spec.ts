@@ -1,6 +1,9 @@
 import { test, expect } from "@playwright/test";
 import { StudioProblemsPage } from "../../pages/studio-problems-page";
-import { buildMyProblemListItem, buildMyProblemsMetadata } from "@/test/factories/problem";
+import {
+  buildMyProblemListItem,
+  buildMyProblemsMetadata,
+} from "@/test/factories/problem";
 import { mockStudio } from "./mocks";
 
 test(
@@ -112,7 +115,9 @@ test(
     await studio.goto();
 
     const [request] = await Promise.all([
-      page.waitForRequest((req) => /\/api\/v1\/problem\/mine\?/.test(req.url())),
+      page.waitForRequest((req) =>
+        /\/api\/v1\/problem\/mine\?/.test(req.url())
+      ),
       studio.statusPill("Draft").click(),
     ]);
     expect(request.url()).toContain("statuses=Draft");
@@ -137,7 +142,9 @@ test(
     await studio.statusPill("Draft").click();
 
     const [request] = await Promise.all([
-      page.waitForRequest((req) => /\/api\/v1\/problem\/mine\?/.test(req.url())),
+      page.waitForRequest((req) =>
+        /\/api\/v1\/problem\/mine\?/.test(req.url())
+      ),
       studio.statusPill("Pending").click(),
     ]);
     expect(request.url()).toContain("statuses=Draft");
@@ -158,7 +165,9 @@ test(
     await studio.statusPill("Draft").click();
 
     const [request] = await Promise.all([
-      page.waitForRequest((req) => /\/api\/v1\/problem\/mine\?/.test(req.url())),
+      page.waitForRequest((req) =>
+        /\/api\/v1\/problem\/mine\?/.test(req.url())
+      ),
       studio.statusPill("All").click(),
     ]);
     expect(request.url()).not.toContain("statuses=");
@@ -175,7 +184,9 @@ test(
     await studio.goto();
 
     const [request] = await Promise.all([
-      page.waitForRequest((req) => /\/api\/v1\/problem\/mine\?/.test(req.url())),
+      page.waitForRequest((req) =>
+        /\/api\/v1\/problem\/mine\?/.test(req.url())
+      ),
       studio.searchInput.fill("two sum"),
     ]);
     expect(request.url()).toContain("search=two");

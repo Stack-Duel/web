@@ -1,30 +1,42 @@
 "use client";
 
+import type { AnyFieldApi } from "@tanstack/react-form";
+import { Field, FieldError, FieldLabel } from "@/shared/components/ui/field";
 import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
-import {
-  selectEstimatedDifficulty,
-  useNewStudioProblemStore,
-} from "../new-studio-problem-store";
+import { clampNumber } from "@/shared/utils/clamp-number";
+import { DIFFICULTY_MAX, DIFFICULTY_MIN } from "../new-studio-problem-schema";
+import { useNewStudioProblemStore } from "../new-studio-problem-store";
 
-export default function StudioProblemDifficultyField() {
-  const estimatedDifficulty = useNewStudioProblemStore(
-    selectEstimatedDifficulty
-  );
+export default function StudioProblemDifficultyField({
+  field,
+}: Readonly<{ field: AnyFieldApi }>) {
   const changeEstimatedDifficulty = useNewStudioProblemStore(
     (state) => state.changeEstimatedDifficulty
   );
+  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
   return (
-    <div className="space-y-1.5">
-      <Label htmlFor="new-problem-difficulty">Difficulty</Label>
+    <Field data-invalid={isInvalid}>
+      <FieldLabel htmlFor={field.name}>Difficulty</FieldLabel>
       <Input
-        id="new-problem-difficulty"
+        id={field.name}
+        name={field.name}
         type="number"
-        min={0}
-        value={estimatedDifficulty}
-        onChange={(e) => changeEstimatedDifficulty(Number(e.target.value))}
+        min={DIFFICULTY_MIN}
+        max={DIFFICULTY_MAX}
+        value={field.state.value}
+        onBlur={field.handleBlur}
+        onChange={(e) => {
+          const parsed = Number(e.target.value);
+          const value = Number.isNaN(parsed)
+            ? field.state.value
+            : clampNumber(parsed, DIFFICULTY_MIN, DIFFICULTY_MAX);
+          field.handleChange(value);
+          changeEstimatedDifficulty(value);
+        }}
+        aria-invalid={isInvalid}
       />
-    </div>
+      {isInvalid && <FieldError errors={field.state.meta.errors} />}
+    </Field>
   );
 }

@@ -1,8 +1,10 @@
 "use client";
 
+import { Suspense } from "react";
 import NotFoundCard from "@/shared/components/not-found-card/not-found-card";
 import { Button } from "@/shared/components/ui/button";
 import { Card, CardContent } from "@/shared/components/ui/card";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import { AuthGuard } from "@/shared/guards/auth-guard";
 import SidebarLayout from "@/shared/layouts/sidebar-layout/sidebar-layout";
 import { routerConfig } from "@/shared/router-config";
@@ -10,6 +12,19 @@ import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import { Permissions } from "@/shared/lib/permissions";
 import StudioProblemNewMetadata from "./studio-problem-new-metadata";
+import { useSuspenseInitialStudioProblemSetup } from "@/domains/studio/api/get-initial-studio-problem-setup";
+
+function StudioProblemNewSkeleton() {
+  return (
+    <Card aria-label="Loading new problem form">
+      <CardContent className="space-y-4 py-6">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-40 w-full" />
+      </CardContent>
+    </Card>
+  );
+}
 
 function renderFallback(props: FallbackProps) {
   return (
@@ -23,6 +38,17 @@ function renderFallback(props: FallbackProps) {
         <Button onClick={props.resetErrorBoundary}>Try again</Button>
       </CardContent>
     </Card>
+  );
+}
+
+function StudioProblemNewContent() {
+  const { data: initialStudioProblemSetup } =
+    useSuspenseInitialStudioProblemSetup();
+
+  return (
+    <StudioProblemNewMetadata
+      initialStudioProblemSetup={initialStudioProblemSetup}
+    />
   );
 }
 
@@ -48,7 +74,9 @@ export default function StudioProblemNewLayout() {
           <QueryErrorResetBoundary>
             {({ reset }) => (
               <ErrorBoundary onReset={reset} fallbackRender={renderFallback}>
-                <StudioProblemNewMetadata />
+                <Suspense fallback={<StudioProblemNewSkeleton />}>
+                  <StudioProblemNewContent />
+                </Suspense>
               </ErrorBoundary>
             )}
           </QueryErrorResetBoundary>

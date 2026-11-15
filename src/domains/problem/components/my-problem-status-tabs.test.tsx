@@ -51,9 +51,7 @@ describe("MyProblemStatusTabs", () => {
     render(<MyProblemStatusTabs />);
 
     expect(screen.getByRole("button", { name: "Draft (3)" })).toBeVisible();
-    expect(
-      screen.getByRole("button", { name: "Published (1)" })
-    ).toBeVisible();
+    expect(screen.getByRole("button", { name: "Published (1)" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Archived (0)" })).toBeVisible();
     expect(screen.getByRole("button", { name: /^all \(4\)$/i })).toBeVisible();
   });

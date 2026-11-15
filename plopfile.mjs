@@ -53,8 +53,7 @@ export default function (plop) {
       {
         type: "confirm",
         name: "interactive",
-        message:
-          "Does it use hooks/state/event handlers (needs \"use client\")?",
+        message: 'Does it use hooks/state/event handlers (needs "use client")?',
         default: false,
       },
     ],
@@ -83,12 +82,13 @@ export default function (plop) {
     description:
       "Server-component route entry under src/app that renders a client view/layout",
     prompts: [
-      namePrompt("Page name, matches the view it renders (kebab-case, e.g. studio-problem):"),
+      namePrompt(
+        "Page name, matches the view it renders (kebab-case, e.g. studio-problem):"
+      ),
       {
         type: "input",
         name: "route",
-        message:
-          "Route folder under src/app (e.g. studio/problems/[id]):",
+        message: "Route folder under src/app (e.g. studio/problems/[id]):",
       },
       {
         type: "input",
@@ -160,7 +160,9 @@ export default function (plop) {
     description: "Write endpoint + useMutation hook built on defineMutation",
     prompts: [
       domainPrompt,
-      namePrompt("Mutation name (kebab-case, e.g. submit-problem-for-validation):"),
+      namePrompt(
+        "Mutation name (kebab-case, e.g. submit-problem-for-validation):"
+      ),
       {
         type: "list",
         name: "method",
@@ -197,7 +199,10 @@ export default function (plop) {
 
   plop.setGenerator("model", {
     description: "TypeScript interface in a domain's models/ folder",
-    prompts: [domainPrompt, namePrompt("Model name (kebab-case, e.g. problem-summary):")],
+    prompts: [
+      domainPrompt,
+      namePrompt("Model name (kebab-case, e.g. problem-summary):"),
+    ],
     actions: [
       {
         type: "add",
@@ -209,7 +214,12 @@ export default function (plop) {
 
   plop.setGenerator("hook", {
     description: "Standalone hook in a domain's hooks/ folder",
-    prompts: [domainPrompt, namePrompt("Hook name without the use- prefix (e.g. pool-add-selection):")],
+    prompts: [
+      domainPrompt,
+      namePrompt(
+        "Hook name without the use- prefix (e.g. pool-add-selection):"
+      ),
+    ],
     actions: [
       {
         type: "add",
@@ -259,7 +269,8 @@ export default function (plop) {
   });
 
   plop.setGenerator("route-error", {
-    description: "Next.js error.tsx boundary for a route segment, built on ErrorCard",
+    description:
+      "Next.js error.tsx boundary for a route segment, built on ErrorCard",
     prompts: [
       namePrompt("Route name (kebab-case, e.g. studio-problem):"),
       {
@@ -270,7 +281,8 @@ export default function (plop) {
       {
         type: "input",
         name: "homeHref",
-        message: "Link href the error card's secondary button goes to (e.g. /studio/problems):",
+        message:
+          "Link href the error card's secondary button goes to (e.g. /studio/problems):",
       },
       {
         type: "input",

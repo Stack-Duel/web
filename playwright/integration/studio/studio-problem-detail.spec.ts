@@ -24,13 +24,9 @@ test(
     await studioProblem.goto("problem_1");
 
     await expect(page.getByText("two-sum")).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: "Two Sum" })
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Two Sum" })).toBeVisible();
     await expect(page.getByText("Easy")).toBeVisible();
-    await expect(
-      page.getByText("Published", { exact: true })
-    ).toBeVisible();
+    await expect(page.getByText("Published", { exact: true })).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Given an array, return two indices." })
     ).toBeVisible();
@@ -86,8 +82,6 @@ test(
 
     await studioProblem.goto("missing");
 
-    await expect(
-      page.getByRole("button", { name: "Try again" })
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
   }
 );
