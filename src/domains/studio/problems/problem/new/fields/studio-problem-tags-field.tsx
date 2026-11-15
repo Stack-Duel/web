@@ -60,11 +60,7 @@ export default function StudioProblemTagsField({
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
       addDraftTag();
-    } else if (
-      e.key === "Backspace" &&
-      draftTag === "" &&
-      draftTag.length > 0
-    ) {
+    } else if (e.key === "Backspace" && draftTag === "" && tags.length > 0) {
       handleRemoveTag(tags[tags.length - 1]);
     }
   };
