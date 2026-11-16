@@ -7,6 +7,7 @@ interface UserState {
   authProfile: AuthUser | null;
   user: User | null;
 
+  hasCheckedAuth: boolean;
   isAuthLoading: boolean;
   isUserLoading: boolean;
 

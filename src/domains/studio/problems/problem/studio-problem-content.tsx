@@ -7,6 +7,9 @@ import DifficultyBadge from "@/domains/problem/components/difficulty-badge";
 import AdminProblemStatusBadge from "@/domains/problem/components/admin-problem-status-badge";
 import { useSuspenseStudioProblemDetails } from "../../api/get-studio-problem";
 import type { ProblemStatus } from "@/domains/problem/models/admin-problem";
+import { Button } from "@/shared/components/ui/button";
+import Link from "next/link";
+import { routerConfig } from "@/shared/router-config";
 
 type StudioProblemContentProps = {
   id: string;
@@ -15,9 +18,9 @@ type StudioProblemContentProps = {
 export default function StudioProblemContent({
   id,
 }: Readonly<StudioProblemContentProps>) {
-  const { data } = useSuspenseStudioProblemDetails({ problemId: id });
+  const { data, isPending } = useSuspenseStudioProblemDetails({ problemId: id });
 
-  if (!data) {
+  if (!data && !isPending) {
     return notFound();
   }
 
@@ -35,6 +38,15 @@ export default function StudioProblemContent({
             <div className="flex items-center gap-2">
               <DifficultyBadge difficulty={data.difficultyTier} />
               <AdminProblemStatusBadge status={data.status as ProblemStatus} />
+              <Button size="sm" asChild>
+                <Link
+                  href={routerConfig.studioProblemEdit.execute({
+                    id: data.problemId,
+                  })}
+                >
+                  Edit Problem
+                </Link>
+              </Button>
             </div>
           </div>
         </CardHeader>

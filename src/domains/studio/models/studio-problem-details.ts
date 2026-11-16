@@ -1,3 +1,5 @@
+import { StudioProblemPublishReadiness } from "./studio-problem-publish-readiness";
+
 export interface StudioProblemDetails {
   problemId: string;
   slug: string;
@@ -13,4 +15,5 @@ export interface StudioProblemDetails {
   attemptCount: number;
   solveRatePercent: number;
   question: string;
+  publishReadiness: StudioProblemPublishReadiness | null;
 }
