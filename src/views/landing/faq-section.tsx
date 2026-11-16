@@ -16,7 +16,7 @@ function buildFaqs(siteName: string) {
     {
       question: "What programming languages are supported?",
       answer:
-        "We currently support 3 languages: Python, JavaScript, C++, Java, and SQLite. We plan to add many more languages in the future. If you have a language you'd like to see supported, please let us know.",
+        "We currently support 5 languages: C++, Java, JavaScript, Python, and SQLite. We plan to add many more languages in the future. If you have a language you'd like to see supported, please let us know.",
     },
     {
       question: "How are matches judged?",

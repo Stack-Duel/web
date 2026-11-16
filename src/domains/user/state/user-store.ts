@@ -32,10 +32,16 @@ interface UserState {
 const initialState = {
   authProfile: null,
   user: null,
+  hasCheckedAuth: false,
   isAuthLoading: false,
   isUserLoading: false,
   authError: null,
   userError: null,
+} satisfies Partial<UserState>;
+
+const signedOutState = {
+  ...initialState,
+  hasCheckedAuth: true,
 } satisfies Partial<UserState>;
 
 export const useUserStore = create<UserState>((set) => ({
@@ -44,15 +50,25 @@ export const useUserStore = create<UserState>((set) => ({
   authCheckStarted: () => set({ isAuthLoading: true, authError: null }),
 
   userAuthenticated: (user) =>
-    set({ authProfile: user, isAuthLoading: false, authError: null }),
+    set({
+      authProfile: user,
+      hasCheckedAuth: true,
+      isAuthLoading: false,
+      authError: null,
+    }),
 
   userUnauthenticated: () =>
-    set({ authProfile: null, user: null, isAuthLoading: false }),
+    set({
+      authProfile: null,
+      user: null,
+      hasCheckedAuth: true,
+      isAuthLoading: false,
+    }),
 
   authCheckFailed: (message) =>
-    set({ authError: message, isAuthLoading: false }),
+    set({ authError: message, hasCheckedAuth: true, isAuthLoading: false }),
 
-  sessionExpired: () => set(initialState),
+  sessionExpired: () => set(signedOutState),
 
   userSyncStarted: () => set({ isUserLoading: true, userError: null }),
 
@@ -64,7 +80,7 @@ export const useUserStore = create<UserState>((set) => ({
   userLoadFailed: (message) =>
     set({ userError: message, isUserLoading: false }),
 
-  loggedOut: () => set(initialState),
+  loggedOut: () => set(signedOutState),
 }));
 
 const EMPTY_ROLES: string[] = [];
@@ -83,8 +99,10 @@ export const selectUserError = (s: UserState) => s.userError;
 export const selectIsAuthenticated = (s: UserState): boolean =>
   s.authProfile !== null;
 
+export const selectHasCheckedAuth = (s: UserState): boolean => s.hasCheckedAuth;
+
 export const selectIsFullyLoaded = (s: UserState): boolean =>
-  !s.isAuthLoading && !s.isUserLoading;
+  s.hasCheckedAuth && !s.isAuthLoading && !s.isUserLoading;
 
 export const selectHasError = (s: UserState): boolean =>
   s.authError !== null || s.userError !== null;
@@ -106,6 +124,6 @@ export const selectUserEmail = (s: UserState): string | null =>
   s.authProfile?.email ?? null;
 
 export const selectUserStatus = (s: UserState) => ({
-  isLoading: s.isAuthLoading || s.isUserLoading,
+  isLoading: !s.hasCheckedAuth || s.isAuthLoading || s.isUserLoading,
   error: s.authError ?? s.userError ?? null,
 });
