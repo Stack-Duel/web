@@ -33,7 +33,7 @@ describe("FaqSection", () => {
     render(await FaqSection());
 
     expect(
-      screen.queryByText(/We currently support 3 languages/)
+      screen.queryByText(/We currently support 5 languages/)
     ).not.toBeInTheDocument();
 
     await user.click(
@@ -42,7 +42,7 @@ describe("FaqSection", () => {
       })
     );
 
-    expect(screen.getByText(/We currently support 3 languages/)).toBeVisible();
+    expect(screen.getByText(/We currently support 5 languages/)).toBeVisible();
   });
 
   it("only keeps one answer open at a time", async () => {

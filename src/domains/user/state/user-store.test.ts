@@ -12,7 +12,10 @@ import {
   selectUserSyncFailed,
   useUserStore,
 } from "./user-store";
-import { resetUserStore } from "@/test/mocks/user-store";
+import {
+  resetUserStore,
+  resetUserStoreBeforeAuthCheck,
+} from "@/test/mocks/user-store";
 import { buildUser } from "@/test/factories/user";
 import { buildAuthUser } from "@/test/factories/auth-user";
 
@@ -21,11 +24,14 @@ describe("useUserStore actions", () => {
     resetUserStore();
   });
 
-  it("starts in a signed-out, non-loading state", () => {
+  it("starts in a signed-out, unchecked state", () => {
+    resetUserStoreBeforeAuthCheck();
+
     const state = useUserStore.getState();
 
     expect(state.authProfile).toBeNull();
     expect(state.user).toBeNull();
+    expect(state.hasCheckedAuth).toBe(false);
     expect(state.isAuthLoading).toBe(false);
     expect(state.isUserLoading).toBe(false);
     expect(state.authError).toBeNull();
@@ -76,7 +82,7 @@ describe("useUserStore actions", () => {
     expect(state.isAuthLoading).toBe(false);
   });
 
-  it("sessionExpired resets the whole store", () => {
+  it("sessionExpired resets the store to a checked, signed-out state", () => {
     useUserStore.setState({
       authProfile: buildAuthUser(),
       user: buildUser(),
@@ -91,6 +97,7 @@ describe("useUserStore actions", () => {
     const state = useUserStore.getState();
     expect(state.authProfile).toBeNull();
     expect(state.user).toBeNull();
+    expect(state.hasCheckedAuth).toBe(true);
     expect(state.isAuthLoading).toBe(false);
     expect(state.isUserLoading).toBe(false);
     expect(state.authError).toBeNull();
@@ -134,7 +141,7 @@ describe("useUserStore actions", () => {
     expect(state.isUserLoading).toBe(false);
   });
 
-  it("loggedOut resets the whole store", () => {
+  it("loggedOut resets the store to a checked, signed-out state", () => {
     useUserStore.setState({
       authProfile: buildAuthUser(),
       user: buildUser(),
@@ -145,6 +152,7 @@ describe("useUserStore actions", () => {
     const state = useUserStore.getState();
     expect(state.authProfile).toBeNull();
     expect(state.user).toBeNull();
+    expect(state.hasCheckedAuth).toBe(true);
   });
 });
 
@@ -183,13 +191,27 @@ describe("useUserStore selectors", () => {
   });
 
   it("selectIsFullyLoaded is false while either auth or user is loading", () => {
-    useUserStore.setState({ isAuthLoading: true, isUserLoading: false });
+    useUserStore.setState({
+      hasCheckedAuth: true,
+      isAuthLoading: true,
+      isUserLoading: false,
+    });
     expect(selectIsFullyLoaded(useUserStore.getState())).toBe(false);
 
     useUserStore.setState({ isAuthLoading: false, isUserLoading: true });
     expect(selectIsFullyLoaded(useUserStore.getState())).toBe(false);
 
     useUserStore.setState({ isAuthLoading: false, isUserLoading: false });
+    expect(selectIsFullyLoaded(useUserStore.getState())).toBe(true);
+  });
+
+  it("selectIsFullyLoaded is false before the auth check has resolved", () => {
+    resetUserStoreBeforeAuthCheck();
+
+    expect(selectIsFullyLoaded(useUserStore.getState())).toBe(false);
+
+    useUserStore.getState().userUnauthenticated();
+
     expect(selectIsFullyLoaded(useUserStore.getState())).toBe(true);
   });
 

@@ -142,6 +142,11 @@ export const routerConfig = {
   studioProblems: {
     path: "/studio/problems",
   },
+  studioProblemEdit: {
+    path: "/studio/problems/:id/edit",
+    execute: ({ id }: { id: string }) =>
+      `/studio/problems/${encodeURIComponent(id)}/edit`,
+  },
   studioProblemNew: {
     path: "/studio/problems/new",
   },

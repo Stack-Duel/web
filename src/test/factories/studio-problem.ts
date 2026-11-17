@@ -18,6 +18,7 @@ export function buildStudioProblemDetails(
     attemptCount: 0,
     solveRatePercent: 0,
     question: "Given an array of integers...",
+    publishReadiness: null,
     ...overrides,
   };
 }
