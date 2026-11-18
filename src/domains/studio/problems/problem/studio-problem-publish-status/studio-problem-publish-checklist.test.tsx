@@ -4,7 +4,7 @@ import { render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { buildStudioProblemDetails } from "@/test/factories/studio-problem";
 import type { StudioProblemPublishReadiness } from "@/domains/studio/models/studio-problem-publish-readiness";
-import { useSuspenseStudioProblemDetails } from "../../api/get-studio-problem";
+import { useSuspenseStudioProblemDetails } from "../../../api/get-studio-problem";
 import StudioProblemPublishStatus from "./studio-problem-publish-status";
 
 vi.mock("@/shared/lib/http", () => ({

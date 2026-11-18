@@ -10,12 +10,12 @@ import {
 } from "@/shared/components/ui/card";
 import { Check, Info, X } from "lucide-react";
 import Link from "next/link";
-import { useSuspenseStudioProblemDetails } from "../../api/get-studio-problem";
-import { StudioProblemPublishReadiness } from "../../models/studio-problem-publish-readiness";
+import { useSuspenseStudioProblemDetails } from "../../../api/get-studio-problem";
+import { StudioProblemPublishReadiness } from "../../../models/studio-problem-publish-readiness";
 import { routerConfig } from "@/shared/router-config";
-import StudioProblemSubmitForValidationButton from "./studio-problem-submit-for-validation-button";
+import StudioProblemSubmitForValidationButton from "../studio-problem-submit-for-validation-button";
 
-type StudioProblemPublishStatusProps = {
+type StudioProblemPublishChecklistProps = {
   id: string;
 };
 
@@ -102,9 +102,9 @@ function buildRequirements(
   ];
 }
 
-export default function StudioProblemPublishStatus({
+export default function StudioProblemPublishChecklist({
   id,
-}: Readonly<StudioProblemPublishStatusProps>) {
+}: Readonly<StudioProblemPublishChecklistProps>) {
   const { data } = useSuspenseStudioProblemDetails({ problemId: id });
   const readiness = data.publishReadiness;
 
