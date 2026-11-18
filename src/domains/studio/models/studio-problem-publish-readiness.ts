@@ -1,8 +1,5 @@
 export type ProblemValidationJobStatus =
-  | "Pending"
-  | "AwaitingGeneration"
-  | "Completed"
-  | "Failed";
+  "Pending" | "AwaitingGeneration" | "Completed" | "Failed";
 
 export interface StudioProblemPublishReadiness {
   canSubmit: boolean;

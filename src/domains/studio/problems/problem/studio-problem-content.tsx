@@ -18,7 +18,9 @@ type StudioProblemContentProps = {
 export default function StudioProblemContent({
   id,
 }: Readonly<StudioProblemContentProps>) {
-  const { data, isPending } = useSuspenseStudioProblemDetails({ problemId: id });
+  const { data, isPending } = useSuspenseStudioProblemDetails({
+    problemId: id,
+  });
 
   if (!data && !isPending) {
     return notFound();
