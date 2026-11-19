@@ -37,6 +37,7 @@ function buildReadiness(
     lastCompletedAt: null,
     lastAttemptStatus: null,
     lastFailureReason: null,
+    steps: null,
     ...overrides,
   };
 }

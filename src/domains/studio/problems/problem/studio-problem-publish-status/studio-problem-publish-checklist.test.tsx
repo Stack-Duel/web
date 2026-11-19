@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { buildStudioProblemDetails } from "@/test/factories/studio-problem";
 import type { StudioProblemPublishReadiness } from "@/domains/studio/models/studio-problem-publish-readiness";
 import { useSuspenseStudioProblemDetails } from "../../../api/get-studio-problem";
-import StudioProblemPublishStatus from "./studio-problem-publish-status";
+import StudioProblemPublishChecklist from "./studio-problem-publish-checklist";
 
 vi.mock("@/shared/lib/http", () => ({
   http: {
@@ -17,7 +17,7 @@ vi.mock("@/shared/lib/http", () => ({
   },
 }));
 
-vi.mock("../../api/get-studio-problem", () => ({
+vi.mock("../../../api/get-studio-problem", () => ({
   useSuspenseStudioProblemDetails: vi.fn(),
 }));
 
@@ -40,6 +40,7 @@ function buildReadiness(
     lastCompletedAt: null,
     lastAttemptStatus: null,
     lastFailureReason: null,
+    steps: null,
     ...overrides,
   };
 }
@@ -56,10 +57,12 @@ function renderStatus(readiness: StudioProblemPublishReadiness) {
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 
-  render(<StudioProblemPublishStatus id="problem_1" />, { wrapper: Wrapper });
+  render(<StudioProblemPublishChecklist id="problem_1" />, {
+    wrapper: Wrapper,
+  });
 }
 
-describe("StudioProblemPublishStatus", () => {
+describe("StudioProblemPublishChecklist", () => {
   it("links a missing setup to the setups tab of the editor", () => {
     renderStatus(buildReadiness());
 
