@@ -173,6 +173,7 @@ export default function StudioProblemEditSectionNav({
             <StudioProblemSubmitForValidationButton
               className="w-full"
               problemId={problemId}
+              isRepublish={readiness.hasUnpublishedChanges}
               isDisabled={!readiness.isReady || !readiness.canSubmit}
             />
           </div>

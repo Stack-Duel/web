@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, CircleDashed, LoaderCircle, Minus, X } from "lucide-react";
+import { Button } from "@/shared/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,8 +10,10 @@ import {
   CardTitle,
 } from "@/shared/components/ui/card";
 import { cn } from "@/shared/lib/utils";
+import { useCancelStudioProblemValidation } from "@/domains/studio/api/cancel-studio-problem-validation";
 import type { StudioProblemDetails } from "@/domains/studio/models/studio-problem-details";
 import type {
+  ProblemValidationJobStatus,
   ProblemValidationStep,
   ProblemValidationStepItem,
   ProblemValidationStepKind,
@@ -46,6 +49,7 @@ const STATUS_LABELS: Record<ProblemValidationStepStatus, string> = {
   Succeeded: "done",
   Failed: "failed",
   Skipped: "not reached",
+  Cancelled: "cancelled",
 };
 
 function StepIcon({
@@ -73,6 +77,7 @@ function StepIcon({
     case "Failed":
       return <X size={16} className="text-destructive" aria-label={label} />;
     case "Skipped":
+    case "Cancelled":
       return (
         <Minus size={16} className="text-muted-foreground" aria-label={label} />
       );
@@ -114,10 +119,6 @@ function StepItemRow({ item }: Readonly<{ item: ProblemValidationStepItem }>) {
   );
 }
 
-/**
- * Steps come from the validation job itself. A run submitted before steps were recorded has
- * none, so the stage list falls back to what the job status alone can tell us.
- */
 function toSteps(readiness: StudioProblemPublishReadiness) {
   if (readiness.steps && readiness.steps.length > 0) {
     return [...readiness.steps].sort(
@@ -125,20 +126,23 @@ function toSteps(readiness: StudioProblemPublishReadiness) {
     );
   }
 
-  const reached = {
+  const reached: Record<ProblemValidationJobStatus, number> = {
     Pending: 1,
     AwaitingGeneration: 2,
     Completed: 4,
     Failed: 1,
-  }[readiness.lastAttemptStatus ?? "Pending"];
+    Cancelled: 1,
+  };
+
+  const reachedIndex = reached[readiness.lastAttemptStatus ?? "Pending"];
 
   const hasFailed = readiness.lastAttemptStatus === "Failed";
 
   return STEP_ORDER.map((kind, index): ProblemValidationStep => {
     let status: ProblemValidationStepStatus;
 
-    if (index < reached) status = "Succeeded";
-    else if (index === reached) status = hasFailed ? "Failed" : "Running";
+    if (index < reachedIndex) status = "Succeeded";
+    else if (index === reachedIndex) status = hasFailed ? "Failed" : "Running";
     else status = "Pending";
 
     return {
@@ -150,6 +154,14 @@ function toSteps(readiness: StudioProblemPublishReadiness) {
       items: [],
     };
   });
+}
+
+const MAX_PROCESSING_ATTEMPTS = 5;
+
+function describeRetry(readiness: StudioProblemPublishReadiness) {
+  if (readiness.processingAttempts < 1 || !readiness.lastError) return null;
+
+  return `Recovered from an error and retried (${readiness.processingAttempts} of ${MAX_PROCESSING_ATTEMPTS} attempts used): ${readiness.lastError}`;
 }
 
 function describeAttempt(readiness: StudioProblemPublishReadiness) {
@@ -166,11 +178,16 @@ export default function StudioProblemPublishingPipeline({
   details,
 }: Readonly<{ details: StudioProblemDetails }>) {
   const readiness = details.publishReadiness;
+  const { mutate: cancelValidation, isPending: isCancelling } =
+    useCancelStudioProblemValidation();
 
   if (!readiness) return null;
 
   const steps = toSteps(readiness);
   const hasFailed = readiness.lastAttemptStatus === "Failed";
+  const isRunning =
+    details.status === "Pending" || readiness.isRevalidating === true;
+  const retryNotice = describeRetry(readiness);
 
   return (
     <Card>
@@ -179,6 +196,12 @@ export default function StudioProblemPublishingPipeline({
         <CardDescription>{describeAttempt(readiness)}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {retryNotice && (
+          <p className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
+            {retryNotice}
+          </p>
+        )}
+
         <ol className="space-y-3">
           {steps.map((step, index) => {
             const duration = formatDuration(step);
@@ -223,11 +246,23 @@ export default function StudioProblemPublishingPipeline({
           })}
         </ol>
 
-        <p className="border-t pt-3 text-sm text-muted-foreground">
-          {hasFailed
-            ? "Editing is unlocked again. Fix the problem, then resubmit to start another attempt."
-            : "Editing is locked while validation runs. It usually takes under two minutes."}
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-3">
+          <p className="text-sm text-muted-foreground">
+            {hasFailed
+              ? "Editing is unlocked again. Fix the problem, then resubmit to start another attempt."
+              : "Editing is locked while validation runs. It usually takes under two minutes."}
+          </p>
+          {isRunning && (
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={isCancelling}
+              onClick={() => cancelValidation({ problemId: details.problemId })}
+            >
+              {isCancelling ? "Cancelling..." : "Cancel validation"}
+            </Button>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

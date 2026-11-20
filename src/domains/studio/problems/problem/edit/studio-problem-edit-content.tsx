@@ -44,7 +44,10 @@ export default function StudioProblemEditContent({
     problemId,
     queryConfig: {
       refetchInterval: (query) =>
-        query.state.data?.status === "Pending" ? 3_000 : false,
+        query.state.data?.status === "Pending" ||
+        query.state.data?.publishReadiness?.isRevalidating
+          ? 3_000
+          : false,
     },
   });
 
@@ -77,7 +80,10 @@ export default function StudioProblemEditContent({
     </Card>
   );
 
-  if (details.status === "Pending") {
+  if (
+    details.status === "Pending" ||
+    details.publishReadiness?.isRevalidating
+  ) {
     return (
       <>
         {header}

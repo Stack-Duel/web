@@ -35,7 +35,14 @@ export default function StudioProblemContent({
               <h2 className="font-mono text-sm text-muted-foreground">
                 {data.slug}
               </h2>
-              <h1 className="text-lg font-semibold">{data.title}</h1>
+              <h1 className="text-lg font-semibold">
+                <Link
+                  href={routerConfig.problem.execute({ slug: data.slug })}
+                  className="underline-offset-4 hover:underline"
+                >
+                  {data.title}
+                </Link>
+              </h1>
             </div>
             <div className="flex items-center gap-2">
               <DifficultyBadge difficulty={data.difficultyTier} />

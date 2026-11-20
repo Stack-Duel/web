@@ -41,6 +41,10 @@ function buildReadiness(
     lastAttemptStatus: null,
     lastFailureReason: null,
     steps: null,
+    processingAttempts: 0,
+    lastError: null,
+    hasUnpublishedChanges: false,
+    isRevalidating: false,
     ...overrides,
   };
 }

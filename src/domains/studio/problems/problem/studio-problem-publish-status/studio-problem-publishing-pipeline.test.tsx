@@ -1,8 +1,25 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { buildStudioProblemDetails } from "@/test/factories/studio-problem";
+import { useCancelStudioProblemValidation } from "@/domains/studio/api/cancel-studio-problem-validation";
 import type { StudioProblemPublishReadiness } from "@/domains/studio/models/studio-problem-publish-readiness";
+import type { StudioProblemDetails } from "@/domains/studio/models/studio-problem-details";
 import StudioProblemPublishingPipeline from "./studio-problem-publishing-pipeline";
+
+vi.mock("@/env", () => import("@/test/mocks/env"));
+vi.mock("@/domains/studio/api/cancel-studio-problem-validation");
+
+const mockUseCancelValidation = vi.mocked(useCancelStudioProblemValidation);
+const cancelValidation = vi.fn();
+
+beforeEach(() => {
+  cancelValidation.mockClear();
+  mockUseCancelValidation.mockReturnValue({
+    mutate: cancelValidation,
+    isPending: false,
+  } as unknown as ReturnType<typeof useCancelStudioProblemValidation>);
+});
 
 function buildReadiness(
   overrides: Partial<StudioProblemPublishReadiness> = {}
@@ -22,14 +39,24 @@ function buildReadiness(
     lastAttemptStatus: "Pending",
     lastFailureReason: null,
     steps: null,
+    processingAttempts: 0,
+    lastError: null,
+    hasUnpublishedChanges: false,
+    isRevalidating: false,
     ...overrides,
   };
 }
 
-function renderPipeline(readiness: StudioProblemPublishReadiness | null) {
+function renderPipeline(
+  readiness: StudioProblemPublishReadiness | null,
+  detailOverrides: Partial<StudioProblemDetails> = {}
+) {
   render(
     <StudioProblemPublishingPipeline
-      details={buildStudioProblemDetails({ publishReadiness: readiness })}
+      details={buildStudioProblemDetails({
+        publishReadiness: readiness,
+        ...detailOverrides,
+      })}
     />
   );
 }
@@ -228,6 +255,44 @@ describe("StudioProblemPublishingPipeline", () => {
     expect(
       within(step("Test case generation")).getByLabelText("not reached")
     ).toBeVisible();
+  });
+
+  it("offers to cancel a run that is still in flight", async () => {
+    renderPipeline(buildReadiness({ lastAttemptStatus: "Pending" }), {
+      status: "Pending",
+      problemId: "problem_42",
+    });
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Cancel validation" })
+    );
+
+    expect(cancelValidation).toHaveBeenCalledWith({ problemId: "problem_42" });
+  });
+
+  it("does not offer to cancel a run that already failed", () => {
+    renderPipeline(buildReadiness({ lastAttemptStatus: "Failed" }), {
+      status: "Failed",
+    });
+
+    expect(
+      screen.queryByRole("button", { name: "Cancel validation" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("reports a retried error and how many attempts remain", () => {
+    renderPipeline(
+      buildReadiness({ processingAttempts: 2, lastError: "Judge0 timed out" })
+    );
+
+    expect(screen.getByText(/2 of 5 attempts used/)).toBeVisible();
+    expect(screen.getByText(/Judge0 timed out/)).toBeVisible();
+  });
+
+  it("stays quiet when no attempt has errored", () => {
+    renderPipeline(buildReadiness());
+
+    expect(screen.queryByText(/attempts used/)).not.toBeInTheDocument();
   });
 
   it("renders nothing when there is no readiness to report", () => {

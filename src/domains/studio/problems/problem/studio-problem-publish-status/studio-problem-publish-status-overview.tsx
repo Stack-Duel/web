@@ -15,11 +15,14 @@ export default function StudioProblemPublishStatusOverview({
     problemId: id,
     queryConfig: {
       refetchInterval: (query) =>
-        query.state.data?.status === "Pending" ? 3_000 : false,
+        query.state.data?.status === "Pending" ||
+        query.state.data?.publishReadiness?.isRevalidating
+          ? 3_000
+          : false,
     },
   });
 
-  if (data.status === "Pending") {
+  if (data.status === "Pending" || data.publishReadiness?.isRevalidating) {
     return <StudioProblemPublishingPipeline details={data} />;
   }
 

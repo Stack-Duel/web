@@ -42,6 +42,10 @@ function buildReadiness(
     lastAttemptStatus: null,
     lastFailureReason: null,
     steps: null,
+    processingAttempts: 0,
+    lastError: null,
+    hasUnpublishedChanges: false,
+    isRevalidating: false,
     ...overrides,
   };
 }
@@ -100,6 +104,31 @@ describe("StudioProblemPublishStatusOverview", () => {
       publishReadiness: buildReadiness({
         lastAttemptStatus: "Completed",
         isReady: true,
+      }),
+    });
+
+    expect(screen.getByText("Ready to publish?")).toBeVisible();
+  });
+
+  it("shows the pipeline while a published problem is revalidating", () => {
+    renderOverview({
+      status: "Published",
+      publishReadiness: buildReadiness({
+        isRevalidating: true,
+        hasUnpublishedChanges: true,
+        lastAttemptStatus: "Pending",
+      }),
+    });
+
+    expect(screen.getByText("Publishing")).toBeVisible();
+  });
+
+  it("shows the checklist for a published problem with unpublished changes", () => {
+    renderOverview({
+      status: "Published",
+      publishReadiness: buildReadiness({
+        isRevalidating: false,
+        hasUnpublishedChanges: true,
       }),
     });
 

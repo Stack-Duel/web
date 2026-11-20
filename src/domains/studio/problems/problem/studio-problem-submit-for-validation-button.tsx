@@ -7,12 +7,14 @@ import { useSubmitStudioProblemForValidation } from "@/domains/studio/api/submit
 type StudioProblemSubmitForValidationButtonProps = {
   problemId: string;
   isDisabled?: boolean;
+  isRepublish?: boolean;
   className?: string;
 };
 
 export default function StudioProblemSubmitForValidationButton({
   problemId,
   isDisabled = false,
+  isRepublish = false,
   className,
 }: Readonly<StudioProblemSubmitForValidationButtonProps>) {
   const { mutate: submit, isPending } = useSubmitStudioProblemForValidation();
@@ -21,7 +23,10 @@ export default function StudioProblemSubmitForValidationButton({
     submit(
       { problemId },
       {
-        onSuccess: () => toast.success("Submitted for validation"),
+        onSuccess: () =>
+          toast.success(
+            isRepublish ? "Publishing your changes" : "Submitted for validation"
+          ),
         onError: (error) =>
           toast.error(error.message || "Failed to submit for validation"),
       }
@@ -34,7 +39,11 @@ export default function StudioProblemSubmitForValidationButton({
       onClick={handleSubmit}
       disabled={isDisabled || isPending}
     >
-      {isPending ? "Submitting..." : "Submit for validation"}
+      {isPending
+        ? "Submitting..."
+        : isRepublish
+          ? "Publish changes"
+          : "Submit for validation"}
     </Button>
   );
 }

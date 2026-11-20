@@ -1,11 +1,11 @@
 export type ProblemValidationJobStatus =
-  "Pending" | "AwaitingGeneration" | "Completed" | "Failed";
+  "Pending" | "AwaitingGeneration" | "Completed" | "Failed" | "Cancelled";
 
 export type ProblemValidationStepKind =
   "AuthorChecks" | "ReferenceSolutions" | "TestCaseGeneration" | "Publish";
 
 export type ProblemValidationStepStatus =
-  "Pending" | "Running" | "Succeeded" | "Failed" | "Skipped";
+  "Pending" | "Running" | "Succeeded" | "Failed" | "Skipped" | "Cancelled";
 
 export interface ProblemValidationStepItem {
   label: string;
@@ -37,4 +37,8 @@ export interface StudioProblemPublishReadiness {
   lastAttemptStatus: ProblemValidationJobStatus | null;
   lastFailureReason: string | null;
   steps: ProblemValidationStep[] | null;
+  processingAttempts: number;
+  lastError: string | null;
+  hasUnpublishedChanges: boolean;
+  isRevalidating: boolean;
 }

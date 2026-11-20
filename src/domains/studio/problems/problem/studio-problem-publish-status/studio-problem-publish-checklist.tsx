@@ -127,10 +127,17 @@ export default function StudioProblemPublishChecklist({
         <StudioProblemSubmitForValidationButton
           className="ml-auto"
           problemId={id}
+          isRepublish={readiness.hasUnpublishedChanges}
           isDisabled={!readiness.isReady || !readiness.canSubmit}
         />
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        {readiness.hasUnpublishedChanges && (
+          <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm">
+            This problem has edits that are not live yet. People solving it
+            still see the published version until you publish your changes.
+          </p>
+        )}
         <div className="grid grid-cols-[auto_1fr] gap-x-3">
           {requirements.map((requirement, index) => (
             <div

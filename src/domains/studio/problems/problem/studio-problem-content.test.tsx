@@ -93,4 +93,20 @@ describe("StudioProblemContent", () => {
       NextNotFoundError
     );
   });
+
+  it("links the title to the problem itself", () => {
+    mockUseSuspenseStudioProblemDetails.mockReturnValue({
+      data: buildStudioProblemDetails({
+        slug: "count-vowels",
+        title: "Count Vowels",
+      }),
+    } as unknown as ReturnType<typeof useSuspenseStudioProblemDetails>);
+
+    render(<StudioProblemContent id="problem_1" />);
+
+    expect(screen.getByRole("link", { name: "Count Vowels" })).toHaveAttribute(
+      "href",
+      "/problems/count-vowels"
+    );
+  });
 });
