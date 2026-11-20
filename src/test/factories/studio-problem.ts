@@ -19,6 +19,12 @@ export function buildStudioProblemDetails(
     solveRatePercent: 0,
     question: "Given an array of integers...",
     publishReadiness: null,
+    trackId: null,
+    tags: [],
+    generationParameters: null,
+    generationOutputValueType: null,
+    generationTargetCaseCount: null,
+    generationSeed: null,
     ...overrides,
   };
 }

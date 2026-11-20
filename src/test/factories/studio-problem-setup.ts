@@ -13,6 +13,7 @@ export function buildStudioProblemSetup(
     referenceSolution: "",
     amountOfTestSuites: "0",
     amountOfTestCases: "0",
+    sampleTestCases: [],
     ...overrides,
   };
 }

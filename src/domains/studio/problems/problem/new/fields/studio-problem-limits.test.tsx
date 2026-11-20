@@ -38,7 +38,7 @@ describe.each([
     label: "Time limit (ms)",
     replacement: "1500",
     min: 100,
-    max: 10000,
+    max: 2000,
     key: "timeLimitMs" as const,
     loaded: 2000,
   },
