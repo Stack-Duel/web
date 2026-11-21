@@ -7,6 +7,9 @@ import StudioProblemDeleteButton from "./studio-problem-delete-button";
 vi.mock("@/env", () => import("@/test/mocks/env"));
 vi.mock("next/navigation", () => import("@/test/mocks/next-navigation"));
 vi.mock("@/domains/studio/api/delete-studio-problem");
+vi.mock("@/domains/studio/api/get-studio-problem-deletion-impact", () => ({
+  useStudioProblemDeletionImpact: () => ({ data: undefined }),
+}));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 const mockUseDeleteStudioProblem = vi.mocked(useDeleteStudioProblem);

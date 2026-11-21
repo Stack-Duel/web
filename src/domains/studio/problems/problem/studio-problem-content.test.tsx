@@ -10,6 +10,9 @@ vi.mock("@/domains/studio/api/get-studio-problem", () => ({
 }));
 vi.mock("next/navigation", () => import("@/test/mocks/next-navigation"));
 vi.mock("@/env", () => import("@/test/mocks/env"));
+vi.mock("@/domains/studio/api/get-studio-problem-deletion-impact", () => ({
+  useStudioProblemDeletionImpact: () => ({ data: undefined }),
+}));
 vi.mock("@/domains/studio/api/delete-studio-problem", () => ({
   useDeleteStudioProblem: () => ({ mutate: vi.fn(), isPending: false }),
 }));

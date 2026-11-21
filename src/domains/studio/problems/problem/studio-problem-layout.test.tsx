@@ -21,6 +21,9 @@ vi.mock("@/shared/lib/http", () => ({
   },
 }));
 vi.mock("next/navigation", () => import("@/test/mocks/next-navigation"));
+vi.mock("@/domains/studio/api/get-studio-problem-deletion-impact", () => ({
+  useStudioProblemDeletionImpact: () => ({ data: undefined }),
+}));
 vi.mock("@/domains/studio/api/delete-studio-problem", () => ({
   useDeleteStudioProblem: () => ({ mutate: vi.fn(), isPending: false }),
 }));

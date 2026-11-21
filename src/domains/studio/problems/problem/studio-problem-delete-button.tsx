@@ -19,6 +19,7 @@ import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { routerConfig } from "@/shared/router-config";
 import { useDeleteStudioProblem } from "@/domains/studio/api/delete-studio-problem";
+import { useStudioProblemDeletionImpact } from "@/domains/studio/api/get-studio-problem-deletion-impact";
 
 type StudioProblemDeleteButtonProps = {
   problemId: string;
@@ -37,6 +38,10 @@ export default function StudioProblemDeleteButton({
   const [isOpen, setIsOpen] = useState(false);
   const [typedTitle, setTypedTitle] = useState("");
   const { mutate: deleteProblem, isPending } = useDeleteStudioProblem();
+  const { data: impact } = useStudioProblemDeletionImpact({
+    problemId,
+    queryConfig: { enabled: isOpen },
+  });
 
   const matchesTitle = typedTitle.trim() === title;
 
@@ -82,6 +87,22 @@ export default function StudioProblemDeleteButton({
                   : "This draft has never been solved or played, so it will be permanently deleted."}
               </p>
               <p>Any game still in progress keeps working until it finishes.</p>
+              {impact?.isInPlay ? (
+                <p className="font-medium">
+                  {impact.unfinishedGameCount === 1
+                    ? "1 game is playing this problem right now."
+                    : impact.unfinishedGameCount +
+                      " games are playing this problem right now."}
+                </p>
+              ) : null}
+              {impact && impact.submissionCount > 0 ? (
+                <p>
+                  {impact.submissionCount === 1
+                    ? "1 submission has been made against it."
+                    : impact.submissionCount +
+                      " submissions have been made against it."}
+                </p>
+              ) : null}
             </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
