@@ -3,6 +3,7 @@
 import { notFound } from "next/navigation";
 import { Clock, Cpu, Layers, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
+import StudioProblemDeleteButton from "./studio-problem-delete-button";
 import DifficultyBadge from "@/domains/problem/components/difficulty-badge";
 import AdminProblemStatusBadge from "@/domains/problem/components/admin-problem-status-badge";
 import { useSuspenseStudioProblemDetails } from "../../api/get-studio-problem";
@@ -56,6 +57,11 @@ export default function StudioProblemContent({
                   Edit Problem
                 </Link>
               </Button>
+              <StudioProblemDeleteButton
+                problemId={data.problemId}
+                title={data.title}
+                isPublished={data.status === "Published"}
+              />
             </div>
           </div>
         </CardHeader>

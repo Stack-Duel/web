@@ -21,6 +21,9 @@ vi.mock("@/shared/lib/http", () => ({
   },
 }));
 vi.mock("next/navigation", () => import("@/test/mocks/next-navigation"));
+vi.mock("@/domains/studio/api/delete-studio-problem", () => ({
+  useDeleteStudioProblem: () => ({ mutate: vi.fn(), isPending: false }),
+}));
 vi.mock(
   "@/shared/layouts/sidebar-layout/sidebar-layout",
   () => import("@/test/mocks/sidebar-layout")

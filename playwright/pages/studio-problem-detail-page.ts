@@ -15,4 +15,32 @@ export class StudioProblemDetailPage {
   get setupsTab() {
     return this.page.getByRole("tab", { name: "Setups" });
   }
+
+  get titleLink() {
+    return this.page.getByRole("link", { name: "Two Sum" });
+  }
+
+  get deleteButton() {
+    return this.page.getByRole("button", { name: "Delete" });
+  }
+
+  get confirmationInput() {
+    return this.page.getByLabel(/to confirm/i);
+  }
+
+  get confirmDeleteButton() {
+    return this.page.getByRole("button", { name: "Delete problem" });
+  }
+
+  get publishChangesButton() {
+    return this.page.getByRole("button", { name: "Publish changes" });
+  }
+
+  get submitForValidationButton() {
+    return this.page.getByRole("button", { name: "Submit for validation" });
+  }
+
+  get cancelValidationButton() {
+    return this.page.getByRole("button", { name: "Cancel validation" });
+  }
 }

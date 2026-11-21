@@ -19,6 +19,7 @@ type JsonDataDialogProps = {
   description: string;
   triggerLabel?: string;
   isDisabled?: boolean;
+  triggerSize?: "sm" | "default";
   getCurrentJson: () => unknown;
   onApply: (parsed: unknown) => void;
 };
@@ -28,6 +29,7 @@ export default function JsonDataDialog({
   description,
   triggerLabel = "JSON",
   isDisabled = false,
+  triggerSize = "sm",
   getCurrentJson,
   onApply,
 }: Readonly<JsonDataDialogProps>) {
@@ -82,7 +84,7 @@ export default function JsonDataDialog({
       <Button
         type="button"
         variant="outline"
-        size="sm"
+        size={triggerSize}
         className="gap-2"
         disabled={isDisabled}
         onClick={() => handleOpenChange(true)}

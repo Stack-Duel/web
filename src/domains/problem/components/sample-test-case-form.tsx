@@ -127,6 +127,7 @@ function SampleTestCaseFormBody({
             <Plus size={16} /> Add test case
           </Button>
           <JsonDataDialog
+            triggerSize="default"
             title="Sample cases JSON"
             description="Edit the whole set as JSON, then apply it to the form. Nothing is saved until you press save."
             isDisabled={isSaving}

@@ -9,6 +9,10 @@ vi.mock("@/domains/studio/api/get-studio-problem", () => ({
   useSuspenseStudioProblemDetails: vi.fn(),
 }));
 vi.mock("next/navigation", () => import("@/test/mocks/next-navigation"));
+vi.mock("@/env", () => import("@/test/mocks/env"));
+vi.mock("@/domains/studio/api/delete-studio-problem", () => ({
+  useDeleteStudioProblem: () => ({ mutate: vi.fn(), isPending: false }),
+}));
 
 const mockUseSuspenseStudioProblemDetails = vi.mocked(
   useSuspenseStudioProblemDetails

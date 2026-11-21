@@ -150,6 +150,7 @@ function GenerationParametersFormBody({
           <Plus size={16} /> Add parameter
         </Button>
         <JsonDataDialog
+          triggerSize="default"
           title="Generation parameters JSON"
           description="Edit the parameters, output type, case count and seed as JSON, then apply them to the form. Nothing is saved until you press save."
           isDisabled={isSaving}
