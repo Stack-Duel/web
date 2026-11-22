@@ -3,6 +3,7 @@
 import { notFound } from "next/navigation";
 import { Clock, Cpu, Layers, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/shared/components/ui/card";
+import StudioProblemDeleteButton from "./studio-problem-delete-button";
 import DifficultyBadge from "@/domains/problem/components/difficulty-badge";
 import AdminProblemStatusBadge from "@/domains/problem/components/admin-problem-status-badge";
 import { useSuspenseStudioProblemDetails } from "../../api/get-studio-problem";
@@ -18,7 +19,9 @@ type StudioProblemContentProps = {
 export default function StudioProblemContent({
   id,
 }: Readonly<StudioProblemContentProps>) {
-  const { data, isPending } = useSuspenseStudioProblemDetails({ problemId: id });
+  const { data, isPending } = useSuspenseStudioProblemDetails({
+    problemId: id,
+  });
 
   if (!data && !isPending) {
     return notFound();
@@ -33,7 +36,14 @@ export default function StudioProblemContent({
               <h2 className="font-mono text-sm text-muted-foreground">
                 {data.slug}
               </h2>
-              <h1 className="text-lg font-semibold">{data.title}</h1>
+              <h1 className="text-lg font-semibold">
+                <Link
+                  href={routerConfig.problem.execute({ slug: data.slug })}
+                  className="underline-offset-4 hover:underline"
+                >
+                  {data.title}
+                </Link>
+              </h1>
             </div>
             <div className="flex items-center gap-2">
               <DifficultyBadge difficulty={data.difficultyTier} />
@@ -47,6 +57,11 @@ export default function StudioProblemContent({
                   Edit Problem
                 </Link>
               </Button>
+              <StudioProblemDeleteButton
+                problemId={data.problemId}
+                title={data.title}
+                isPublished={data.status === "Published"}
+              />
             </div>
           </div>
         </CardHeader>

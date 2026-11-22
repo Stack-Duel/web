@@ -44,7 +44,7 @@ apiClient.interceptors.response.use(
       !original._retry
     ) {
       original._retry = true;
-      const accessToken = await getSharedAccessToken();
+      const accessToken = await getSharedAccessToken({ forceRefresh: true });
       if (accessToken) {
         original.headers.Authorization = `Bearer ${accessToken}`;
         return apiClient(original);

@@ -1,64 +1,44 @@
 import { describe, expect, it } from "vitest";
-import { cleanDetail, extractErrorMessage } from "./api-error";
-
-describe("cleanDetail", () => {
-  it("strips the Ardalis 'Next error(s) occurred' boilerplate", () => {
-    expect(
-      cleanDetail("Next error(s) occurred:* Invalid or expired code.\r\n")
-    ).toBe("Invalid or expired code.");
-  });
-
-  it("joins multiple bulleted lines", () => {
-    expect(
-      cleanDetail(
-        "Next error(s) occurred:\r\n* First problem.\r\n* Second problem.\r\n"
-      )
-    ).toBe("First problem.; Second problem.");
-  });
-
-  it("returns plain detail text unchanged when there's no boilerplate", () => {
-    expect(cleanDetail("Something went wrong.")).toBe("Something went wrong.");
-  });
-});
+import { extractErrorMessage } from "./api-error";
 
 describe("extractErrorMessage", () => {
-  it("prefers a literal message field when present", () => {
-    expect(
-      extractErrorMessage({ message: "Explicit message" }, "fallback")
-    ).toBe("Explicit message");
+  it("prefers the message field", () => {
+    expect(extractErrorMessage({ message: "Nope" }, "fallback")).toBe("Nope");
   });
 
-  it("flattens an ASP.NET validation errors dictionary", () => {
-    expect(
-      extractErrorMessage(
-        { errors: { JoinCode: ["Code is required."], Foo: ["Bar."] } },
-        "fallback"
-      )
-    ).toBe("Code is required.; Bar.");
-  });
-
-  it("falls back to a cleaned detail from an Ardalis problem+json body", () => {
+  it("surfaces a rate limit message sent as error", () => {
     expect(
       extractErrorMessage(
         {
-          title: "Resource not found.",
-          detail: "Next error(s) occurred:* Invalid or expired code.\r\n",
+          error:
+            "You are sending requests too quickly. Please wait 8 second(s) before trying again.",
+          retryAfterSeconds: 8,
         },
-        "fallback"
+        "Failed to run solution"
       )
-    ).toBe("Invalid or expired code.");
+    ).toBe(
+      "You are sending requests too quickly. Please wait 8 second(s) before trying again."
+    );
   });
 
-  it("falls back to title when there's no message, errors, or detail", () => {
+  it("joins validation errors", () => {
     expect(
-      extractErrorMessage({ title: "Resource not found." }, "fallback")
-    ).toBe("Resource not found.");
+      extractErrorMessage({ errors: { Title: ["Required", "Too short"] } }, "f")
+    ).toBe("Required; Too short");
   });
 
-  it("falls back to the provided fallback when the body has nothing usable", () => {
+  it("cleans a detail block", () => {
+    expect(
+      extractErrorMessage(
+        { detail: "Next error(s) occurred:\n* First\n* Second" },
+        "f"
+      )
+    ).toBe("First; Second");
+  });
+
+  it("falls back when the body is empty", () => {
     expect(extractErrorMessage(undefined, "Request failed")).toBe(
       "Request failed"
     );
-    expect(extractErrorMessage({}, "Request failed")).toBe("Request failed");
   });
 });

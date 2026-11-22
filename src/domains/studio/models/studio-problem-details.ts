@@ -1,3 +1,4 @@
+import { GenerationParameter } from "@/domains/problem/models/generation-parameters";
 import { StudioProblemPublishReadiness } from "./studio-problem-publish-readiness";
 
 export interface StudioProblemDetails {
@@ -16,4 +17,10 @@ export interface StudioProblemDetails {
   solveRatePercent: number;
   question: string;
   publishReadiness: StudioProblemPublishReadiness | null;
+  trackId: string | null;
+  tags: string[] | null;
+  generationParameters: GenerationParameter[] | null;
+  generationOutputValueType: string | null;
+  generationTargetCaseCount: number | null;
+  generationSeed: number | null;
 }

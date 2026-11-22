@@ -7,6 +7,8 @@
 export const Permissions = {
   SUBMISSION_CREATE: "submission:create",
   SUBMISSION_VIEW: "submission:view",
+  STUDIO_PROBLEMS_READ: "problem:read:studio",
+  STUDIO_PROBLEMS_UPDATE: "problem:update:studio",
   ADMIN_PROBLEMS_READ: "problem:read:admin",
   ADMIN_PROBLEMS_UPDATE: "problem:update:admin",
   ADMIN_PROBLEMS_CREATE: "problem:create:admin",

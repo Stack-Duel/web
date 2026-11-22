@@ -1,7 +1,6 @@
 "use client";
 
 import { Alert } from "@/shared/components/ui/alert";
-import { Button } from "@/shared/components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,10 +10,12 @@ import {
 } from "@/shared/components/ui/card";
 import { Check, Info, X } from "lucide-react";
 import Link from "next/link";
-import { useSuspenseStudioProblemDetails } from "../../api/get-studio-problem";
-import { StudioProblemPublishReadiness } from "../../models/studio-problem-publish-readiness";
+import { useSuspenseStudioProblemDetails } from "../../../api/get-studio-problem";
+import { StudioProblemPublishReadiness } from "../../../models/studio-problem-publish-readiness";
+import { routerConfig } from "@/shared/router-config";
+import StudioProblemSubmitForValidationButton from "../studio-problem-submit-for-validation-button";
 
-type StudioProblemPublishStatusProps = {
+type StudioProblemPublishChecklistProps = {
   id: string;
 };
 
@@ -43,9 +44,12 @@ function describeLastAttempt(readiness: StudioProblemPublishReadiness) {
 }
 
 function buildRequirements(
-  readiness: StudioProblemPublishReadiness
+  readiness: StudioProblemPublishReadiness,
+  problemId: string
 ): Requirement[] {
   const missingLanguages = readiness.languagesMissingReferenceSolution;
+  const editHref = (section: string) =>
+    routerConfig.studioProblemEdit.execute({ id: problemId, section });
 
   return [
     {
@@ -57,7 +61,7 @@ function buildRequirements(
       action:
         readiness.setupCount > 0
           ? undefined
-          : { label: "Open Setups", href: "#" },
+          : { label: "Open Setups", href: editHref("setups") },
     },
     {
       met: readiness.sampleTestCaseCount > 0,
@@ -68,7 +72,7 @@ function buildRequirements(
       action:
         readiness.sampleTestCaseCount > 0
           ? undefined
-          : { label: "Open Setups", href: "#" },
+          : { label: "Open Sample cases", href: editHref("sample-cases") },
     },
     {
       met: readiness.setupCount > 0 && missingLanguages.length === 0,
@@ -83,7 +87,7 @@ function buildRequirements(
         ),
       action:
         missingLanguages.length > 0
-          ? { label: "Open Setups", href: "#" }
+          ? { label: "Open Setups", href: editHref("setups") }
           : undefined,
     },
     {
@@ -93,14 +97,14 @@ function buildRequirements(
         : "Generation parameters not set, needed to build the hidden test cases",
       action: readiness.hasGenerationParameters
         ? undefined
-        : { label: "Open Generation", href: "#" },
+        : { label: "Open Generation", href: editHref("generation") },
     },
   ];
 }
 
-export default function StudioProblemPublishStatus({
+export default function StudioProblemPublishChecklist({
   id,
-}: Readonly<StudioProblemPublishStatusProps>) {
+}: Readonly<StudioProblemPublishChecklistProps>) {
   const { data } = useSuspenseStudioProblemDetails({ problemId: id });
   const readiness = data.publishReadiness;
 
@@ -108,7 +112,7 @@ export default function StudioProblemPublishStatus({
     return null;
   }
 
-  const requirements = buildRequirements(readiness);
+  const requirements = buildRequirements(readiness, id);
 
   return (
     <Card>
@@ -120,14 +124,20 @@ export default function StudioProblemPublishStatus({
             requirements met &middot; {describeLastAttempt(readiness)}
           </CardDescription>
         </div>
-        <Button
+        <StudioProblemSubmitForValidationButton
           className="ml-auto"
-          disabled={!readiness.isReady || !readiness.canSubmit}
-        >
-          Submit for validation
-        </Button>
+          problemId={id}
+          isRepublish={readiness.hasUnpublishedChanges}
+          isDisabled={!readiness.isReady || !readiness.canSubmit}
+        />
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        {readiness.hasUnpublishedChanges && (
+          <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm">
+            This problem has edits that are not live yet. People solving it
+            still see the published version until you publish your changes.
+          </p>
+        )}
         <div className="grid grid-cols-[auto_1fr] gap-x-3">
           {requirements.map((requirement, index) => (
             <div

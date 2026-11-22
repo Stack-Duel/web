@@ -34,6 +34,7 @@ export default function MyProblemStatusTabs() {
         type="button"
         size="sm"
         variant={isAllSelected ? "default" : "outline"}
+        aria-pressed={isAllSelected}
         onClick={() => setStatusFilter([])}
       >
         All{total !== undefined ? ` (${total})` : ""}
@@ -44,6 +45,7 @@ export default function MyProblemStatusTabs() {
           type="button"
           size="sm"
           variant={statusFilter.includes(status) ? "default" : "outline"}
+          aria-pressed={statusFilter.includes(status)}
           onClick={() => toggleStatusFilter(status)}
         >
           {status} ({countByStatus.get(status) ?? 0})

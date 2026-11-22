@@ -9,6 +9,13 @@ vi.mock("@/domains/studio/api/get-studio-problem", () => ({
   useSuspenseStudioProblemDetails: vi.fn(),
 }));
 vi.mock("next/navigation", () => import("@/test/mocks/next-navigation"));
+vi.mock("@/env", () => import("@/test/mocks/env"));
+vi.mock("@/domains/studio/api/get-studio-problem-deletion-impact", () => ({
+  useStudioProblemDeletionImpact: () => ({ data: undefined }),
+}));
+vi.mock("@/domains/studio/api/delete-studio-problem", () => ({
+  useDeleteStudioProblem: () => ({ mutate: vi.fn(), isPending: false }),
+}));
 
 const mockUseSuspenseStudioProblemDetails = vi.mocked(
   useSuspenseStudioProblemDetails
@@ -91,6 +98,22 @@ describe("StudioProblemContent", () => {
 
     expect(() => render(<StudioProblemContent id="problem_1" />)).toThrow(
       NextNotFoundError
+    );
+  });
+
+  it("links the title to the problem itself", () => {
+    mockUseSuspenseStudioProblemDetails.mockReturnValue({
+      data: buildStudioProblemDetails({
+        slug: "count-vowels",
+        title: "Count Vowels",
+      }),
+    } as unknown as ReturnType<typeof useSuspenseStudioProblemDetails>);
+
+    render(<StudioProblemContent id="problem_1" />);
+
+    expect(screen.getByRole("link", { name: "Count Vowels" })).toHaveAttribute(
+      "href",
+      "/problems/count-vowels"
     );
   });
 });

@@ -11,7 +11,22 @@ import { useSuspenseStudioProblemDetails } from "../../api/get-studio-problem";
 import { useSuspenseStudioProblemSetups } from "../../api/get-studio-problem-setups";
 import { buildStudioProblemDetails } from "@/test/factories/studio-problem";
 
+vi.mock("@/shared/lib/http", () => ({
+  http: {
+    get: vi.fn(),
+    post: vi.fn(),
+    put: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
+  },
+}));
 vi.mock("next/navigation", () => import("@/test/mocks/next-navigation"));
+vi.mock("@/domains/studio/api/get-studio-problem-deletion-impact", () => ({
+  useStudioProblemDeletionImpact: () => ({ data: undefined }),
+}));
+vi.mock("@/domains/studio/api/delete-studio-problem", () => ({
+  useDeleteStudioProblem: () => ({ mutate: vi.fn(), isPending: false }),
+}));
 vi.mock(
   "@/shared/layouts/sidebar-layout/sidebar-layout",
   () => import("@/test/mocks/sidebar-layout")

@@ -85,3 +85,23 @@ test(
     await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
   }
 );
+
+test(
+  "a creator can jump from their studio problem to the live problem page",
+  { tag: ["@integration"] },
+  async ({ page }) => {
+    const studioProblem = new StudioProblemDetailPage(page);
+    await mockAccount(page, buildStudioAccount());
+    await mockStudioProblemDetail(page, "problem_1", {
+      slug: "two-sum",
+      title: "Two Sum",
+    });
+
+    await studioProblem.goto("problem_1");
+
+    await expect(studioProblem.titleLink).toHaveAttribute(
+      "href",
+      "/problems/two-sum"
+    );
+  }
+);

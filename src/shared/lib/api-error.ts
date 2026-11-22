@@ -1,5 +1,7 @@
 export type ProblemDetailsBody = {
   message?: string;
+  error?: string;
+  retryAfterSeconds?: number;
   errors?: Record<string, string[]>;
   detail?: string;
   title?: string;
@@ -19,6 +21,8 @@ export function extractErrorMessage(
   fallback: string
 ): string {
   if (data?.message) return data.message;
+
+  if (data?.error) return data.error;
 
   if (data?.errors) {
     const messages = Object.values(data.errors).flat();

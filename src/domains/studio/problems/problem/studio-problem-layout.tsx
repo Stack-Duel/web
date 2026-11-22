@@ -21,7 +21,7 @@ import {
 import StudioProblemQuestion from "./studio-problem-question";
 import StudioProblemSetups from "./studio-problem-setups/studio-problem-setups";
 import StudioProblemSetupsSkeleton from "./studio-problem-setups/studio-problem-setups-skeleton";
-import StudioProblemPublishStatus from "./studio-problem-publish-status";
+import StudioProblemPublishStatusOverview from "./studio-problem-publish-status/studio-problem-publish-status-overview";
 
 function StudioProblemSkeleton() {
   return (
@@ -87,7 +87,7 @@ export default function StudioProblemLayout({
               <ErrorBoundary onReset={reset} fallbackRender={renderFallback}>
                 <Suspense fallback={<StudioProblemSkeleton />}>
                   <StudioProblemContent id={id} />
-                  <StudioProblemPublishStatus id={id} />
+                  <StudioProblemPublishStatusOverview id={id} />
                   <Card className="min-w-0">
                     <CardContent className="min-w-0">
                       <Tabs defaultValue="question">

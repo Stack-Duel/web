@@ -1,10 +1,22 @@
 import { test, expect } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { StudioProblemsPage } from "../../pages/studio-problems-page";
 import {
   buildMyProblemListItem,
   buildMyProblemsMetadata,
 } from "@/test/factories/problem";
 import { mockStudio } from "./mocks";
+
+const PROBLEMS_REQUEST = /\/api\/v1\/problem\/mine\?/;
+
+async function waitForInitialProblemsLoad(page: Page) {
+  await page.waitForRequest(
+    (req) =>
+      PROBLEMS_REQUEST.test(req.url()) &&
+      !req.url().includes("statuses=") &&
+      !req.url().includes("search=")
+  );
+}
 
 test(
   "a creator with Studio access sees their problem list",
@@ -113,11 +125,10 @@ test(
     });
 
     await studio.goto();
+    await waitForInitialProblemsLoad(page);
 
     const [request] = await Promise.all([
-      page.waitForRequest((req) =>
-        /\/api\/v1\/problem\/mine\?/.test(req.url())
-      ),
+      page.waitForRequest((req) => req.url().includes("statuses=Draft")),
       studio.statusPill("Draft").click(),
     ]);
     expect(request.url()).toContain("statuses=Draft");
@@ -139,12 +150,15 @@ test(
     });
 
     await studio.goto();
-    await studio.statusPill("Draft").click();
+    await waitForInitialProblemsLoad(page);
+
+    await Promise.all([
+      page.waitForRequest((req) => req.url().includes("statuses=Draft")),
+      studio.statusPill("Draft").click(),
+    ]);
 
     const [request] = await Promise.all([
-      page.waitForRequest((req) =>
-        /\/api\/v1\/problem\/mine\?/.test(req.url())
-      ),
+      page.waitForRequest((req) => req.url().includes("statuses=Pending")),
       studio.statusPill("Pending").click(),
     ]);
     expect(request.url()).toContain("statuses=Draft");
@@ -162,15 +176,32 @@ test(
     });
 
     await studio.goto();
-    await studio.statusPill("Draft").click();
+    await waitForInitialProblemsLoad(page);
 
-    const [request] = await Promise.all([
-      page.waitForRequest((req) =>
-        /\/api\/v1\/problem\/mine\?/.test(req.url())
-      ),
-      studio.statusPill("All").click(),
+    await Promise.all([
+      page.waitForRequest((req) => req.url().includes("statuses=Draft")),
+      studio.statusPill("Draft").click(),
     ]);
-    expect(request.url()).not.toContain("statuses=");
+
+    await expect(studio.statusPill("Draft")).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    await expect(studio.statusPill("All")).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
+
+    await studio.statusPill("All").click();
+
+    await expect(studio.statusPill("All")).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    await expect(studio.statusPill("Draft")).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
   }
 );
 
@@ -182,11 +213,10 @@ test(
     await mockStudio(page);
 
     await studio.goto();
+    await waitForInitialProblemsLoad(page);
 
     const [request] = await Promise.all([
-      page.waitForRequest((req) =>
-        /\/api\/v1\/problem\/mine\?/.test(req.url())
-      ),
+      page.waitForRequest((req) => req.url().includes("search=two")),
       studio.searchInput.fill("two sum"),
     ]);
     expect(request.url()).toContain("search=two");
