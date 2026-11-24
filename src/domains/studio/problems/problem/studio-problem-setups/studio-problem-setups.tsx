@@ -8,6 +8,7 @@ import {
 } from "@/shared/components/ui/accordion";
 import { Badge } from "@/shared/components/ui/badge";
 import { useSuspenseStudioProblemSetups } from "../../../api/get-studio-problem-setups";
+import StudioProblemSetupDeleteButton from "./studio-problem-setup-delete-button";
 
 type StudioProblemSetupsProps = {
   problemId: string;
@@ -33,19 +34,27 @@ export default function StudioProblemSetups({
           key={setup.languageVersionId}
           value={setup.languageVersionId}
         >
-          <AccordionTrigger>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-medium">
-                {setup.language} {setup.languageVersion}
-              </span>
-              {setup.functionName && (
-                <Badge variant="outline">{setup.functionName}</Badge>
-              )}
-              {setup.referenceSolution && (
-                <Badge variant="secondary">Reference solution</Badge>
-              )}
-            </div>
-          </AccordionTrigger>
+          <div className="flex items-center gap-2">
+            <AccordionTrigger className="flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-medium">
+                  {setup.language} {setup.languageVersion}
+                </span>
+                {setup.functionName && (
+                  <Badge variant="outline">{setup.functionName}</Badge>
+                )}
+                {setup.referenceSolution && (
+                  <Badge variant="secondary">Reference solution</Badge>
+                )}
+              </div>
+            </AccordionTrigger>
+            <StudioProblemSetupDeleteButton
+              problemId={problemId}
+              languageVersionId={setup.languageVersionId}
+              languageLabel={`${setup.language} ${setup.languageVersion}`}
+              testCaseCount={setup.amountOfTestCases}
+            />
+          </div>
           <AccordionContent className="space-y-3">
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
