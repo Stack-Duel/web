@@ -55,7 +55,7 @@ export default function StudioProblemNewMetadata({
   const form = useForm({
     defaultValues: selectDraft(useNewStudioProblemStore.getState()),
     validators: {
-      onBlur: newStudioProblemSchema,
+      onChange: newStudioProblemSchema,
       onSubmit: newStudioProblemSchema,
     },
     onSubmit: async ({ value }) => {

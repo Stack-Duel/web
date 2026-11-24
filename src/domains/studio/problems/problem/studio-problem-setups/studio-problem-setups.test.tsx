@@ -9,6 +9,10 @@ vi.mock("@/domains/studio/api/get-studio-problem-setups", () => ({
   useSuspenseStudioProblemSetups: vi.fn(),
 }));
 
+vi.mock("@/domains/studio/api/remove-studio-problem-setup", () => ({
+  useRemoveStudioProblemSetup: () => ({ mutate: vi.fn(), isPending: false }),
+}));
+
 const mockUseSuspenseStudioProblemSetups = vi.mocked(
   useSuspenseStudioProblemSetups
 );
@@ -97,7 +101,9 @@ describe("StudioProblemSetups", () => {
     } as unknown as ReturnType<typeof useSuspenseStudioProblemSetups>);
 
     render(<StudioProblemSetups problemId="problem_1" />);
-    await user.click(screen.getByRole("button", { name: /JavaScript/ }));
+    await user.click(
+      screen.getByRole("button", { name: /^JavaScript/ })
+    );
 
     expect(screen.getByText("2")).toBeVisible();
     expect(screen.getByText("10")).toBeVisible();

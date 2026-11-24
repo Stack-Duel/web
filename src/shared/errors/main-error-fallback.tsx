@@ -14,7 +14,6 @@ import {
 import { Alert, AlertDescription } from "@/shared/components/ui/alert";
 import { Separator } from "@/shared/components/ui/separator";
 import { FallbackProps } from "react-error-boundary";
-import { redirect } from "next/navigation";
 import { routerConfig } from "../router-config";
 
 type NormalizedError = {
@@ -47,7 +46,7 @@ export function MainErrorFallback({
   };
 
   const handleGoHome = () => {
-    redirect(routerConfig.home.path);
+    window.location.href = routerConfig.home.path;
   };
 
   return (
