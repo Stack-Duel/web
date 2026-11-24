@@ -65,8 +65,8 @@ export default function StudioProblemSetupDeleteButton({
           <AlertDialogTitle>Remove {languageLabel}?</AlertDialogTitle>
           <AlertDialogDescription>
             {parsedTestCaseCount > 0
-              ? `This deletes the ${languageLabel} starter code, reference solution, and ${parsedTestCaseCount} test case${parsedTestCaseCount === 1 ? "" : "s"}. This cannot be undone.`
-              : `This deletes the ${languageLabel} starter code and reference solution. This cannot be undone.`}
+              ? `${languageLabel} will no longer be offered for this problem, along with its starter code, reference solution, and ${parsedTestCaseCount} test case${parsedTestCaseCount === 1 ? "" : "s"}. Already published versions and existing submissions keep it, and you can add the language back later.`
+              : `${languageLabel} will no longer be offered for this problem. Already published versions and existing submissions keep it, and you can add the language back later.`}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
