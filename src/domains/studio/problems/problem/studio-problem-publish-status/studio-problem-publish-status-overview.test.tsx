@@ -98,7 +98,7 @@ describe("StudioProblemPublishStatusOverview", () => {
     expect(screen.getByText("Go reference solution timed out")).toBeVisible();
   });
 
-  it("returns to the checklist once the problem is published", () => {
+  it("hides the publish status once the problem is published", () => {
     renderOverview({
       status: "Published",
       publishReadiness: buildReadiness({
@@ -107,7 +107,8 @@ describe("StudioProblemPublishStatusOverview", () => {
       }),
     });
 
-    expect(screen.getByText("Ready to publish?")).toBeVisible();
+    expect(screen.queryByText("Ready to publish?")).not.toBeInTheDocument();
+    expect(screen.queryByText("Publishing")).not.toBeInTheDocument();
   });
 
   it("shows the pipeline while a published problem is revalidating", () => {
@@ -123,7 +124,7 @@ describe("StudioProblemPublishStatusOverview", () => {
     expect(screen.getByText("Publishing")).toBeVisible();
   });
 
-  it("shows the checklist for a published problem with unpublished changes", () => {
+  it("hides the publish status for a published problem with unpublished changes", () => {
     renderOverview({
       status: "Published",
       publishReadiness: buildReadiness({
@@ -132,6 +133,19 @@ describe("StudioProblemPublishStatusOverview", () => {
       }),
     });
 
-    expect(screen.getByText("Ready to publish?")).toBeVisible();
+    expect(screen.queryByText("Ready to publish?")).not.toBeInTheDocument();
+  });
+
+  it("keeps showing the pipeline after a published problem fails to republish", () => {
+    renderOverview({
+      status: "Published",
+      publishReadiness: buildReadiness({
+        hasUnpublishedChanges: true,
+        lastAttemptStatus: "Failed",
+        lastFailureReason: "Go reference solution timed out",
+      }),
+    });
+
+    expect(screen.getByText("Publishing failed")).toBeVisible();
   });
 });

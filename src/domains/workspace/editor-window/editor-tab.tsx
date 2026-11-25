@@ -172,8 +172,8 @@ const LayoutNodeView = ({
         setCurrentTab={(index) => onTabActivate(shapeNode.id, index)}
         groupId={shapeNode.id}
       />
-      <div className="relative min-h-0 min-w-0 flex-1 overflow-y-auto">
-        {currentTab?.component}
+      <div className="relative min-h-0 min-w-0 flex-1">
+        <div className="h-full overflow-y-auto">{currentTab?.component}</div>
         <EditorWindowSplitZones groupId={shapeNode.id} />
       </div>
     </Card>
