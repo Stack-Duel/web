@@ -118,18 +118,18 @@ describe("StudioProblemEditSetups", () => {
     const user = userEvent.setup();
     renderSetups([pythonSetup]);
 
-    await user.click(screen.getByRole("button", { name: /Python 3.13/ }));
+    await user.click(screen.getByRole("button", { name: /^Python 3.13/ }));
 
     const functionName = await screen.findByLabelText("Function name");
     await user.clear(functionName);
     await user.type(functionName, "twoSum");
 
-    await user.click(screen.getByRole("button", { name: /Python 3.13/ }));
+    await user.click(screen.getByRole("button", { name: /^Python 3.13/ }));
     await waitFor(() =>
       expect(screen.queryByLabelText("Function name")).not.toBeInTheDocument()
     );
 
-    await user.click(screen.getByRole("button", { name: /Python 3.13/ }));
+    await user.click(screen.getByRole("button", { name: /^Python 3.13/ }));
 
     expect(await screen.findByLabelText("Function name")).toHaveValue("twoSum");
   });
@@ -138,20 +138,20 @@ describe("StudioProblemEditSetups", () => {
     const user = userEvent.setup();
     renderSetups([pythonSetup]);
 
-    await user.click(screen.getByRole("button", { name: /Python 3.13/ }));
+    await user.click(screen.getByRole("button", { name: /^Python 3.13/ }));
 
     const starterCode = await screen.findByLabelText("Python starter code");
     await user.clear(starterCode);
     await user.type(starterCode, "def twoSum(nums):");
 
-    await user.click(screen.getByRole("button", { name: /Python 3.13/ }));
+    await user.click(screen.getByRole("button", { name: /^Python 3.13/ }));
     await waitFor(() =>
       expect(
         screen.queryByLabelText("Python starter code")
       ).not.toBeInTheDocument()
     );
 
-    await user.click(screen.getByRole("button", { name: /Python 3.13/ }));
+    await user.click(screen.getByRole("button", { name: /^Python 3.13/ }));
 
     expect(await screen.findByLabelText("Python starter code")).toHaveValue(
       "def twoSum(nums):"
@@ -162,7 +162,7 @@ describe("StudioProblemEditSetups", () => {
     const user = userEvent.setup();
     renderSetups([pythonSetup]);
 
-    await user.click(screen.getByRole("button", { name: /Python 3.13/ }));
+    await user.click(screen.getByRole("button", { name: /^Python 3.13/ }));
 
     const starterCode = await screen.findByLabelText("Python starter code");
 
@@ -186,7 +186,7 @@ describe("StudioProblemEditSetups", () => {
     const user = userEvent.setup();
     renderSetups([pythonSetup]);
 
-    await user.click(screen.getByRole("button", { name: /Python 3.13/ }));
+    await user.click(screen.getByRole("button", { name: /^Python 3.13/ }));
 
     const starterCode = await screen.findByLabelText("Python starter code");
     await user.type(starterCode, "x");
@@ -205,7 +205,7 @@ describe("StudioProblemEditSetups", () => {
     const user = userEvent.setup();
     renderSetups([pythonSetup]);
 
-    const trigger = screen.getByRole("button", { name: /Python 3.13/ });
+    const trigger = screen.getByRole("button", { name: /^Python 3.13/ });
 
     expect(
       within(trigger).queryByText("Unsaved changes")
@@ -217,6 +217,24 @@ describe("StudioProblemEditSetups", () => {
     await user.click(trigger);
 
     expect(within(trigger).getByText("Unsaved changes")).toBeVisible();
+  });
+
+  it("removes a language setup on request", async () => {
+    const user = userEvent.setup();
+    mockedHttp.delete.mockResolvedValue(undefined);
+    renderSetups([pythonSetup]);
+
+    await user.click(
+      screen.getByRole("button", { name: "Remove Python 3.13 setup" })
+    );
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    await waitFor(() =>
+      expect(mockedHttp.delete).toHaveBeenCalledWith(
+        "/api/v1/studio/problems/problem_1/setups/python-3.13",
+        expect.anything()
+      )
+    );
   });
 
   it("keeps each language's edits separate", async () => {
@@ -231,17 +249,17 @@ describe("StudioProblemEditSetups", () => {
       }),
     ]);
 
-    await user.click(screen.getByRole("button", { name: /Python 3.13/ }));
+    await user.click(screen.getByRole("button", { name: /^Python 3.13/ }));
     const pythonFunctionName = await screen.findByLabelText("Function name");
     await user.clear(pythonFunctionName);
     await user.type(pythonFunctionName, "pythonSolve");
 
-    await user.click(screen.getByRole("button", { name: /JavaScript 22/ }));
+    await user.click(screen.getByRole("button", { name: /^JavaScript 22/ }));
     const jsFunctionName = await screen.findByLabelText("Function name");
 
     expect(jsFunctionName).toHaveValue("solve");
 
-    await user.click(screen.getByRole("button", { name: /Python 3.13/ }));
+    await user.click(screen.getByRole("button", { name: /^Python 3.13/ }));
 
     expect(await screen.findByLabelText("Function name")).toHaveValue(
       "pythonSolve"
@@ -252,7 +270,7 @@ describe("StudioProblemEditSetups", () => {
     const user = userEvent.setup();
     renderSetups([pythonSetup]);
 
-    await user.click(screen.getByRole("button", { name: /Python 3.13/ }));
+    await user.click(screen.getByRole("button", { name: /^Python 3.13/ }));
     const functionName = await screen.findByLabelText("Function name");
     await user.clear(functionName);
     await user.type(functionName, "changed");
@@ -266,7 +284,7 @@ describe("StudioProblemEditSetups", () => {
     mockedHttp.put.mockResolvedValue("setup_1");
     renderSetups([pythonSetup]);
 
-    const trigger = screen.getByRole("button", { name: /Python 3.13/ });
+    const trigger = screen.getByRole("button", { name: /^Python 3.13/ });
     await user.click(trigger);
     const functionName = await screen.findByLabelText("Function name");
     await user.clear(functionName);

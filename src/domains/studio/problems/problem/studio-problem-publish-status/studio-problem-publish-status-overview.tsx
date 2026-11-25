@@ -30,5 +30,9 @@ export default function StudioProblemPublishStatusOverview({
     return <StudioProblemPublishingPipeline details={data} />;
   }
 
+  if (data.status === "Published") {
+    return null;
+  }
+
   return <StudioProblemPublishChecklist id={id} />;
 }

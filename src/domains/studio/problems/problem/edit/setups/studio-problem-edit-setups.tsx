@@ -18,6 +18,7 @@ import {
 } from "@/shared/components/ui/card";
 import { useSuspenseStudioProblemSetups } from "@/domains/studio/api/get-studio-problem-setups";
 import type { StudioProblemSetup } from "@/domains/studio/models/studio-problem-setup";
+import StudioProblemSetupDeleteButton from "../../studio-problem-setups/studio-problem-setup-delete-button";
 import StudioProblemAddLanguageDialog from "./studio-problem-add-language-dialog";
 import StudioProblemSetupEditor from "./studio-problem-setup-editor";
 import {
@@ -63,22 +64,32 @@ function StudioProblemSetupsList({
           key={setup.languageVersionId}
           value={setup.languageVersionId}
         >
-          <AccordionTrigger>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-medium">
-                {setup.language} {setup.languageVersion}
-              </span>
-              {setup.functionName && (
-                <Badge variant="outline">{setup.functionName}</Badge>
-              )}
-              {setup.referenceSolution ? (
-                <Badge variant="secondary">Reference solution</Badge>
-              ) : (
-                <Badge variant="destructive">Needs reference solution</Badge>
-              )}
-              <UnsavedSetupBadge languageVersionId={setup.languageVersionId} />
-            </div>
-          </AccordionTrigger>
+          <div className="flex items-center gap-2">
+            <AccordionTrigger className="flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-medium">
+                  {setup.language} {setup.languageVersion}
+                </span>
+                {setup.functionName && (
+                  <Badge variant="outline">{setup.functionName}</Badge>
+                )}
+                {setup.referenceSolution ? (
+                  <Badge variant="secondary">Reference solution</Badge>
+                ) : (
+                  <Badge variant="destructive">Needs reference solution</Badge>
+                )}
+                <UnsavedSetupBadge
+                  languageVersionId={setup.languageVersionId}
+                />
+              </div>
+            </AccordionTrigger>
+            <StudioProblemSetupDeleteButton
+              problemId={problemId}
+              languageVersionId={setup.languageVersionId}
+              languageLabel={`${setup.language} ${setup.languageVersion}`}
+              testCaseCount={setup.amountOfTestCases}
+            />
+          </div>
           <AccordionContent>
             <StudioProblemSetupEditor problemId={problemId} setup={setup} />
           </AccordionContent>

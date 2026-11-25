@@ -65,13 +65,14 @@ export const createStudioProblemSetupsStore = (setups: StudioProblemSetup[]) =>
 
       syncSetupsFromServer: (serverSetups) =>
         set((state) => {
-          const drafts = { ...state.drafts };
-          const saved = { ...state.saved };
+          const drafts: SetupDraftsByLanguageVersionId = {};
+          const saved: SetupDraftsByLanguageVersionId = {};
 
           for (const setup of serverSetups) {
             const serverDraft = toSetupDraft(setup);
             saved[setup.languageVersionId] = serverDraft;
-            drafts[setup.languageVersionId] ??= serverDraft;
+            drafts[setup.languageVersionId] =
+              state.drafts[setup.languageVersionId] ?? serverDraft;
           }
 
           return { drafts, saved };
