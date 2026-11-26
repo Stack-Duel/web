@@ -6,18 +6,25 @@ import { useLobbyListRealtimeSync } from "./use-lobby-list-realtime-sync";
 import {
   joinGameUpdates,
   leaveGameUpdates,
-  onGameLobbyUpdatedPush,
+  onGamePush,
 } from "@/shared/lib/signalr/game-hub-client";
 
 vi.mock("@/shared/lib/signalr/game-hub-client", () => ({
+  GameHubEvent: {
+    Completed: "GameCompleted",
+    LobbyUpdated: "GameLobbyUpdated",
+    ProgressUpdated: "GameProgressUpdated",
+    ParticipantAttempted: "GameParticipantAttempted",
+    ParticipantReacted: "GameParticipantReacted",
+  },
   joinGameUpdates: vi.fn().mockResolvedValue(undefined),
   leaveGameUpdates: vi.fn().mockResolvedValue(undefined),
-  onGameLobbyUpdatedPush: vi.fn(() => () => {}),
+  onGamePush: vi.fn(() => () => {}),
 }));
 
 const mockedJoinGameUpdates = vi.mocked(joinGameUpdates);
 const mockedLeaveGameUpdates = vi.mocked(leaveGameUpdates);
-const mockedOnGameLobbyUpdatedPush = vi.mocked(onGameLobbyUpdatedPush);
+const mockedOnGamePush = vi.mocked(onGamePush);
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -37,7 +44,7 @@ describe("useLobbyListRealtimeSync", () => {
     vi.clearAllMocks();
     mockedJoinGameUpdates.mockResolvedValue(undefined);
     mockedLeaveGameUpdates.mockResolvedValue(undefined);
-    mockedOnGameLobbyUpdatedPush.mockImplementation(() => () => {});
+    mockedOnGamePush.mockImplementation(() => () => {});
   });
 
   it("joins the SignalR group for each given game id", async () => {
@@ -74,8 +81,8 @@ describe("useLobbyListRealtimeSync", () => {
 
   it("invalidates my-active-games and open-games on a push for a joined game", async () => {
     let pushHandler: (payload: { gameId: string }) => void = () => {};
-    mockedOnGameLobbyUpdatedPush.mockImplementation((handler) => {
-      pushHandler = handler;
+    mockedOnGamePush.mockImplementation((_event, handler) => {
+      pushHandler = handler as typeof pushHandler;
       return () => {};
     });
     const { Wrapper, invalidateQueries } = createWrapper();
@@ -100,8 +107,8 @@ describe("useLobbyListRealtimeSync", () => {
 
   it("ignores a push for a game it hasn't joined", async () => {
     let pushHandler: (payload: { gameId: string }) => void = () => {};
-    mockedOnGameLobbyUpdatedPush.mockImplementation((handler) => {
-      pushHandler = handler;
+    mockedOnGamePush.mockImplementation((_event, handler) => {
+      pushHandler = handler as typeof pushHandler;
       return () => {};
     });
     const { Wrapper, invalidateQueries } = createWrapper();

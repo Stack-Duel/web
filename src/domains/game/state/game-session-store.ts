@@ -78,9 +78,17 @@ export const useGameSessionStore = create<GameSessionState>((set) => ({
   returnToCurrentProblem: () => set({ viewingProblemId: null }),
 
   addFeedEntry: (entry) =>
-    set((state) => ({
-      feed: [entry, ...state.feed].slice(0, MAX_FEED_ENTRIES),
-    })),
+    set((state) => {
+      if (state.feed.some((existing) => existing.id === entry.id)) {
+        return state;
+      }
+
+      const feed = [entry, ...state.feed]
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        .slice(0, MAX_FEED_ENTRIES);
+
+      return { feed };
+    }),
 
   gradingStarted: (problemId) => set({ gradingProblemId: problemId }),
 

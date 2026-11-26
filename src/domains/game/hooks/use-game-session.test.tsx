@@ -9,10 +9,10 @@ import { useGameSessionStore } from "../state/game-session-store";
 import { useUserStore } from "@/domains/user/state/user-store";
 import { useWorkspaceStore } from "@/domains/workspace/state/workspace-store";
 import {
+  GameHubEvent,
   joinGameUpdates,
   leaveGameUpdates,
-  onGameParticipantAttemptedPush,
-  onGameParticipantReactedPush,
+  onGamePush,
 } from "@/shared/lib/signalr/game-hub-client";
 import { buildUser } from "@/test/factories/user";
 import { GameModeKey } from "../models/game-mode";
@@ -38,25 +38,29 @@ vi.mock("@/domains/problem/api/get-problem-by-id", () => ({
   }),
 }));
 vi.mock("@/shared/lib/signalr/game-hub-client", () => ({
+  GameHubEvent: {
+    Completed: "GameCompleted",
+    LobbyUpdated: "GameLobbyUpdated",
+    ProgressUpdated: "GameProgressUpdated",
+    ParticipantAttempted: "GameParticipantAttempted",
+    ParticipantReacted: "GameParticipantReacted",
+  },
   joinGameUpdates: vi.fn().mockResolvedValue(undefined),
   leaveGameUpdates: vi.fn().mockResolvedValue(undefined),
-  onGameCompletedPush: vi.fn(() => () => {}),
-  onGameLobbyUpdatedPush: vi.fn(() => () => {}),
-  onGameProgressUpdatedPush: vi.fn(() => () => {}),
-  onGameParticipantAttemptedPush: vi.fn(() => () => {}),
-  onGameParticipantReactedPush: vi.fn(() => () => {}),
+  onGamePush: vi.fn(() => () => {}),
 }));
 
 const initializeProblem = vi.fn();
 const clearProblem = vi.fn();
 const mockedUseStartGame = vi.mocked(useStartGame);
 const mockedUseGame = vi.mocked(useGame);
-const mockedOnGameParticipantAttemptedPush = vi.mocked(
-  onGameParticipantAttemptedPush
-);
-const mockedOnGameParticipantReactedPush = vi.mocked(
-  onGameParticipantReactedPush
-);
+const mockedOnGamePush = vi.mocked(onGamePush);
+
+const handlerFor = <TPayload,>(event: string) => {
+  const call = mockedOnGamePush.mock.calls.find(([name]) => name === event);
+  if (!call) throw new Error(`No handler registered for ${event}`);
+  return call[1] as unknown as (payload: TPayload) => void;
+};
 
 function buildGame(overrides: Partial<Game> = {}): Game {
   return baseBuildGame({ status: GameStatus.Pending, ...overrides });
@@ -192,10 +196,13 @@ describe("useGameSession", () => {
 
     renderHook(() => useGameSession("game-1"), { wrapper: createWrapper() });
 
-    await waitFor(() =>
-      expect(mockedOnGameParticipantAttemptedPush).toHaveBeenCalled()
-    );
-    const handler = mockedOnGameParticipantAttemptedPush.mock.calls[0][0];
+    await waitFor(() => expect(mockedOnGamePush).toHaveBeenCalled());
+    const handler = handlerFor<{
+      gameId: string;
+      userId: string;
+      status: string;
+      attemptedAt: string;
+    }>(GameHubEvent.ParticipantAttempted);
     handler({
       gameId: "game-1",
       userId: "user-2",
@@ -218,10 +225,13 @@ describe("useGameSession", () => {
 
     renderHook(() => useGameSession("game-1"), { wrapper: createWrapper() });
 
-    await waitFor(() =>
-      expect(mockedOnGameParticipantReactedPush).toHaveBeenCalled()
-    );
-    const handler = mockedOnGameParticipantReactedPush.mock.calls[0][0];
+    await waitFor(() => expect(mockedOnGamePush).toHaveBeenCalled());
+    const handler = handlerFor<{
+      gameId: string;
+      userId: string;
+      emoji: string;
+      sentAt: string;
+    }>(GameHubEvent.ParticipantReacted);
     handler({
       gameId: "game-1",
       userId: "user-2",
@@ -244,10 +254,13 @@ describe("useGameSession", () => {
 
     renderHook(() => useGameSession("game-1"), { wrapper: createWrapper() });
 
-    await waitFor(() =>
-      expect(mockedOnGameParticipantAttemptedPush).toHaveBeenCalled()
-    );
-    const handler = mockedOnGameParticipantAttemptedPush.mock.calls[0][0];
+    await waitFor(() => expect(mockedOnGamePush).toHaveBeenCalled());
+    const handler = handlerFor<{
+      gameId: string;
+      userId: string;
+      status: string;
+      attemptedAt: string;
+    }>(GameHubEvent.ParticipantAttempted);
     handler({
       gameId: "some-other-game",
       userId: "user-2",

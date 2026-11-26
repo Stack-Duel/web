@@ -108,12 +108,48 @@ describe("useGameSessionStore", () => {
         type: "reaction",
         userId: `user-${i}`,
         emoji: "👍",
-        createdAt: `t${i}`,
+        createdAt: new Date(Date.UTC(2026, 0, 1, 0, 0, i)).toISOString(),
       });
     }
 
     expect(useGameSessionStore.getState().feed).toHaveLength(50);
     expect(useGameSessionStore.getState().feed[0].userId).toBe("user-54");
+  });
+
+  it("drops a repeated entry with the same id", () => {
+    const entry = {
+      id: "attempt:user-1:2026-01-01T00:00:00.000Z",
+      type: "attempt" as const,
+      userId: "user-1",
+      status: "Accepted" as const,
+      createdAt: "2026-01-01T00:00:00.000Z",
+    };
+
+    useGameSessionStore.getState().addFeedEntry(entry);
+    useGameSessionStore.getState().addFeedEntry(entry);
+
+    expect(useGameSessionStore.getState().feed).toHaveLength(1);
+  });
+
+  it("orders the feed by its payload timestamps, not arrival order", () => {
+    useGameSessionStore.getState().addFeedEntry({
+      id: "later",
+      type: "reaction",
+      userId: "user-later",
+      emoji: "🔥",
+      createdAt: "2026-01-01T00:00:05.000Z",
+    });
+    useGameSessionStore.getState().addFeedEntry({
+      id: "earlier",
+      type: "reaction",
+      userId: "user-earlier",
+      emoji: "👍",
+      createdAt: "2026-01-01T00:00:01.000Z",
+    });
+
+    expect(
+      useGameSessionStore.getState().feed.map((entry) => entry.id)
+    ).toEqual(["later", "earlier"]);
   });
 
   it("records the problem id out for grading when grading starts", () => {

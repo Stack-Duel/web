@@ -85,12 +85,14 @@ export function useSubmitSolution(problemSetupId: string | null) {
 
       // Fire-and-forget: the panel is already polling this submission, this
       // just shaves the latency down to (roughly) the push arriving instead
-      // of waiting for the next 10s poll tick.
+      // of waiting for the next poll tick.
       void waitForTerminalSubmission(queryClient, submissionId).then(
-        (status) => {
+        (outcome) => {
+          if (outcome.kind !== "terminal") return;
+
           queryClient.setQueryData(
             submissionStatusQueryKey(submissionId),
-            status
+            outcome.submission
           );
         }
       );

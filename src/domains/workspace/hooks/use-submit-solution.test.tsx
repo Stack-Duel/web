@@ -47,11 +47,14 @@ describe("useSubmitSolution", () => {
     runSubmissionMutateAsync.mockResolvedValue("run-sub-1");
     gradeSubmissionMutateAsync.mockResolvedValue("grade-sub-1");
     mockWaitForTerminalSubmission.mockResolvedValue({
-      submissionId: "run-sub-1",
-      problemSetupId: "setup-1",
-      status: "Accepted",
-      code: "",
-      results: [],
+      kind: "terminal",
+      submission: {
+        submissionId: "run-sub-1",
+        problemSetupId: "setup-1",
+        status: "Accepted",
+        code: "",
+        results: [],
+      },
     });
 
     mockUseCreateRunSubmission.mockReturnValue({

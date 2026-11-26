@@ -16,13 +16,10 @@ import {
 } from "../state/game-session-store";
 import { useGradingProblemId } from "./use-grading-problem-id";
 import {
+  GameHubEvent,
   joinGameUpdates,
   leaveGameUpdates,
-  onGameCompletedPush,
-  onGameLobbyUpdatedPush,
-  onGameParticipantAttemptedPush,
-  onGameParticipantReactedPush,
-  onGameProgressUpdatedPush,
+  onGamePush,
 } from "@/shared/lib/signalr/game-hub-client";
 import { Game, GameStatus } from "../models/game";
 import { GameModeKey } from "../models/game-mode";
@@ -123,22 +120,20 @@ export function useGameSession(gameId: string) {
   // "GameParticipantAttempted"/"GameParticipantReacted" while Running (a participant's submission
   // reached a terminal state, or they sent a quick reaction. Both feed the live chat panel and have
   // no fallback at all since neither is a re-fetch signal). One subscription covers all five
-  // without dropping and rejoining the SignalR group across the Pending -> Running transition.
-  // Depends on gameId/status specifically (not the whole `game`
-  // object) so a routine poll/refetch doesn't tear this down and redo the group join on every
-  // tick. `gameId` (the hook's own param) is used rather than `game.gameId`, since it's known
-  // synchronously, no need to wait on fetched data for it.
-  const gameStatus = game?.status;
+  // without dropping and rejoining the SignalR group across the Pending -> Running transition:
+  // the effect depends on whether the game is watchable at all rather than on its exact status,
+  // so starting the game leaves that flag true and the group join stands. Depends on gameId
+  // specifically (not the whole `game` object) so a routine poll/refetch doesn't tear this down
+  // and redo the group join on every tick. `gameId` (the hook's own param) is used rather than
+  // `game.gameId`, since it's known synchronously, no need to wait on fetched data for it.
+  const isWatchableGame =
+    game?.status === GameStatus.Pending || game?.status === GameStatus.Running;
+
   useEffect(() => {
-    if (gameStatus !== GameStatus.Pending && gameStatus !== GameStatus.Running)
-      return;
+    if (!isWatchableGame) return;
 
     const activeGameId = gameId;
-    let unsubscribeCompleted = () => {};
-    let unsubscribeLobbyUpdated = () => {};
-    let unsubscribeProgressUpdated = () => {};
-    let unsubscribeParticipantAttempted = () => {};
-    let unsubscribeParticipantReacted = () => {};
+    const unsubscribers: Array<() => void> = [];
     let cancelled = false;
 
     const invalidateGame = () => {
@@ -147,40 +142,39 @@ export function useGameSession(gameId: string) {
       });
     };
 
+    const onRefetchSignal = (push: { gameId: string }) => {
+      if (push.gameId === activeGameId) invalidateGame();
+    };
+
     void joinGameUpdates(activeGameId)
       .then(() => {
         if (cancelled) return;
-        unsubscribeCompleted = onGameCompletedPush((push) => {
-          if (push.gameId === activeGameId) invalidateGame();
-        });
-        unsubscribeLobbyUpdated = onGameLobbyUpdatedPush((push) => {
-          if (push.gameId === activeGameId) invalidateGame();
-        });
-        unsubscribeProgressUpdated = onGameProgressUpdatedPush((push) => {
-          if (push.gameId === activeGameId) invalidateGame();
-        });
-        unsubscribeParticipantAttempted = onGameParticipantAttemptedPush(
-          (push) => {
+
+        unsubscribers.push(
+          onGamePush(GameHubEvent.Completed, onRefetchSignal),
+          onGamePush(GameHubEvent.LobbyUpdated, onRefetchSignal),
+          onGamePush(GameHubEvent.ProgressUpdated, onRefetchSignal),
+          onGamePush(GameHubEvent.ParticipantAttempted, (push) => {
             if (push.gameId !== activeGameId) return;
             addFeedEntry({
-              id: crypto.randomUUID(),
+              id: `attempt:${push.userId}:${push.attemptedAt}`,
               type: "attempt",
               userId: push.userId,
               status: push.status,
               createdAt: push.attemptedAt,
             });
-          }
+          }),
+          onGamePush(GameHubEvent.ParticipantReacted, (push) => {
+            if (push.gameId !== activeGameId) return;
+            addFeedEntry({
+              id: `reaction:${push.userId}:${push.sentAt}:${push.emoji}`,
+              type: "reaction",
+              userId: push.userId,
+              emoji: push.emoji,
+              createdAt: push.sentAt,
+            });
+          })
         );
-        unsubscribeParticipantReacted = onGameParticipantReactedPush((push) => {
-          if (push.gameId !== activeGameId) return;
-          addFeedEntry({
-            id: crypto.randomUUID(),
-            type: "reaction",
-            userId: push.userId,
-            emoji: push.emoji,
-            createdAt: push.sentAt,
-          });
-        });
       })
       .catch(() => {
         // SignalR unavailable. The Pending-phase poll / Running-phase poll+timer re-fetch
@@ -190,14 +184,10 @@ export function useGameSession(gameId: string) {
 
     return () => {
       cancelled = true;
-      unsubscribeCompleted();
-      unsubscribeLobbyUpdated();
-      unsubscribeProgressUpdated();
-      unsubscribeParticipantAttempted();
-      unsubscribeParticipantReacted();
+      unsubscribers.forEach((unsubscribe) => unsubscribe());
       void leaveGameUpdates(activeGameId);
     };
-  }, [gameId, gameStatus, queryClient, addFeedEntry]);
+  }, [gameId, isWatchableGame, queryClient, addFeedEntry]);
 
   // Load the current user's active problem for this game, if it isn't already
   // loaded. Re-runs whenever the game or the user identity changes, which

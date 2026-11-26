@@ -18,9 +18,16 @@ vi.mock("../api/get-my-active-games", () => ({ useMyActiveGames: vi.fn() }));
 vi.mock("../api/leave-game", () => ({ useLeaveGame: vi.fn() }));
 vi.mock("next/navigation", () => import("@/test/mocks/next-navigation"));
 vi.mock("@/shared/lib/signalr/game-hub-client", () => ({
+  GameHubEvent: {
+    Completed: "GameCompleted",
+    LobbyUpdated: "GameLobbyUpdated",
+    ProgressUpdated: "GameProgressUpdated",
+    ParticipantAttempted: "GameParticipantAttempted",
+    ParticipantReacted: "GameParticipantReacted",
+  },
   joinGameUpdates: vi.fn().mockResolvedValue(undefined),
   leaveGameUpdates: vi.fn().mockResolvedValue(undefined),
-  onGameLobbyUpdatedPush: vi.fn(() => () => {}),
+  onGamePush: vi.fn(() => () => {}),
 }));
 
 const mockedUseMyActiveGames = vi.mocked(useMyActiveGames);

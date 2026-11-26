@@ -3,9 +3,10 @@
 import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+  GameHubEvent,
   joinGameUpdates,
   leaveGameUpdates,
-  onGameLobbyUpdatedPush,
+  onGamePush,
 } from "@/shared/lib/signalr/game-hub-client";
 
 /**
@@ -50,7 +51,7 @@ export function useLobbyListRealtimeSync(pendingGameIds: string[]) {
   }, [idsKey]);
 
   useEffect(() => {
-    return onGameLobbyUpdatedPush((push) => {
+    return onGamePush(GameHubEvent.LobbyUpdated, (push) => {
       if (!joinedIds.current.has(push.gameId)) return;
       queryClient.invalidateQueries({ queryKey: ["my-active-games"] });
       queryClient.invalidateQueries({ queryKey: ["open-games"] });
