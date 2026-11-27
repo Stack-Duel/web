@@ -75,7 +75,7 @@ describe("StudioProblemLayout", () => {
   });
 
   it("shows the problem's content and question with read permission", () => {
-    grantPermissions(Permissions.ADMIN_PROBLEMS_READ);
+    grantPermissions(Permissions.STUDIO_PROBLEMS_READ);
 
     render(<StudioProblemLayout id="problem_1" />);
 
@@ -85,7 +85,7 @@ describe("StudioProblemLayout", () => {
   });
 
   it("switches to the Setups tab when clicked", async () => {
-    grantPermissions(Permissions.ADMIN_PROBLEMS_READ);
+    grantPermissions(Permissions.STUDIO_PROBLEMS_READ);
     const user = userEvent.setup();
 
     render(<StudioProblemLayout id="problem_1" />);

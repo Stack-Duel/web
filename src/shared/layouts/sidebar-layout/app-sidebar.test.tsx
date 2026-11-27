@@ -142,6 +142,28 @@ describe("AppSidebar", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("shows Studio with the studio read permission alone", () => {
+    useUserStore.setState({
+      user: buildUser({ permissions: [Permissions.STUDIO_PROBLEMS_READ] }),
+    });
+
+    renderSidebar();
+
+    expect(screen.getByRole("button", { name: "Studio" })).toBeInTheDocument();
+  });
+
+  it("does not show Studio without the studio read permission", () => {
+    useUserStore.setState({
+      user: buildUser({ permissions: [Permissions.ADMIN_PROBLEMS_READ] }),
+    });
+
+    renderSidebar();
+
+    expect(
+      screen.queryByRole("button", { name: "Studio" })
+    ).not.toBeInTheDocument();
+  });
+
   it("does not show an Admin nav item without any admin permission", () => {
     renderSidebar();
 
