@@ -17,33 +17,19 @@ export type GameFeedReactionEntry = GameFeedEntryBase & {
   emoji: string;
 };
 
-/**
- * A live, chat-like feed of things that happen during a Running game: currently submission
- * attempts and quick emoji reactions. Deliberately a discriminated union on `type` rather than
- * separate lists: adding a future entry kind (e.g. a real chat message) is a new union member plus
- * a new case in whatever renders the feed, not a parallel data structure.
- */
 export type GameFeedEntry = GameFeedAttemptEntry | GameFeedReactionEntry;
 
-/** Live feed is capped rather than unbounded. It's a "what just happened" view, not a durable
- *  record (the History tab already covers that per-player). */
 const MAX_FEED_ENTRIES = 50;
 
 interface GameSessionState {
-  /** True once the current problem is solved and the player has not moved on yet. */
   hasSolvedCurrentProblem: boolean;
 
-  /** The next problem ready to load, or `null` when the solve was the last one. */
   nextProblemId: string | null;
 
   viewingProblemId: string | null;
 
-  /** The problem ID whose submission is currently out for grading, or `null` when nothing is in flight. */
   gradingProblemId: string | null;
 
-  /** Newest first. Populated purely from SignalR pushes ("GameParticipantAttempted",
-   *  "GameParticipantReacted"). There's no REST endpoint backing this, so it starts empty on
-   *  every fresh page load/navigation. */
   feed: GameFeedEntry[];
 
   problemSolved: (nextProblemId: string | null) => void;
@@ -78,9 +64,17 @@ export const useGameSessionStore = create<GameSessionState>((set) => ({
   returnToCurrentProblem: () => set({ viewingProblemId: null }),
 
   addFeedEntry: (entry) =>
-    set((state) => ({
-      feed: [entry, ...state.feed].slice(0, MAX_FEED_ENTRIES),
-    })),
+    set((state) => {
+      if (state.feed.some((existing) => existing.id === entry.id)) {
+        return state;
+      }
+
+      const feed = [entry, ...state.feed]
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        .slice(0, MAX_FEED_ENTRIES);
+
+      return { feed };
+    }),
 
   gradingStarted: (problemId) => set({ gradingProblemId: problemId }),
 

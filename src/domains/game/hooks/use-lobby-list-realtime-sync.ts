@@ -3,18 +3,12 @@
 import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+  GameHubEvent,
   joinGameUpdates,
   leaveGameUpdates,
-  onGameLobbyUpdatedPush,
+  onGamePush,
 } from "@/shared/lib/signalr/game-hub-client";
 
-/**
- * Keeps the Games list live for the caller's own Pending games: joins the SignalR
- * lobby-update group for each `gameId` given and invalidates "my-active-games" and
- * "open-games" on a "GameLobbyUpdated" push for one of them, the same push
- * useGameSession relies on inside an individual lobby. Those queries' own polling
- * is the fallback if SignalR can't connect.
- */
 export function useLobbyListRealtimeSync(pendingGameIds: string[]) {
   const queryClient = useQueryClient();
   const joinedIds = useRef(new Set<string>());
@@ -33,9 +27,7 @@ export function useLobbyListRealtimeSync(pendingGameIds: string[]) {
         .then(() => {
           if (!cancelled) joinedIds.current.add(id);
         })
-        .catch(() => {
-          // SignalR unavailable; the underlying queries' own polling covers it.
-        });
+        .catch(() => {});
     });
 
     joinedIds.current.forEach((id) => {
@@ -50,7 +42,7 @@ export function useLobbyListRealtimeSync(pendingGameIds: string[]) {
   }, [idsKey]);
 
   useEffect(() => {
-    return onGameLobbyUpdatedPush((push) => {
+    return onGamePush(GameHubEvent.LobbyUpdated, (push) => {
       if (!joinedIds.current.has(push.gameId)) return;
       queryClient.invalidateQueries({ queryKey: ["my-active-games"] });
       queryClient.invalidateQueries({ queryKey: ["open-games"] });

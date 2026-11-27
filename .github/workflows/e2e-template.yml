@@ -44,7 +44,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
         with:
-          dotnet-version: "10.0.x"
+          dotnet-version: "11.0.x"
 
       - name: Restore server dependencies
         run: dotnet restore StackDuel.slnx
@@ -54,17 +54,14 @@ jobs:
         run: dotnet build StackDuel.slnx --configuration Release --no-restore
         working-directory: server
 
-      - name: Install EF Core tools
-        run: dotnet tool install --global dotnet-ef
-
       - name: Run database migrations
-        run: dotnet ef database update --context StackDuelDbContext --project StackDuel.Infrastructure --startup-project StackDuel.Api
+        run: dotnet run --project StackDuel.Data --no-build --no-restore --configuration Release -- migrate
         working-directory: server
         env:
           ConnectionStrings__DefaultConnection: ${{ env.DB_CONNECTION_STRING }}
 
-      - name: Seed reference data
-        run: dotnet run --project StackDuel.Seeder -- --static
+      - name: Seed problem fixtures
+        run: dotnet run --project StackDuel.Data --no-build --no-restore --configuration Release -- seed --dev --e2e
         working-directory: server
         env:
           ConnectionStrings__DefaultConnection: ${{ env.DB_CONNECTION_STRING }}
@@ -170,7 +167,7 @@ jobs:
 
       - name: Grant admin role to the second test user
         if: ${{ env.TEST_USER_2_EMAIL != '' }}
-        run: dotnet run --project StackDuel.Seeder -- --grant-admin test-admin
+        run: dotnet run --project StackDuel.Data --no-build --no-restore --configuration Release -- grant-admin test-admin
         working-directory: server
         env:
           ConnectionStrings__DefaultConnection: ${{ env.DB_CONNECTION_STRING }}

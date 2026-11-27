@@ -45,11 +45,6 @@ const getStatusIcon = (status: SubmissionStatus) =>
 const getStatusLabel = (status: SubmissionStatus) =>
   status === "WrongAnswer" ? "Wrong Answer" : status;
 
-/**
- * Renders one feed entry's content. A switch on `entry.type` is the only place a future entry
- * kind (e.g. a real chat message) needs a new case. TS flags the switch as non-exhaustive the
- * moment the union grows, so there's no way to add a type and forget to render it.
- */
 function FeedEntryContent({ entry }: Readonly<{ entry: GameFeedEntry }>) {
   switch (entry.type) {
     case "attempt":
@@ -122,13 +117,6 @@ function FeedEntryBubble({
   );
 }
 
-/**
- * Always-visible chat-style panel for a Running game: a live feed of submission attempts and
- * quick emoji reactions (verdict/emoji, who, and when, deliberately not which problem, since
- * participants can be on different ones and naming it could spoil pool content the viewer hasn't
- * reached yet), plus the reaction picker to send one. Purely a moment-to-moment view built from
- * SignalR pushes; a page refresh clears it, unlike the durable per-player History tab.
- */
 export default function RampActivityFeed({
   game,
 }: Readonly<RampActivityFeedProps>) {

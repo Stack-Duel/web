@@ -9,10 +9,10 @@ import { useGameSessionStore } from "../state/game-session-store";
 import { useUserStore } from "@/domains/user/state/user-store";
 import { useWorkspaceStore } from "@/domains/workspace/state/workspace-store";
 import {
+  GameHubEvent,
   joinGameUpdates,
   leaveGameUpdates,
-  onGameParticipantAttemptedPush,
-  onGameParticipantReactedPush,
+  onGamePush,
 } from "@/shared/lib/signalr/game-hub-client";
 import { buildUser } from "@/test/factories/user";
 import { GameModeKey } from "../models/game-mode";
@@ -38,25 +38,29 @@ vi.mock("@/domains/problem/api/get-problem-by-id", () => ({
   }),
 }));
 vi.mock("@/shared/lib/signalr/game-hub-client", () => ({
+  GameHubEvent: {
+    Completed: "GameCompleted",
+    LobbyUpdated: "GameLobbyUpdated",
+    ProgressUpdated: "GameProgressUpdated",
+    ParticipantAttempted: "GameParticipantAttempted",
+    ParticipantReacted: "GameParticipantReacted",
+  },
   joinGameUpdates: vi.fn().mockResolvedValue(undefined),
   leaveGameUpdates: vi.fn().mockResolvedValue(undefined),
-  onGameCompletedPush: vi.fn(() => () => {}),
-  onGameLobbyUpdatedPush: vi.fn(() => () => {}),
-  onGameProgressUpdatedPush: vi.fn(() => () => {}),
-  onGameParticipantAttemptedPush: vi.fn(() => () => {}),
-  onGameParticipantReactedPush: vi.fn(() => () => {}),
+  onGamePush: vi.fn(() => () => {}),
 }));
 
 const initializeProblem = vi.fn();
 const clearProblem = vi.fn();
 const mockedUseStartGame = vi.mocked(useStartGame);
 const mockedUseGame = vi.mocked(useGame);
-const mockedOnGameParticipantAttemptedPush = vi.mocked(
-  onGameParticipantAttemptedPush
-);
-const mockedOnGameParticipantReactedPush = vi.mocked(
-  onGameParticipantReactedPush
-);
+const mockedOnGamePush = vi.mocked(onGamePush);
+
+const handlerFor = <TPayload,>(event: string) => {
+  const call = mockedOnGamePush.mock.calls.find(([name]) => name === event);
+  if (!call) throw new Error(`No handler registered for ${event}`);
+  return call[1] as unknown as (payload: TPayload) => void;
+};
 
 function buildGame(overrides: Partial<Game> = {}): Game {
   return baseBuildGame({ status: GameStatus.Pending, ...overrides });
@@ -74,6 +78,43 @@ function createWrapper() {
   return Wrapper;
 }
 
+function givenGame(overrides: Partial<Game> = {}) {
+  mockedUseGame.mockReturnValue({
+    data: buildGame(overrides),
+    isLoading: false,
+    error: null,
+    refetch: vi.fn(),
+  } as never);
+}
+
+function givenNoGame(state: { isLoading?: boolean; error?: Error } = {}) {
+  mockedUseGame.mockReturnValue({
+    data: undefined,
+    isLoading: state.isLoading ?? true,
+    error: state.error ?? null,
+    refetch: vi.fn(),
+  } as never);
+}
+
+function participantOn(problemId: string) {
+  return {
+    userId: "user-1",
+    username: "tester",
+    seatNumber: 0,
+    joinedAt: new Date(),
+    score: 0,
+    currentProblem: { problemId },
+    hasForfeited: false,
+    hasFinishedProblems: false,
+  };
+}
+
+function renderGameSession() {
+  return renderHook(() => useGameSession("game-1"), {
+    wrapper: createWrapper(),
+  });
+}
+
 describe("useGameSession", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -81,16 +122,11 @@ describe("useGameSession", () => {
     useWorkspaceStore.getState().reset();
     useUserStore.setState({ user: null, authProfile: null });
     mockedUseStartGame.mockReturnValue({ mutateAsync: vi.fn() } as never);
-    mockedUseGame.mockReturnValue({
-      data: undefined,
-      isLoading: true,
-      error: null,
-      refetch: vi.fn(),
-    } as never);
+    givenNoGame();
   });
 
   it("clears leftover problem/workspace/session state on mount", () => {
-    renderHook(() => useGameSession("game-1"), { wrapper: createWrapper() });
+    renderGameSession();
 
     expect(clearProblem).toHaveBeenCalled();
   });
@@ -98,14 +134,9 @@ describe("useGameSession", () => {
   it("auto-starts a Pending Solo Rush game once", async () => {
     const startGame = vi.fn().mockResolvedValue(undefined);
     mockedUseStartGame.mockReturnValue({ mutateAsync: startGame } as never);
-    mockedUseGame.mockReturnValue({
-      data: buildGame({ status: GameStatus.Pending }),
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    } as never);
+    givenGame({ status: GameStatus.Pending });
 
-    renderHook(() => useGameSession("game-1"), { wrapper: createWrapper() });
+    renderGameSession();
 
     await waitFor(() =>
       expect(startGame).toHaveBeenCalledWith(
@@ -119,17 +150,12 @@ describe("useGameSession", () => {
   it("does not auto-start a Pending Duel game", async () => {
     const startGame = vi.fn();
     mockedUseStartGame.mockReturnValue({ mutateAsync: startGame } as never);
-    mockedUseGame.mockReturnValue({
-      data: buildGame({
-        status: GameStatus.Pending,
-        gameModeKey: GameModeKey.Duel,
-      }),
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    } as never);
+    givenGame({
+      status: GameStatus.Pending,
+      gameModeKey: GameModeKey.Duel,
+    });
 
-    renderHook(() => useGameSession("game-1"), { wrapper: createWrapper() });
+    renderGameSession();
 
     expect(startGame).not.toHaveBeenCalled();
   });
@@ -137,42 +163,25 @@ describe("useGameSession", () => {
   it("does not auto-start an already Running game", () => {
     const startGame = vi.fn();
     mockedUseStartGame.mockReturnValue({ mutateAsync: startGame } as never);
-    mockedUseGame.mockReturnValue({
-      data: buildGame({ status: GameStatus.Running }),
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    } as never);
+    givenGame({ status: GameStatus.Running });
 
-    renderHook(() => useGameSession("game-1"), { wrapper: createWrapper() });
+    renderGameSession();
 
     expect(startGame).not.toHaveBeenCalled();
   });
 
   it("joins SignalR game updates while the game is Pending or Running", async () => {
-    mockedUseGame.mockReturnValue({
-      data: buildGame({ status: GameStatus.Running }),
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    } as never);
+    givenGame({ status: GameStatus.Running });
 
-    renderHook(() => useGameSession("game-1"), { wrapper: createWrapper() });
+    renderGameSession();
 
     await waitFor(() => expect(joinGameUpdates).toHaveBeenCalledWith("game-1"));
   });
 
   it("leaves SignalR game updates on unmount", async () => {
-    mockedUseGame.mockReturnValue({
-      data: buildGame({ status: GameStatus.Running }),
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    } as never);
+    givenGame({ status: GameStatus.Running });
 
-    const { unmount } = renderHook(() => useGameSession("game-1"), {
-      wrapper: createWrapper(),
-    });
+    const { unmount } = renderGameSession();
     await waitFor(() => expect(joinGameUpdates).toHaveBeenCalled());
 
     unmount();
@@ -183,19 +192,17 @@ describe("useGameSession", () => {
   });
 
   it("adds a feed entry when a participant-attempted push arrives", async () => {
-    mockedUseGame.mockReturnValue({
-      data: buildGame({ status: GameStatus.Running }),
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    } as never);
+    givenGame({ status: GameStatus.Running });
 
-    renderHook(() => useGameSession("game-1"), { wrapper: createWrapper() });
+    renderGameSession();
 
-    await waitFor(() =>
-      expect(mockedOnGameParticipantAttemptedPush).toHaveBeenCalled()
-    );
-    const handler = mockedOnGameParticipantAttemptedPush.mock.calls[0][0];
+    await waitFor(() => expect(mockedOnGamePush).toHaveBeenCalled());
+    const handler = handlerFor<{
+      gameId: string;
+      userId: string;
+      status: string;
+      attemptedAt: string;
+    }>(GameHubEvent.ParticipantAttempted);
     handler({
       gameId: "game-1",
       userId: "user-2",
@@ -209,19 +216,17 @@ describe("useGameSession", () => {
   });
 
   it("adds a feed entry when a participant-reacted push arrives", async () => {
-    mockedUseGame.mockReturnValue({
-      data: buildGame({ status: GameStatus.Running }),
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    } as never);
+    givenGame({ status: GameStatus.Running });
 
-    renderHook(() => useGameSession("game-1"), { wrapper: createWrapper() });
+    renderGameSession();
 
-    await waitFor(() =>
-      expect(mockedOnGameParticipantReactedPush).toHaveBeenCalled()
-    );
-    const handler = mockedOnGameParticipantReactedPush.mock.calls[0][0];
+    await waitFor(() => expect(mockedOnGamePush).toHaveBeenCalled());
+    const handler = handlerFor<{
+      gameId: string;
+      userId: string;
+      emoji: string;
+      sentAt: string;
+    }>(GameHubEvent.ParticipantReacted);
     handler({
       gameId: "game-1",
       userId: "user-2",
@@ -235,19 +240,17 @@ describe("useGameSession", () => {
   });
 
   it("ignores pushes for a different game", async () => {
-    mockedUseGame.mockReturnValue({
-      data: buildGame({ status: GameStatus.Running }),
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    } as never);
+    givenGame({ status: GameStatus.Running });
 
-    renderHook(() => useGameSession("game-1"), { wrapper: createWrapper() });
+    renderGameSession();
 
-    await waitFor(() =>
-      expect(mockedOnGameParticipantAttemptedPush).toHaveBeenCalled()
-    );
-    const handler = mockedOnGameParticipantAttemptedPush.mock.calls[0][0];
+    await waitFor(() => expect(mockedOnGamePush).toHaveBeenCalled());
+    const handler = handlerFor<{
+      gameId: string;
+      userId: string;
+      status: string;
+      attemptedAt: string;
+    }>(GameHubEvent.ParticipantAttempted);
     handler({
       gameId: "some-other-game",
       userId: "user-2",
@@ -259,42 +262,21 @@ describe("useGameSession", () => {
   });
 
   it("does not subscribe to SignalR updates when the game is Completed", () => {
-    mockedUseGame.mockReturnValue({
-      data: buildGame({ status: GameStatus.Completed }),
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    } as never);
+    givenGame({ status: GameStatus.Completed });
 
-    renderHook(() => useGameSession("game-1"), { wrapper: createWrapper() });
+    renderGameSession();
 
     expect(joinGameUpdates).not.toHaveBeenCalled();
   });
 
   it("loads the current user's active problem once the game and user are available", async () => {
     useUserStore.setState({ user: buildUser({ id: "user-1" }) });
-    mockedUseGame.mockReturnValue({
-      data: buildGame({
-        status: GameStatus.Running,
-        participants: [
-          {
-            userId: "user-1",
-            username: "tester",
-            seatNumber: 0,
-            joinedAt: new Date(),
-            score: 0,
-            currentProblem: { problemId: "problem-1" },
-            hasForfeited: false,
-            hasFinishedProblems: false,
-          },
-        ],
-      }),
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    } as never);
+    givenGame({
+      status: GameStatus.Running,
+      participants: [participantOn("problem-1")],
+    });
 
-    renderHook(() => useGameSession("game-1"), { wrapper: createWrapper() });
+    renderGameSession();
 
     await waitFor(() => expect(initializeProblem).toHaveBeenCalled());
   });
@@ -302,43 +284,20 @@ describe("useGameSession", () => {
   it("does not load a problem while a next-problem transition is pending", () => {
     useGameSessionStore.getState().problemSolved("problem-2");
     useUserStore.setState({ user: buildUser({ id: "user-1" }) });
-    mockedUseGame.mockReturnValue({
-      data: buildGame({
-        status: GameStatus.Running,
-        participants: [
-          {
-            userId: "user-1",
-            username: "tester",
-            seatNumber: 0,
-            joinedAt: new Date(),
-            score: 0,
-            currentProblem: { problemId: "problem-1" },
-            hasForfeited: false,
-            hasFinishedProblems: false,
-          },
-        ],
-      }),
-      isLoading: false,
-      error: null,
-      refetch: vi.fn(),
-    } as never);
+    givenGame({
+      status: GameStatus.Running,
+      participants: [participantOn("problem-1")],
+    });
 
-    renderHook(() => useGameSession("game-1"), { wrapper: createWrapper() });
+    renderGameSession();
 
     expect(initializeProblem).not.toHaveBeenCalled();
   });
 
   it("exposes the game, loading state, and error message from the query", () => {
-    mockedUseGame.mockReturnValue({
-      data: undefined,
-      isLoading: true,
-      error: new Error("failed to load"),
-      refetch: vi.fn(),
-    } as never);
+    givenNoGame({ error: new Error("failed to load") });
 
-    const { result } = renderHook(() => useGameSession("game-1"), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderGameSession();
 
     expect(result.current.isLoading).toBe(true);
     expect(result.current.error).toBe("failed to load");

@@ -6,7 +6,10 @@ import {
   connectSubmissionHub,
   onSubmissionCompletedPush,
 } from "@/shared/lib/signalr/submission-hub-client";
-import type { SubmissionStatusDto } from "../models/submission-status";
+import type {
+  SubmissionStatus,
+  SubmissionStatusDto,
+} from "../models/submission-status";
 
 export const getSubmissionStatus = ({
   submissionId,
@@ -25,17 +28,16 @@ export const submissionStatusQueryKey = (submissionId: string) => [
   submissionId,
 ];
 
-const terminalSubmissionStatuses = new Set<string>([
+const terminalSubmissionStatuses = new Set<SubmissionStatus>([
   "Accepted",
   "WrongAnswer",
-  "TimeLimitExceeded",
-  "MemoryLimitExceeded",
-  "RuntimeError",
-  "CompileError",
 ]);
 
-const isPendingSubmissionStatus = (status: string) =>
-  !terminalSubmissionStatuses.has(status);
+export const isTerminalSubmissionStatus = (status: SubmissionStatus) =>
+  terminalSubmissionStatuses.has(status);
+
+const isPendingSubmissionStatus = (status: SubmissionStatus) =>
+  !isTerminalSubmissionStatus(status);
 
 export function useSubmissionStatus(submissionId: string | null) {
   const queryClient = useQueryClient();
@@ -49,7 +51,7 @@ export function useSubmissionStatus(submissionId: string | null) {
     refetchInterval: (query) => {
       const data = query.state.data;
       if (!data || isPendingSubmissionStatus(data.status)) {
-        return 60_000;
+        return 10_000;
       }
       return false;
     },
@@ -65,26 +67,17 @@ export function useSubmissionStatus(submissionId: string | null) {
   useEffect(() => {
     if (!submissionId || !isPending) return;
 
-    let cancelled = false;
-    let unsubscribe = () => {};
+    const unsubscribe = onSubmissionCompletedPush(({ submissionId: id }) => {
+      if (id !== submissionId || !isPendingRef.current) return;
 
-    connectSubmissionHub()
-      .then(() => {
-        if (cancelled || !isPendingRef.current) return;
-        unsubscribe = onSubmissionCompletedPush(({ submissionId: id }) => {
-          if (id === submissionId) {
-            queryClient.invalidateQueries({
-              queryKey: submissionStatusQueryKey(submissionId),
-            });
-          }
-        });
-      })
-      .catch(() => {});
+      queryClient.invalidateQueries({
+        queryKey: submissionStatusQueryKey(submissionId),
+      });
+    });
 
-    return () => {
-      cancelled = true;
-      unsubscribe();
-    };
+    void connectSubmissionHub().catch(() => {});
+
+    return unsubscribe;
   }, [submissionId, isPending, queryClient]);
 
   return query;

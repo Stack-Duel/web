@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -52,7 +52,13 @@ function setupRampSubmission(options: SetupOptions = {}) {
 
   if (options.terminalStatus) {
     mockedWaitForTerminalSubmission.mockResolvedValue({
-      status: options.terminalStatus,
+      kind: "terminal",
+      submission: { status: options.terminalStatus },
+    } as never);
+  } else {
+    mockedWaitForTerminalSubmission.mockResolvedValue({
+      kind: "stillGrading",
+      submission: null,
     } as never);
   }
 
@@ -87,6 +93,10 @@ function setupRampSubmission(options: SetupOptions = {}) {
 }
 
 describe("useRampSubmission", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     useGameSessionStore.getState().reset();
@@ -164,7 +174,8 @@ describe("useRampSubmission", () => {
       mutateAsync: submitGameProblem,
     } as never);
     mockedWaitForTerminalSubmission.mockResolvedValue({
-      status: "Accepted",
+      kind: "terminal",
+      submission: { status: "Accepted" },
     } as never);
 
     const queryClient = new QueryClient({

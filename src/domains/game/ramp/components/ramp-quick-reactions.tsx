@@ -10,15 +10,8 @@ type RampQuickReactionsProps = {
   gameId: string;
 };
 
-/** How long the row disables itself after a send, to curb spam-clicking. Purely a client-side
- *  courtesy. There's no server-side rate limit behind this. */
 const SEND_COOLDOWN_MS = 800;
 
-/**
- * A row of one-click emoji reactions, no typing: clicking a button just broadcasts that emoji to
- * everyone watching the game (see GameHub.SendReaction). Renders one button per QUICK_REACTIONS
- * entry, so growing that list is the only change needed to offer more.
- */
 export default function RampQuickReactions({
   gameId,
 }: Readonly<RampQuickReactionsProps>) {

@@ -52,7 +52,18 @@ describe("waitForTerminalSubmission", () => {
     vi.useRealTimers();
   });
 
-  it("resolves once the push for the matching submission id arrives", async () => {
+  it("subscribes to the push before connecting the hub", () => {
+    mockedHttp.get.mockResolvedValue(buildStatus());
+
+    void waitForTerminalSubmission(queryClient, "submission_1");
+
+    expect(mockedOnPush).toHaveBeenCalled();
+    expect(mockedOnPush.mock.invocationCallOrder[0]).toBeLessThan(
+      mockedConnect.mock.invocationCallOrder[0]
+    );
+  });
+
+  it("resolves as terminal once the push for the matching submission id arrives", async () => {
     mockedHttp.get.mockResolvedValue(buildStatus());
     let pushHandler: (payload: { submissionId: string }) => void = () => {};
     mockedOnPush.mockImplementation((handler) => {
@@ -68,9 +79,10 @@ describe("waitForTerminalSubmission", () => {
     await Promise.resolve();
     pushHandler({ submissionId: "submission_1" });
 
-    const result = await resultPromise;
+    const outcome = await resultPromise;
 
-    expect(result.status).toBe("Accepted");
+    expect(outcome.kind).toBe("terminal");
+    expect(outcome.submission?.status).toBe("Accepted");
     expect(unsubscribe).toHaveBeenCalledTimes(1);
     expect(mockedHttp.get).toHaveBeenCalledWith(
       "/api/v1/submission/submission_1",
@@ -78,7 +90,24 @@ describe("waitForTerminalSubmission", () => {
     );
   });
 
-  it("ignores a push for a different submission id", async () => {
+  it("resolves from the poll well before the timeout when no push ever arrives", async () => {
+    vi.useFakeTimers();
+    mockedHttp.get.mockResolvedValue(buildStatus({ status: "WrongAnswer" }));
+
+    const resultPromise = waitForTerminalSubmission(
+      queryClient,
+      "submission_1"
+    );
+
+    await vi.advanceTimersByTimeAsync(2_500);
+    const outcome = await resultPromise;
+
+    expect(outcome.kind).toBe("terminal");
+    expect(outcome.submission?.status).toBe("WrongAnswer");
+    expect(unsubscribe).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignores a push for a different submission id and still resolves from the poll", async () => {
     vi.useFakeTimers();
     mockedHttp.get.mockResolvedValue(buildStatus());
     let pushHandler: (payload: { submissionId: string }) => void = () => {};
@@ -93,34 +122,44 @@ describe("waitForTerminalSubmission", () => {
     );
     pushHandler({ submissionId: "other-submission" });
 
-    await vi.advanceTimersByTimeAsync(60_000);
-    const result = await resultPromise;
+    await vi.advanceTimersByTimeAsync(2_500);
+    const outcome = await resultPromise;
 
-    expect(result.status).toBe("Accepted");
+    expect(outcome.kind).toBe("terminal");
+    expect(outcome.submission?.status).toBe("Accepted");
   });
 
-  it("falls back to fetching status after the 60s timeout when no push arrives", async () => {
+  it("reports stillGrading when the submission never reaches a terminal state", async () => {
     vi.useFakeTimers();
-    mockedHttp.get.mockResolvedValue(buildStatus({ status: "WrongAnswer" }));
+    mockedHttp.get.mockResolvedValue(buildStatus({ status: "Running" }));
 
     const resultPromise = waitForTerminalSubmission(
       queryClient,
       "submission_1"
     );
-    await vi.advanceTimersByTimeAsync(60_000);
-    const result = await resultPromise;
 
-    expect(result.status).toBe("WrongAnswer");
+    await vi.advanceTimersByTimeAsync(61_000);
+    const outcome = await resultPromise;
+
+    expect(outcome.kind).toBe("stillGrading");
+    expect(outcome.submission?.status).toBe("Running");
     expect(unsubscribe).toHaveBeenCalledTimes(1);
   });
 
-  it("still fetches the status when the hub connection fails", async () => {
+  it("still resolves from the poll when the hub connection fails", async () => {
+    vi.useFakeTimers();
     mockedConnect.mockRejectedValue(new Error("hub unavailable"));
     mockedHttp.get.mockResolvedValue(buildStatus());
 
-    const result = await waitForTerminalSubmission(queryClient, "submission_1");
+    const resultPromise = waitForTerminalSubmission(
+      queryClient,
+      "submission_1"
+    );
 
-    expect(result.status).toBe("Accepted");
+    await vi.advanceTimersByTimeAsync(2_500);
+    const outcome = await resultPromise;
+
+    expect(outcome.kind).toBe("terminal");
     expect(mockedHttp.get).toHaveBeenCalledWith(
       "/api/v1/submission/submission_1",
       expect.anything()

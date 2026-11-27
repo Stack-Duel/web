@@ -95,11 +95,19 @@ export function useRampSubmission() {
       setActiveSubmissionId(submissionId);
       toast.success("Submission created");
 
-      const submission = await waitForTerminalSubmission(
+      const gradingOutcome = await waitForTerminalSubmission(
         queryClient,
         submissionId
       );
-      if (submission.status !== "Accepted") {
+
+      if (gradingOutcome.kind === "stillGrading") {
+        toast.error(
+          "We haven't heard back from the grader yet. Your submission is still running, and the game will update on its own once it lands."
+        );
+        return;
+      }
+
+      if (gradingOutcome.submission.status !== "Accepted") {
         return;
       }
 
