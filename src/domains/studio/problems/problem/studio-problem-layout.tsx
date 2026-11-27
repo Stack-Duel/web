@@ -66,7 +66,7 @@ export default function StudioProblemLayout({
 }: Readonly<StudioProblemLayoutProps>) {
   return (
     <AuthGuard
-      permission={Permissions.ADMIN_PROBLEMS_READ}
+      permission={Permissions.STUDIO_PROBLEMS_READ}
       fallback={
         <NotFoundCard
           title="Page not found"

@@ -48,6 +48,9 @@ export default function AppSidebar(
   const canReadAdminProblems = permissions.includes(
     Permissions.ADMIN_PROBLEMS_READ
   );
+  const canReadStudioProblems = permissions.includes(
+    Permissions.STUDIO_PROBLEMS_READ
+  );
   const canReadAdminFeedback = permissions.includes(
     Permissions.ADMIN_FEEDBACK_READ
   );
@@ -117,7 +120,7 @@ export default function AppSidebar(
           external: true,
         })),
       },
-      ...(canReadAdminProblems
+      ...(canReadStudioProblems
         ? [
             {
               title: "Studio",
