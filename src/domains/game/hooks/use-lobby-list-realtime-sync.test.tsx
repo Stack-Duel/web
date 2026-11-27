@@ -39,6 +39,27 @@ function createWrapper() {
   return { Wrapper, invalidateQueries };
 }
 
+async function renderWatching(gameId: string) {
+  let pushHandler: (payload: { gameId: string }) => void = () => {};
+  mockedOnGamePush.mockImplementation((_event, handler) => {
+    pushHandler = handler as typeof pushHandler;
+    return () => {};
+  });
+
+  const { Wrapper, invalidateQueries } = createWrapper();
+
+  renderHook(() => useLobbyListRealtimeSync([gameId]), { wrapper: Wrapper });
+
+  await waitFor(() =>
+    expect(mockedJoinGameUpdates).toHaveBeenCalledWith(gameId)
+  );
+
+  return {
+    invalidateQueries,
+    push: (pushedGameId: string) => pushHandler({ gameId: pushedGameId }),
+  };
+}
+
 describe("useLobbyListRealtimeSync", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -80,22 +101,9 @@ describe("useLobbyListRealtimeSync", () => {
   });
 
   it("invalidates my-active-games and open-games on a push for a joined game", async () => {
-    let pushHandler: (payload: { gameId: string }) => void = () => {};
-    mockedOnGamePush.mockImplementation((_event, handler) => {
-      pushHandler = handler as typeof pushHandler;
-      return () => {};
-    });
-    const { Wrapper, invalidateQueries } = createWrapper();
+    const { push, invalidateQueries } = await renderWatching("game-1");
 
-    renderHook(() => useLobbyListRealtimeSync(["game-1"]), {
-      wrapper: Wrapper,
-    });
-
-    await waitFor(() =>
-      expect(mockedJoinGameUpdates).toHaveBeenCalledWith("game-1")
-    );
-
-    pushHandler({ gameId: "game-1" });
+    push("game-1");
 
     expect(invalidateQueries).toHaveBeenCalledWith({
       queryKey: ["my-active-games"],
@@ -106,22 +114,9 @@ describe("useLobbyListRealtimeSync", () => {
   });
 
   it("ignores a push for a game it hasn't joined", async () => {
-    let pushHandler: (payload: { gameId: string }) => void = () => {};
-    mockedOnGamePush.mockImplementation((_event, handler) => {
-      pushHandler = handler as typeof pushHandler;
-      return () => {};
-    });
-    const { Wrapper, invalidateQueries } = createWrapper();
+    const { push, invalidateQueries } = await renderWatching("game-1");
 
-    renderHook(() => useLobbyListRealtimeSync(["game-1"]), {
-      wrapper: Wrapper,
-    });
-
-    await waitFor(() =>
-      expect(mockedJoinGameUpdates).toHaveBeenCalledWith("game-1")
-    );
-
-    pushHandler({ gameId: "some-other-game" });
+    push("some-other-game");
 
     expect(invalidateQueries).not.toHaveBeenCalled();
   });

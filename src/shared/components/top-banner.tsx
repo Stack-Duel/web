@@ -27,9 +27,8 @@ export default function TopBanner() {
   });
 
   const needsSetup = isAuthenticated && !!account && !account.setupCompletedAt;
-  const isSetupBannerHiddenOnThisRoute =
-    pathname === routerConfig.userSetup.path;
-  const isVisible = needsSetup && !isSetupBannerHiddenOnThisRoute;
+  const isDashboard = pathname === routerConfig.dashboard.path;
+  const isVisible = needsSetup && isDashboard;
 
   useEffect(() => {
     document.documentElement.style.setProperty(

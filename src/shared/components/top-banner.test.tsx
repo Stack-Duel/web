@@ -46,9 +46,15 @@ describe("TopBanner", () => {
     expect(screen.getByText("setup-banner")).toBeVisible();
   });
 
-  it("hides the setup banner on the user setup page itself", () => {
+  it.each([
+    ["the user setup page itself", routerConfig.userSetup.path],
+    ["the problems list", routerConfig.problems.path],
+    ["the games list", routerConfig.games.path],
+    ["a game in progress", "/game/play/game-1"],
+    ["the landing page", routerConfig.home.path],
+  ])("hides the setup banner on %s", (_description, path) => {
     useUserStore.setState({ authProfile: buildAuthUser() });
-    mockUsePathname.mockReturnValue(routerConfig.userSetup.path);
+    mockUsePathname.mockReturnValue(path);
     mockUseAccount.mockReturnValue({
       data: buildUser({ setupCompletedAt: undefined }),
     } as unknown as ReturnType<typeof useAccount>);
@@ -56,6 +62,20 @@ describe("TopBanner", () => {
     const { container } = render(<TopBanner />);
 
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it("leaves the banner offset at zero on a screen that hides the banner", () => {
+    useUserStore.setState({ authProfile: buildAuthUser() });
+    mockUsePathname.mockReturnValue(routerConfig.problems.path);
+    mockUseAccount.mockReturnValue({
+      data: buildUser({ setupCompletedAt: undefined }),
+    } as unknown as ReturnType<typeof useAccount>);
+
+    render(<TopBanner />);
+
+    expect(
+      document.documentElement.style.getPropertyValue("--active-banner-offset")
+    ).toBe("0px");
   });
 
   it("does not show the setup banner once setup is complete", () => {
