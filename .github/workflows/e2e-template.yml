@@ -60,8 +60,8 @@ jobs:
         env:
           ConnectionStrings__DefaultConnection: ${{ env.DB_CONNECTION_STRING }}
 
-      - name: Seed e2e fixtures
-        run: dotnet run --project StackDuel.Data --no-build --no-restore --configuration Release -- seed --e2e
+      - name: Seed problem fixtures
+        run: dotnet run --project StackDuel.Data --no-build --no-restore --configuration Release -- seed --dev --e2e
         working-directory: server
         env:
           ConnectionStrings__DefaultConnection: ${{ env.DB_CONNECTION_STRING }}

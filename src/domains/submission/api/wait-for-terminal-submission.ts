@@ -21,18 +21,6 @@ export type TerminalSubmissionOutcome =
   | { kind: "terminal"; submission: SubmissionStatusDto }
   | { kind: "stillGrading"; submission: SubmissionStatusDto | null };
 
-/**
- * Waits for `submissionId` to reach a terminal state, then returns its status.
- *
- * Subscribes to the SignalR "SubmissionCompleted" push *before* connecting the hub, since the
- * submission is already being graded by the time this is called and a push that lands during the
- * handshake would otherwise be lost. The push only short-circuits the wait: a poll runs alongside
- * it so a missed push (or a connection that never arrives) still resolves in seconds rather than
- * at the timeout.
- *
- * Returns "stillGrading" rather than the last fetched status when the submission has not reached
- * a terminal state within the timeout, so callers can tell "not finished" apart from "rejected".
- */
 export async function waitForTerminalSubmission(
   queryClient: QueryClient,
   submissionId: string
@@ -68,9 +56,7 @@ export async function waitForTerminalSubmission(
       : Promise.race([pushArrived, delay(POLL_INTERVAL_MS)]);
 
   try {
-    void connectSubmissionHub().catch(() => {
-      // Hub unavailable: the poll below is the only path, which is why it exists.
-    });
+    void connectSubmissionHub().catch(() => {});
 
     const deadline = Date.now() + TERMINAL_WAIT_TIMEOUT_MS;
     let latest: SubmissionStatusDto | null = null;

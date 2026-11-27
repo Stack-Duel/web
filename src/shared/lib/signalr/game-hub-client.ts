@@ -3,21 +3,10 @@ import { HubConnectionState } from "@microsoft/signalr";
 import { createHubClient } from "@/shared/lib/signalr/create-hub-client";
 import type { SubmissionStatus } from "@/domains/submission/models/submission-status";
 
-/**
- * Payload the server pushes on the "GameCompleted", "GameLobbyUpdated" and
- * "GameProgressUpdated" hub methods. Deliberately treated as just a "go re-fetch" signal: the
- * game's actual status, roster and scores are read back from the REST API (the source of truth)
- * rather than trusted off the socket, which keeps the client's parsing logic in one place
- * (game-api.ts) instead of duplicated here.
- */
 export type GameRefetchPush = {
   gameId: string;
 };
 
-/** Payload the server pushes on the "GameParticipantAttempted" hub method, whenever a
- *  participant's submission in a Running game reaches a terminal state. Unlike the re-fetch
- *  signals, this one carries its own data: it's the sole source for the live activity feed, with
- *  no REST endpoint to fall back on. */
 export type GameParticipantAttemptedPush = {
   gameId: string;
   userId: string;
@@ -25,9 +14,6 @@ export type GameParticipantAttemptedPush = {
   attemptedAt: string;
 };
 
-/** Payload the server pushes on the "GameParticipantReacted" hub method, whenever a participant
- *  sends a quick emoji reaction in a Running game. Same "carries its own data" treatment as
- *  GameParticipantAttemptedPush. There's nothing persisted behind this to fall back on. */
 export type GameParticipantReactedPush = {
   gameId: string;
   userId: string;
@@ -76,18 +62,11 @@ const joinCounts = new Map<string, number>();
 const hub = createHubClient("/hubs/game", {
   onReconnected: (connection) => {
     joinCounts.forEach((_count, gameId) => {
-      connection.invoke("JoinGame", gameId).catch(() => {
-        // Best-effort: the game loop's fallback poll covers a missed rejoin.
-      });
+      connection.invoke("JoinGame", gameId).catch(() => {});
     });
   },
 });
 
-/**
- * Joins the per-game update group for `gameId`. Throws if the connection or the server-side
- * authorization check (participant/permission) fails. Callers should treat that as "push
- * notifications aren't available for this game" and fall back to polling, not as fatal.
- */
 export const joinGameUpdates = async (gameId: string): Promise<void> => {
   const previousCount = joinCounts.get(gameId) ?? 0;
   joinCounts.set(gameId, previousCount + 1);
@@ -110,7 +89,6 @@ export const joinGameUpdates = async (gameId: string): Promise<void> => {
   }
 };
 
-/** Best-effort leave: never throws, since staying in a group briefly longer is harmless. */
 export const leaveGameUpdates = async (gameId: string): Promise<void> => {
   const count = joinCounts.get(gameId) ?? 0;
 
@@ -130,16 +108,9 @@ export const leaveGameUpdates = async (gameId: string): Promise<void> => {
     if (connection.state === HubConnectionState.Connected) {
       await connection.invoke("LeaveGame", gameId);
     }
-  } catch {
-    // Fine to ignore: the connection may already be closed/closing.
-  }
+  } catch {}
 };
 
-/**
- * Sends a quick emoji reaction to everyone watching `gameId`. Best-effort like leaveGameUpdates:
- * a dropped reaction is cosmetic (a missing bubble in the chat), not something worth surfacing as
- * an error to the sender.
- */
 export const sendGameReaction = async (
   gameId: string,
   emoji: string
@@ -147,16 +118,9 @@ export const sendGameReaction = async (
   try {
     const connection = await hub.ensureConnected();
     await connection.invoke("SendReaction", gameId, emoji);
-  } catch {
-    // Fine to ignore: see doc comment above.
-  }
+  } catch {}
 };
 
-/**
- * Subscribes to one game hub event. Returns an unsubscribe function. Safe to call even before the
- * connection exists: the underlying HubConnection is created lazily and handlers persist across
- * reconnects.
- */
 export const onGamePush = <TEvent extends keyof GameHubPayloads>(
   event: TEvent,
   handler: (payload: GameHubPayloads[TEvent]) => void
